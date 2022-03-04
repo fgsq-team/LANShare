@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="1dp">
+
+    <com.fgsqw.lanshare.view.SquareImageView
+        android:id="@+id/photo_item_img"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="#010101"
+        android:scaleType="centerCrop" />
+
+    <com.fgsqw.lanshare.view.SquareImageView
+        android:id="@+id/photo_item_masking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="#111212" />
+
+    <ImageView
+        android:id="@+id/photo_item_select"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="right"
+        android:paddingStart="10dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="10dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_image_un_select" />
+
+    <ImageView
+        android:id="@+id/photo_item_gif"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:padding="3dp"
+        android:src="@drawable/ic_gif"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/photo_item_time_layout"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_gravity="bottom">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:alpha="0.5"
+            android:background="#FF000000" />
+
+        <TextView
+            android:id="@+id/photo_item_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text=""
+            android:textColor="#FFFFFFFF" />
+    </RelativeLayout>
+
+
+</FrameLayout>

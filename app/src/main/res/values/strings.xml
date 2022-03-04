@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">LANShare</string>
+    <string name="record">记录</string>
+    <string name="send">发送</string>
+    <string name="file">文件</string>
+    <string name="cencel">取消</string>
+    <string name="name">名称</string>
+    <string name="size">大小</string>
+    <string name="not_file">无记录</string>
+    <string name="photos">相册</string>
+    <string name="setting">设置</string>
+    <string name="select_all">全选</string>
+    <string name="delete">删除</string>
+    <string name="about">关于</string>
+    <string name="help">使用帮助</string>
+    <string name="github">github</string>
+    <string name="copyright">版权所有©fgsq</string>
+    <string name="version">V0.1_beta</string>
+</resources>

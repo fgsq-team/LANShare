@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/app_name">
+        <EditTextPreference
+            android:defaultValue="/sdcard/LANShare/"
+            android:key="filePath"
+            android:title="文件储存路径" />
+        <SwitchPreference
+            android:defaultValue="false"
+
+            android:key="not_recv_dialog"
+            android:title="接收文件无需确认" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
