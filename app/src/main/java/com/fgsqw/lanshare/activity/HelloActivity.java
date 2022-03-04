@@ -16,7 +16,7 @@ import com.fgsqw.lanshare.R;
 
 
 public class HelloActivity extends AppCompatActivity {
-    private static String[] PERMISSIONS_CAMERA_AND_STORAGE = {
+    private static final String[] PERMISSIONS_CAMERA_AND_STORAGE = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
@@ -55,7 +55,7 @@ public class HelloActivity extends AppCompatActivity {
     public void dialog() {
         AlertDialog.Builder dialog = new AlertDialog.Builder(HelloActivity.this);
         dialog.setTitle("提示");
-        dialog.setMessage("您必须同意储存使用权限才能继续使用本软件");
+        dialog.setMessage("您必须同意储存使用权限才能正常使用本软件,软件并不会上传任何数据");
         dialog.setPositiveButton("确定", (dialogInterface, i) -> requestPermissions(PERMISSIONS_CAMERA_AND_STORAGE, 0));
         dialog.setNegativeButton("取消", (dialogInterface, i) -> finish());
         dialog.show();
@@ -73,12 +73,7 @@ public class HelloActivity extends AppCompatActivity {
                 }
             } else {
                 init();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(HelloActivity.this, "您必须授权权限才能使用比软件", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                runOnUiThread(() -> Toast.makeText(HelloActivity.this, "您必须授权限才能正常使用比软件", Toast.LENGTH_SHORT).show());
             }
 
         }
