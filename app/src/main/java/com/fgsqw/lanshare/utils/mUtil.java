@@ -10,6 +10,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.design.widget.TabLayout;
@@ -161,6 +163,26 @@ public class mUtil {
 
     public static int random(int min, int max) {
         return new Random().nextInt((max - min) + 1) + min;
+    }
+
+
+    /**
+     * 获取程序版本
+     * @param context
+     * @return
+     */
+    public static String getAppVersionName(Context context) {
+        String versionName = null;
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
+            versionName = pi.versionName;
+            if (versionName == null || versionName.length() <= 0) {
+                return "";
+            }
+        } catch (Exception e) {
+        }
+        return versionName;
     }
 
 

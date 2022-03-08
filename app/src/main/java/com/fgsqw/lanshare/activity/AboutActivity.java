@@ -18,7 +18,9 @@ import com.fgsqw.lanshare.utils.mUtil;
 public class AboutActivity extends AppCompatActivity implements View.OnClickListener {
     RelativeLayout githubLayout;
     RelativeLayout aboutLayout;
+    RelativeLayout privacyLayout;
     ImageView exitImg;
+    TextView tvVersionName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,16 +29,23 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         initView();
     }
 
+    @SuppressLint("SetTextI18n")
     public void initView() {
         githubLayout = findViewById(R.id.about_github);
         aboutLayout = findViewById(R.id.about_help);
+        privacyLayout = findViewById(R.id.about_privacy);
+        tvVersionName = findViewById(R.id.about_version_name);
+
         exitImg = findViewById(R.id.about_exit_img);
         TextView copyright = findViewById(R.id.about_copyright);
         copyright.setText(mUtil.addString("Copyright © 2021-2022 By FG", "\n", "        All Rights Reserved"));
 
+        tvVersionName.setText("V" + mUtil.getAppVersionName(this));
+        privacyLayout.setOnClickListener(this);
         githubLayout.setOnClickListener(this);
         aboutLayout.setOnClickListener(this);
         exitImg.setOnClickListener(this);
+
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -56,6 +65,15 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
                 final AlertDialog alertdialog1 = dialog.create();
                 alertdialog1.show();
 
+                break;
+            }
+            case R.id.about_privacy: {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setTitle("隐私声明");
+                dialog.setMessage("  本应用并不会收集用户任何信息并且已开源\n  当软件需要使用到权限并申请时，您有权拒绝授予权限");
+                dialog.setPositiveButton("确定", null);
+                final AlertDialog alertdialog1 = dialog.create();
+                alertdialog1.show();
                 break;
             }
             case R.id.about_exit_img: {

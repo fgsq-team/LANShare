@@ -26,7 +26,6 @@ public class SettingActivity extends PreferenceActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        //  Toast.makeText(getApplicationContext(), "Restart Application for changes to take effect", Toast.LENGTH_SHORT).show();
     }
 
 }

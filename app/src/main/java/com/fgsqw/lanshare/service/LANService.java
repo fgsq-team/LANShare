@@ -168,6 +168,7 @@ public class LANService extends Service {
             // 获取设备信息
             int port = dataDec.getInt();
             String ip = dataDec.getString();
+
             String name = dataDec.getString();
             Device device = devices.get(ip + ":" + port);
             if (device == null) {
@@ -606,6 +607,7 @@ public class LANService extends Service {
         ViewUpdate.runThread(() -> {
             while (true) {
                 try {
+                    // 等待客户端连接
                     Socket client = fileRecive.accept();
                     ViewUpdate.runThread(() -> handelFile(client));
                 } catch (IOException e) {
@@ -616,6 +618,7 @@ public class LANService extends Service {
     }
 
 
+    // 获取自己的设备信息
     public static Device getDevice() {
         Device device = new Device();
         device.setDevName(android.os.Build.MODEL);
@@ -634,23 +637,22 @@ public class LANService extends Service {
         dataEnc.putString(mDevice.getDevIP());
         dataEnc.putString(mDevice.getDevName());
         dataEnc.putInt(mDevice.getDevMode());
-
         try {
             UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), ip, Config.UDP_PORT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
-
     }
 
     DatagramSocket ipGetSocket = null;
 
-    // 监听数据
+    // 监听并处理获取客户和设置客户端命令
     public void runRecive() {
         new Thread(() -> {
 
             byte[] buf = new byte[1024];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
+            // 某些设备UDP不能接收广播数据需要使用下面这几行代码才能正常使用
             WifiManager mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiManager.MulticastLock multicastLock = mWifiManager.createMulticastLock("test");
             multicastLock.setReferenceCounted(false);

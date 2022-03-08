@@ -15,5 +15,6 @@
     <string name="help">使用帮助</string>
     <string name="github">github</string>
     <string name="copyright">版权所有©fgsq</string>
-    <string name="version">V0.1_beta</string>
+    <string name="version">V0.0.1_beta</string>
+    <string name="privacy">隐私声明</string>
 </resources>
