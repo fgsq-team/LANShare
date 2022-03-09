@@ -64,7 +64,7 @@ public class DataEnc {
 
     public DataEnc setLength(int length) {
         this.length = length;
-        return putInt(count, 8);
+        return putInt(length, 8);
     }
 
     public DataEnc putByte(byte b) {
