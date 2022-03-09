@@ -342,14 +342,14 @@ public class LANService extends Service {
                                 if (IOUtil.read(mInput, buffer, DataEnc.getHeaderSize(), length) != length) break;
                                 outFileStream.write(buffer, DataEnc.getHeaderSize(), length);
                                 totalRecv += length;
-                                int prngeress = (int) (totalRecv * 100.0F / recordFile.getLength());
-                                if (prngeress != p) {
-                                    recordFile.setProgress(prngeress);
+                                int progeress = (int) (totalRecv * 100.0F / recordFile.getLength());
+                                if (progeress != p) {
+                                    recordFile.setProgress(progeress);
                                     mMessage = Message.obtain();
                                     mMessage.what = mCmd.SERVICE_PROGRESS;
                                     mMessage.obj = recordFile;
                                     messageSend(mMessage);
-                                    p = prngeress;
+                                    p = progeress;
                                 }
                             } else if (cmd == mCmd.FS_END) {    // 传输完毕
                                 break;
@@ -572,14 +572,12 @@ public class LANService extends Service {
                     dataEnc.reset();
                     dataEnc.setByteCmd(mCmd.FS_CLOSE);
                     out.write(dataEnc.getData(), 0, DataEnc.getHeaderSize());
-
                 } else {
                     recordFile.setSuccess(true);
                     recordFile.setMessage("发送成功");
                     dataEnc.reset();
                     dataEnc.setByteCmd(mCmd.FS_END);
                     out.write(dataEnc.getData(), 0, DataEnc.getHeaderSize());
-
                 }
             } catch (IOException ioException) {
                 ioException.printStackTrace();

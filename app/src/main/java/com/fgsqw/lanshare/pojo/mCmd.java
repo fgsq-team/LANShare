@@ -3,8 +3,9 @@ package com.fgsqw.lanshare.pojo;
 public class mCmd {
 
     // 局域网通讯命令
-    public static final int UDP_GET_DEVICES = 1001;   // 获取设备
-    public static final int UDP_SET_DEVICES = 1002;   // 设置设备
+    public static final int UDP_GET_DEVICES = 1001;        // 获取设备
+    public static final int UDP_SET_DEVICES = 1002;        // 设置设备
+    public static final int UDP_DEVICES_OFF_LINE = 1003;   // 设备下线
 
     // 文件服务命令
     public static final int FS_SHARE_FILE = 1101;    // 发送文件

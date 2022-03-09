@@ -176,31 +176,19 @@ public class DataDec {
 
 
     public int getCmd() {
-        if (byteLen >= HEADER_LEN) {
-            return ByteUtil.bytesToInt(bytes, 0);
-        }
-        return 0;
+        return getInt(0);
     }
 
-    public int getByteCmd() {
-        if (byteLen >= HEADER_LEN) {
-            return bytes[0];
-        }
-        return 0;
+    public byte getByteCmd() {
+        return getByte(0);
     }
 
     public int getCount() {
-        if (byteLen >= HEADER_LEN) {
-            return ByteUtil.bytesToInt(bytes, 4);
-        }
-        return -1;
+        return getInt(4);
     }
 
     public int getLength() {
-        if (byteLen >= HEADER_LEN) {
-            return ByteUtil.bytesToInt(bytes, 8);
-        }
-        return -1;
+        return getInt(8);
     }
 
     public int getHeaderSize() {

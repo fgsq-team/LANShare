@@ -53,27 +53,18 @@ public class DataEnc {
 
     public DataEnc setByteCmd(byte cmd) {
         this.cmd = cmd;
-        bytes[0] = cmd;
-        return this;
+        return putByte(cmd, 0);
     }
 
     public DataEnc setCount(int count) {
-        if (byteLen <= 0) {
-            return null;
-        }
         this.count = count;
-        ByteUtil.intToBytes(count, bytes, 4);
-        return this;
+        return putInt(count, 4);
     }
 
 
     public DataEnc setLength(int length) {
-        if (byteLen <= 0) {
-            return null;
-        }
         this.length = length;
-        ByteUtil.intToBytes(length, bytes, 8);
-        return this;
+        return putInt(count, 8);
     }
 
     public DataEnc putByte(byte b) {
