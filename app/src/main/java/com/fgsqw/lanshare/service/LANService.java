@@ -228,15 +228,13 @@ public class LANService extends Service {
                 mMessage.obj = dataObject;
                 messageSend(mMessage);
             }
-
-
         }
-
-
     }
 
     // 接收文件缓存
-    final byte[] buffer = new byte[2 * 1024 * 1024];
+    final byte[] recvBuffer = new byte[2 * 1024 * 1024];
+    // 发送文件缓存
+    final byte[] sendBuffer = new byte[2 * 1024 * 1024];
 
 
     public void sendCmd(RecordFile recordFile, OutputStream out) {
@@ -291,7 +289,7 @@ public class LANService extends Service {
                 e.printStackTrace();
             }
 
-            synchronized (buffer) {
+            synchronized (recvBuffer) {
                 for (int i = 0; i < recordFileList.size(); i++) {
                     RecordFile recordFile = recordFileList.get(i);
                     File file = new File(Config.FILE_SAVE_PATH + getNameType(recordFile.getName()) + "/");
@@ -332,15 +330,15 @@ public class LANService extends Service {
                     long totalRecv = 0;
                     int p = 0;
                     InputStream mInput = recordFile.getSocket().getInputStream();
-                    DataDec dataDec = new DataDec(buffer);
+                    DataDec dataDec = new DataDec(recvBuffer);
                     try {
                         while (true) {
-                            if (IOUtil.read(mInput, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize()) break;
+                            if (IOUtil.read(mInput, recvBuffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize()) break;
                             int cmd = dataDec.getByteCmd();
                             if (cmd == mCmd.FS_DATA) {          // 数据
                                 int length = dataDec.getLength();
-                                if (IOUtil.read(mInput, buffer, DataEnc.getHeaderSize(), length) != length) break;
-                                outFileStream.write(buffer, DataEnc.getHeaderSize(), length);
+                                if (IOUtil.read(mInput, recvBuffer, DataEnc.getHeaderSize(), length) != length) break;
+                                outFileStream.write(recvBuffer, DataEnc.getHeaderSize(), length);
                                 totalRecv += length;
                                 int progeress = (int) (totalRecv * 100.0F / recordFile.getLength());
                                 if (progeress != p) {
@@ -408,28 +406,38 @@ public class LANService extends Service {
     }
 
 
+    /**
+     * 发送文件同时接收指令 此线程用于接收端取消接收文件
+     *
+     * @param recordFileList
+     * @param input
+     */
     public void startRecvCmd(List<RecordFile> recordFileList, InputStream input) {
         ViewUpdate.runThread(() -> {
             DataDec dataDec = new DataDec();
             try {
                 while (true) {
-                    if (IOUtil.read(input, dataDec.getData(), 0, dataDec.getByteLen()) == dataDec.getByteLen()) {
-                        int cmd = dataDec.getByteCmd();
-                        if (cmd == mCmd.FS_CLOSE) {
-                            int index = dataDec.getCount();
-                            Log.d(TAG, "取消:" + index);
-                            for (RecordFile recordFile : recordFileList) {
-                                if (recordFile.getIndex() == index) {
-                                    recordFile.getSocket().mClose();
+                    int read = IOUtil.read(input, dataDec.getData(), 0, dataDec.getByteLen());
+                    if (read > 0) {
+                        if (read == dataDec.getByteLen()) {
+                            int cmd = dataDec.getByteCmd();
+                            if (cmd == mCmd.FS_CLOSE) {
+                                int index = dataDec.getCount();
+                                Log.d(TAG, "取消:" + index);
+                                for (RecordFile recordFile : recordFileList) {
+                                    if (recordFile.getIndex() == index) {
+                                        recordFile.getSocket().mClose();
+                                    }
                                 }
                             }
                         }
-
+                    } else {
+                        break;
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d(TAG, "接收:" + e.getMessage());
+                Log.d(TAG, "startRecvCmd:" + e.getMessage());
             }
         });
     }
@@ -442,7 +450,6 @@ public class LANService extends Service {
 
     public void fileSend(Device device, List<FileInfo> fileList) {
         ViewUpdate.runThread(() -> {
-
             Socket socket = null;
             try {
                 socket = new Socket(device.getDevIP(), device.getDevPort());
@@ -454,12 +461,17 @@ public class LANService extends Service {
                 T.s("连接" + device.getDevName() + "失败");
                 return;
             }
+            InputStream input = null;
+            OutputStream output = null;
+
             try {
-                fileSend(socket.getInputStream(), socket.getOutputStream(), device, fileList);
+                input = socket.getInputStream();
+                output = socket.getOutputStream();
+                fileSend(input, output, device, fileList);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                IOUtil.closeIO(socket);
+                IOUtil.closeIO(input, output, socket);
             }
 
         });
@@ -467,136 +479,132 @@ public class LANService extends Service {
     }
 
     public void fileSend(InputStream input, OutputStream out, Device device, List<FileInfo> fileList) {
-
-        // 2M缓冲区
-        byte[] buffer = new byte[2 * 1024 * 1024];
         List<RecordFile> recordFileList = new ArrayList<>();
+        synchronized (sendBuffer) {
+            try {
+                DataEnc dataEnc = new DataEnc(sendBuffer);
+                dataEnc.setCmd(mCmd.FS_SHARE_FILE);
+                dataEnc.setCount(fileList.size());
+                dataEnc.putInt(mDevice.getDevPort());
+                dataEnc.putString(mDevice.getDevIP());
+                dataEnc.putString(mDevice.getDevName());
 
-        try {
-            DataEnc dataEnc = new DataEnc(buffer);
-            dataEnc.setCmd(mCmd.FS_SHARE_FILE);
-            dataEnc.setCount(fileList.size());
-            dataEnc.putInt(mDevice.getDevPort());
-            dataEnc.putString(mDevice.getDevIP());
-            dataEnc.putString(mDevice.getDevName());
-
-            out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
-            for (int i = 0; i < fileList.size(); i++) {
-                FileInfo fileInfo = fileList.get(i);
-                RecordFile recordFile = new RecordFile();
-                recordFile.setName(fileInfo.getName());
-                recordFile.setLength(fileInfo.getLength());
-                recordFile.setPath(fileInfo.getPath());
-                recordFile.setSocket(new mSocket(input, out));
-                recordFile.setIndex(i);
-                recordFileList.add(recordFile);
-
-                dataEnc.reset();
-                dataEnc.putLong(fileInfo.getLength());
-                dataEnc.putString(fileInfo.getName());
                 out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+                for (int i = 0; i < fileList.size(); i++) {
+                    FileInfo fileInfo = fileList.get(i);
+                    RecordFile recordFile = new RecordFile();
+                    recordFile.setName(fileInfo.getName());
+                    recordFile.setLength(fileInfo.getLength());
+                    recordFile.setPath(fileInfo.getPath());
+                    recordFile.setSocket(new mSocket(input, out));
+                    recordFile.setIndex(i);
+                    recordFileList.add(recordFile);
 
-        // 读取对方是否同意接收文件
-        try {
-            IOUtil.read(input, buffer, 0, DataEnc.HEADER_LEN);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        DataDec dataDec = new DataDec(buffer, DataEnc.HEADER_LEN);
-        if (dataDec.getCmd() == mCmd.FS_NOT_AGREE) {
-            T.s(device.getDevName() + " 取消接收文件");
-            return;
-        }
-
-
-        Message mMessage;
-        mMessage = Message.obtain();
-        mMessage.what = mCmd.SERVICE_SHOW_PROGRESS;
-        mMessage.obj = recordFileList;
-        messageSend(mMessage);
-
-        startRecvCmd(recordFileList, input);
-
-        for (RecordFile recordFile : recordFileList) {
-
-            InputStream fileIs = null;
-            mOutputStream mOut = recordFile.getSocket().getOutputStream();
-
-            try {
-                fileIs = new FileInputStream(recordFile.getPath());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            // 发送文件
-            Log.d(TAG, "发送文件:" + recordFile.getPath() + " 大小:" + recordFile.getLength());
-
-            long totalSend = 0;
-            int ten = 0;
-            int p = 0;
-
-            DataEnc dataEnc = new DataEnc(buffer);
-            dataEnc.setByteCmd(mCmd.FS_DATA);
-
-            try {
-                while ((ten = fileIs.read(buffer, DataEnc.getHeaderSize(), buffer.length - DataEnc.getHeaderSize())) != -1) {
-                    dataEnc.setDataIndex(ten);
-                    mOut.write(dataEnc);
-                    totalSend += ten;
-                    int prngeress = (int) (totalSend * 100.0F / recordFile.getLength());
-                    if (prngeress != p) {
-                        recordFile.setProgress(prngeress);
-                        mMessage = Message.obtain();
-                        mMessage.what = mCmd.SERVICE_PROGRESS;
-                        mMessage.obj = recordFile;
-                        messageSend(mMessage);
-                        p = prngeress;
-                    }
+                    dataEnc.reset();
+                    dataEnc.putLong(fileInfo.getLength());
+                    dataEnc.putString(fileInfo.getName());
+                    out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                totalSend = 0;
+                return;
             }
-
+            // 读取对方是否同意接收文件
             try {
-                if (totalSend != recordFile.getLength()) {
-                    recordFile.setSuccess(false);
-                    recordFile.setMessage("发送失败");
-                    dataEnc.reset();
-                    dataEnc.setByteCmd(mCmd.FS_CLOSE);
-                    out.write(dataEnc.getData(), 0, DataEnc.getHeaderSize());
-                } else {
-                    recordFile.setSuccess(true);
-                    recordFile.setMessage("发送成功");
-                    dataEnc.reset();
-                    dataEnc.setByteCmd(mCmd.FS_END);
-                    out.write(dataEnc.getData(), 0, DataEnc.getHeaderSize());
-                }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
+                IOUtil.read(input, sendBuffer, 0, DataEnc.HEADER_LEN);
+            } catch (IOException e) {
                 e.printStackTrace();
+                return;
+            }
+            DataDec dataDec = new DataDec(sendBuffer, DataEnc.HEADER_LEN);
+            if (dataDec.getCmd() == mCmd.FS_NOT_AGREE) {
+                T.s(device.getDevName() + " 取消接收文件");
+                return;
             }
 
+            Message mMessage;
             mMessage = Message.obtain();
-            mMessage.what = mCmd.SERVICE_CLOSE_PROGRESS;
-            mMessage.obj = recordFile;
+            mMessage.what = mCmd.SERVICE_SHOW_PROGRESS;
+            mMessage.obj = recordFileList;
             messageSend(mMessage);
 
-            Log.d(TAG, "发送成功:" + totalSend);
+            startRecvCmd(recordFileList, input);
 
+            for (RecordFile recordFile : recordFileList) {
+
+                InputStream fileIs = null;
+                mOutputStream mOut = recordFile.getSocket().getOutputStream();
+
+                try {
+                    fileIs = new FileInputStream(recordFile.getPath());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+
+                // 发送文件
+                Log.d(TAG, "发送文件:" + recordFile.getPath() + " 大小:" + recordFile.getLength());
+
+                long totalSend = 0;
+                int ten = 0;
+                int p = 0;
+
+                DataEnc dataEnc = new DataEnc(sendBuffer);
+                dataEnc.setByteCmd(mCmd.FS_DATA);
+
+                try {
+                    while ((ten = fileIs.read(sendBuffer, DataEnc.getHeaderSize(), sendBuffer.length - DataEnc.getHeaderSize())) != -1) {
+                        dataEnc.setDataIndex(ten);
+                        mOut.write(dataEnc);
+                        totalSend += ten;
+                        int prngeress = (int) (totalSend * 100.0F / recordFile.getLength());
+                        if (prngeress != p) {
+                            recordFile.setProgress(prngeress);
+                            mMessage = Message.obtain();
+                            mMessage.what = mCmd.SERVICE_PROGRESS;
+                            mMessage.obj = recordFile;
+                            messageSend(mMessage);
+                            p = prngeress;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    totalSend = 0;
+                }
+
+                try {
+                    if (totalSend != recordFile.getLength()) {
+                        recordFile.setSuccess(false);
+                        recordFile.setMessage("发送失败");
+                        dataEnc.reset();
+                        dataEnc.setByteCmd(mCmd.FS_CLOSE);
+                    } else {
+                        recordFile.setSuccess(true);
+                        recordFile.setMessage("发送成功");
+                        dataEnc.reset();
+                        dataEnc.setByteCmd(mCmd.FS_END);
+                    }
+                    out.write(dataEnc.getData(), 0, DataEnc.getHeaderSize());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                mMessage = Message.obtain();
+                mMessage.what = mCmd.SERVICE_CLOSE_PROGRESS;
+                mMessage.obj = recordFile;
+                messageSend(mMessage);
+
+                Log.d(TAG, "发送成功:" + totalSend);
+
+            }
         }
+
     }
 
 
