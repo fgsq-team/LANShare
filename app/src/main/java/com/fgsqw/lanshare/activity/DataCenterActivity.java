@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.config.Config;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
 import com.fgsqw.lanshare.fragment.FragFiles;
 import com.fgsqw.lanshare.fragment.FragRecord;
@@ -74,12 +75,15 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     public void getConfig() {
         PrefUtil prefUtil = new PrefUtil(this);
-        String filePath = prefUtil.getString("filePath", Config.FILE_SAVE_PATH);
+        String filePath = prefUtil.getString(PreConfig.FILE_PATH, Config.FILE_SAVE_PATH);
         if (filePath.charAt(filePath.length() - 1) != '/') {
             filePath += "/";
         }
+        String userName = prefUtil.getString(PreConfig.USER_NAME);
+        if (userName.isEmpty()) {
+            prefUtil.saveString(PreConfig.USER_NAME, android.os.Build.MODEL);
+        }
         Config.FILE_SAVE_PATH = filePath;
-        // T.s(Config.FILE_SAVE_PATH);
         File file = new File(Config.FILE_SAVE_PATH);
         if (!file.exists()) {
             file.mkdirs();

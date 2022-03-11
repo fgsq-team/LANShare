@@ -1,6 +1,8 @@
 package com.fgsqw.lanshare.pojo;
 
 
+import static java.lang.System.identityHashCode;
+
 public class RecordFile extends FileInfo {
     private int progress;
     private Boolean success;
@@ -65,4 +67,13 @@ public class RecordFile extends FileInfo {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public boolean equals(Object obj) {
+        return (this == obj);
+    }
+
+    public int hashCode() {
+        return identityHashCode(this);
+    }
+
 }

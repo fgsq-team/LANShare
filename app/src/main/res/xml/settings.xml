@@ -3,11 +3,14 @@
     <PreferenceCategory android:title="@string/app_name">
         <EditTextPreference
             android:defaultValue="/sdcard/LANShare/"
+            android:key="userName"
+            android:title="设置设备名" />
+        <EditTextPreference
+            android:defaultValue="/sdcard/LANShare/"
             android:key="filePath"
             android:title="文件储存路径" />
         <SwitchPreference
             android:defaultValue="false"
-
             android:key="not_recv_dialog"
             android:title="接收文件无需确认" />
 

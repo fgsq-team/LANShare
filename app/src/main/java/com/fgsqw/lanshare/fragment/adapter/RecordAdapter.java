@@ -23,16 +23,14 @@ import java.util.List;
 public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder> {
     private List<RecordFile> filelist;
     OnItemClickListener onItemClickListener;
-    public static final int NOTIFY_PROGRESS = 1000;
-    public static final int NOTIFY_MESSAGE = 1001;
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView mSize;
-        ImageView mIcon;
-        TextView mName;
-        TextView mMessage;
-        TextView mCencel;
-        ProgressBar mProgressBar;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView mSize;
+        public ImageView mIcon;
+        public TextView mName;
+        public TextView mMessage;
+        public TextView mCencel;
+        public ProgressBar mProgressBar;
         View view;
 
 
@@ -49,51 +47,36 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position, List payloads) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         RecordFile recordFile = filelist.get(position);
-        if (payloads.isEmpty()) {
-            holder.mName.setText(mUtil.StringSize(recordFile.getName(), 30));
-            holder.mIcon.setBackgroundResource(R.drawable.ic_file);
-            holder.mSize.setText(FileUtil.computeSize(recordFile.getLength()));
-            holder.mProgressBar.setProgress(recordFile.getProgress());
 
-            if (recordFile.getSuccess() != null) {
-                holder.mProgressBar.setVisibility(View.GONE);
-                holder.mMessage.setVisibility(View.VISIBLE);
-                holder.mMessage.setText(recordFile.getMessage());
-                if (!recordFile.getSuccess()) {
-                    holder.mMessage.setTextColor(Color.RED);
-                } else {
-                    holder.mMessage.setTextColor(0xFF939393);
-                }
+        holder.mName.setText(mUtil.StringSize(recordFile.getName(), 30));
+        holder.mIcon.setBackgroundResource(R.drawable.ic_file);
+        holder.mSize.setText(FileUtil.computeSize(recordFile.getLength()));
+        holder.mProgressBar.setProgress(recordFile.getProgress());
+
+        if (recordFile.getSuccess() != null) {
+            holder.mProgressBar.setVisibility(View.GONE);
+            holder.mMessage.setVisibility(View.VISIBLE);
+            holder.mMessage.setText(recordFile.getMessage());
+            if (!recordFile.getSuccess()) {
+                holder.mMessage.setTextColor(Color.RED);
             } else {
-                holder.mProgressBar.setVisibility(View.VISIBLE);
-                holder.mMessage.setVisibility(View.GONE);
                 holder.mMessage.setTextColor(0xFF939393);
             }
+        } else {
+            holder.mProgressBar.setVisibility(View.VISIBLE);
+            holder.mMessage.setVisibility(View.GONE);
+            holder.mMessage.setTextColor(0xFF939393);
+        }
 
-            if (onItemClickListener != null) {
-                holder.mCencel.setOnClickListener(v -> onItemClickListener.onCloseClick(position));
-                holder.view.setOnClickListener(p11 -> onItemClickListener.onClick(position));
-            }
-
-
-        } else /*if (payloads.get(0) instanceof Integer)*/ {
-            int cmd = (int) payloads.get(0);
-            if (cmd == NOTIFY_PROGRESS) {
-                holder.mProgressBar.setProgress(recordFile.getProgress());
-            } else if (cmd == NOTIFY_MESSAGE) {
-                holder.mProgressBar.setVisibility(View.GONE);
-                holder.mMessage.setVisibility(View.VISIBLE);
-                holder.mMessage.setText(recordFile.getMessage());
-                if (!recordFile.getSuccess()) {
-                    holder.mMessage.setTextColor(Color.RED);
-                }
-            }
-
+        if (onItemClickListener != null) {
+            holder.mCencel.setOnClickListener(v -> onItemClickListener.onCloseClick(position));
+            holder.view.setOnClickListener(p11 -> onItemClickListener.onClick(position));
         }
 
     }
+
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
@@ -110,33 +93,18 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
         notifyDataSetChanged();
     }
 
-    public void updateProgress(RecordFile recordFile) {
-        int index = filelist.indexOf(recordFile);
-        if (index > -1) {
-            // 局部刷新
-            notifyItemChanged(index, NOTIFY_PROGRESS);
-        }
+
+    public int getDataPosition(RecordFile recordFile) {
+        return filelist.indexOf(recordFile);
     }
 
-    public void updateMessage(RecordFile recordFile) {
-        int index = filelist.indexOf(recordFile);
-        if (index > -1) {
-            // 局部刷新
-            notifyItemChanged(index, NOTIFY_MESSAGE);
-        }
 
-    }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup p1, int viewType) {
         View view = LayoutInflater.from(p1.getContext()).inflate(R.layout.record_item, p1, false);
         return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
     }
 
 

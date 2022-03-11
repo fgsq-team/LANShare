@@ -2,6 +2,7 @@ package com.fgsqw.lanshare.dialog.adapter;
 
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.pojo.Device;
 
@@ -23,6 +25,16 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
 
     public static final int NOTIFY_PROGRESS = 1000;
     public static final int NOTIFY_MESSAGE = 1001;
+
+    Context context;
+
+
+    public DeviceDialogAdapter(Context context, List<Device> deviceList) {
+        this.deviceList = deviceList;
+        this.context = context;
+
+    }
+
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView mSelectImg;
@@ -45,6 +57,23 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
         Device device = deviceList.get(position);
         holder.mName.setText(device.getDevName());
         holder.mIp.setText(device.getDevIP());
+        int devMode = device.getDevMode();
+        int dId;
+        if (devMode == Device.ANDROID) {
+            dId = R.drawable.ic_phone;
+        } else if (devMode == Device.WIN) {
+            dId = R.drawable.ic_win;
+        } else {
+            dId = R.drawable.ic_launcher;
+        }
+
+        Glide
+                .with(context)
+                .load(dId)
+                .centerCrop()
+                .placeholder(R.drawable.ic_null)
+                .into(holder.mSelectImg);
+
         if (onItemClickListener != null) {
             holder.view.setOnClickListener(v -> onItemClickListener.onClick(device, position));
         }
@@ -53,10 +82,6 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
-    }
-
-    public DeviceDialogAdapter(List<Device> deviceList) {
-        this.deviceList = deviceList;
     }
 
 

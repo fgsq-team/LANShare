@@ -72,7 +72,7 @@ public class DataEnc {
     }
 
     public DataEnc putByte(byte b, int i) {
-        if (index + 1 <= byteLen) {
+        if (i + 1 <= byteLen) {
             bytes[i] = b;
             return this;
         }

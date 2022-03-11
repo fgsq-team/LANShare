@@ -13,7 +13,9 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.DataObject;
 import com.fgsqw.lanshare.pojo.Device;
@@ -88,7 +90,7 @@ public class LANService extends Service {
         //receiver();
         prefUtil = new PrefUtil(this);
         mDevice = getDevice();
-        mUtil.showNotification(this, "LANFile", "服务正在运行...");
+        mUtil.showNotification(this, getString(R.string.app_name), "服务正在运行...");
         locAddrIndex = NetWorkUtil.getLocAddrIndex(mDevice.getDevIP()) + "255";
 
         try {
@@ -237,19 +239,6 @@ public class LANService extends Service {
     final byte[] sendBuffer = new byte[2 * 1024 * 1024];
 
 
-    public void sendCmd(RecordFile recordFile, OutputStream out) {
-        ViewUpdate.runThread(() -> {
-            DataEnc dataEnc = new DataEnc();
-            dataEnc.setByteCmd(mCmd.FS_CLOSE);
-            dataEnc.setCount(recordFile.getIndex());
-            try {
-                out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
     public void startRecvFile(DataObject dataObject, boolean isAgree) {
         ViewUpdate.runThread(() -> {
             List<RecordFile> recordFileList = (List<RecordFile>) dataObject.getObj2();
@@ -372,7 +361,7 @@ public class LANService extends Service {
                     }
 
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -406,6 +395,21 @@ public class LANService extends Service {
     }
 
 
+    public void sendCmd(RecordFile recordFile, OutputStream out) {
+        ViewUpdate.runThread(() -> {
+            DataEnc dataEnc = new DataEnc();
+            dataEnc.setByteCmd(mCmd.FS_CLOSE);
+            dataEnc.setCount(recordFile.getIndex());
+
+            try {
+                out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+    }
+
     /**
      * 发送文件同时接收指令 此线程用于接收端取消接收文件
      *
@@ -414,6 +418,7 @@ public class LANService extends Service {
      */
     public void startRecvCmd(List<RecordFile> recordFileList, InputStream input) {
         ViewUpdate.runThread(() -> {
+            Log.d(TAG, "startRecvCmd:start");
             DataDec dataDec = new DataDec();
             try {
                 while (true) {
@@ -421,6 +426,7 @@ public class LANService extends Service {
                     if (read > 0) {
                         if (read == dataDec.getByteLen()) {
                             int cmd = dataDec.getByteCmd();
+                            Log.d(TAG, "cmd:" + cmd);
                             if (cmd == mCmd.FS_CLOSE) {
                                 int index = dataDec.getCount();
                                 Log.d(TAG, "取消:" + index);
@@ -439,6 +445,7 @@ public class LANService extends Service {
                 e.printStackTrace();
                 Log.d(TAG, "startRecvCmd:" + e.getMessage());
             }
+            Log.d(TAG, "startRecvCmd:end");
         });
     }
 
@@ -498,6 +505,7 @@ public class LANService extends Service {
                     recordFile.setPath(fileInfo.getPath());
                     recordFile.setSocket(new mSocket(input, out));
                     recordFile.setIndex(i);
+                    recordFile.setRecv(false);
                     recordFileList.add(recordFile);
 
                     dataEnc.reset();
@@ -590,7 +598,7 @@ public class LANService extends Service {
                 }
 
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -625,9 +633,9 @@ public class LANService extends Service {
 
 
     // 获取自己的设备信息
-    public static Device getDevice() {
+    public Device getDevice() {
         Device device = new Device();
-        device.setDevName(android.os.Build.MODEL);
+        device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
         device.setDevIP(NetWorkUtil.getLocAddress(service));
         device.setDevPort(Config.FILE_SERVER_PORT);
         device.setDevMode(Device.ANDROID);
@@ -641,7 +649,7 @@ public class LANService extends Service {
         dataEnc.setCmd(mCmd.UDP_SET_DEVICES);
         dataEnc.putInt(mDevice.getDevPort());
         dataEnc.putString(mDevice.getDevIP());
-        dataEnc.putString(mDevice.getDevName());
+        dataEnc.putString(prefUtil.getString(PreConfig.USER_NAME));
         dataEnc.putInt(mDevice.getDevMode());
         try {
             UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), ip, Config.UDP_PORT);
@@ -683,11 +691,15 @@ public class LANService extends Service {
                 DataDec dataDec = new DataDec(buf, packet.getLength());
                 int cmd = dataDec.getCmd();
                 if (cmd == mCmd.UDP_GET_DEVICES) {
+
                     String devIp = dataDec.getString();
+//                    Log.d(TAG, "收到信息:" + devIp);
+
                     // 排除自己发送的数据
                     if (devIp.equals(mDevice.getDevIP())) {
                         continue;
                     }
+
                     ViewUpdate.runThread(() -> noticeDeviceOnLineByIp(devIp));
 
                 } else if (cmd == mCmd.UDP_SET_DEVICES) {

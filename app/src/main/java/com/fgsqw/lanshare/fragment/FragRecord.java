@@ -1,6 +1,7 @@
 package com.fgsqw.lanshare.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +42,7 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
     private final List<RecordFile> fileInfoList = new ArrayList<>();
     RecyclerView recyclerView;    //列表
     RecordAdapter recordAdapter;
+    LinearLayoutManager layoutManager;
     TextView notFile;
 
     public DataCenterActivity dataCenterActivity;
@@ -80,27 +83,38 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
                 recyclerView.scrollToPosition(recordAdapter.getItemCount() - 1);
             } else if (msg.what == mCmd.SERVICE_PROGRESS) {          // 更新进度
                 RecordFile recordFile = (RecordFile) msg.obj;
-                recordAdapter.updateProgress(recordFile);
-
+                int dataPosition = recordAdapter.getDataPosition(recordFile);
+                RecordAdapter.ViewHolder viewHolder = (RecordAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
+                if (viewHolder != null) {
+                    viewHolder.mProgressBar.setProgress(recordFile.getProgress());
+                } else {
+                    recordAdapter.notifyItemChanged(dataPosition);
+                }
             } else if (msg.what == mCmd.SERVICE_CLOSE_PROGRESS) {    // 完成
                 RecordFile recordFile = (RecordFile) msg.obj;
-                recordAdapter.updateMessage(recordFile);
+                int dataPosition = recordAdapter.getDataPosition(recordFile);
 
-            } else if (msg.what == mCmd.SERVICE_UPDATE_DEVICES) {
-               /* Map<String, Device> devices = (Map<String, Device>) msg.obj;
-                StringBuilder sb = new StringBuilder("设备数:" + devices.size());
-                Set<String> strings = devices.keySet();
-                for (String key : strings) {
-                    Device device = devices.get(key);
-                    sb.append("\n 设备:").append(device.getDeviceName())
-                            .append(" 型号:").append(device.getDevName())
-                            .append(" IP:").append(device.getDevIP())
-                            .append(":").append(device.getDevPort());
-                }*/
-                //   textView.setText(sb);
+                RecordAdapter.ViewHolder viewHolder = (RecordAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
+                if (viewHolder != null) {
+                    viewHolder.mProgressBar.setProgress(recordFile.getProgress());
+                    if (recordFile.getSuccess() != null) {
+                        viewHolder.mProgressBar.setVisibility(View.GONE);
+                        viewHolder.mMessage.setVisibility(View.VISIBLE);
+                        viewHolder.mMessage.setText(recordFile.getMessage());
+                        if (!recordFile.getSuccess()) {
+                            viewHolder.mMessage.setTextColor(Color.RED);
+                        } else {
+                            viewHolder.mMessage.setTextColor(0xFF939393);
+                        }
+                    } else {
+                        viewHolder.mProgressBar.setVisibility(View.VISIBLE);
+                        viewHolder.mMessage.setVisibility(View.GONE);
+                        viewHolder.mMessage.setTextColor(0xFF939393);
+                    }
+                } else {
+                    recordAdapter.notifyItemChanged(dataPosition);
+                }
             }
-
-
         }
     };
 
@@ -130,41 +144,12 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
     public void initList() {
         recordAdapter = new RecordAdapter(fileInfoList);
         recordAdapter.setOnItemClickListener(this);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recordAdapter);
 
     }
 
-    // 测试
-    public void test() {
-        for (int i = 0; i < 1000; i++) {
-            RecordFile recordFile = new RecordFile();
-            recordFile.setLength(i + 1);
-            recordFile.setProgress(50);
-            recordFile.setName("" + i);
-            recordFile.setPath("");
-            fileInfoList.add(recordFile);
-        }
-
-        ViewUpdate.runThread(() -> {
-            while (true) {
-                RecordFile recordFile = fileInfoList.get(3);
-                recordFile.setProgress(mUtil.random(1, 100));
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                ViewUpdate.threadUi(() -> {
-                    recordAdapter.updateProgress(recordFile);
-                });
-
-
-            }
-        });
-
-    }
 
     public void refreshData() {
         recordAdapter.refresh(fileInfoList);
@@ -181,8 +166,6 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
         if (recordFile.getSuccess() != null && recordFile.getSuccess()) {
             FileUtil.openFile(dataCenterActivity, new File(recordFile.getPath()));
         }
-//        recordAdapter.notifyItemRemoved(position);//通知移除该条
-//        recordAdapter.notifyItemRangeChanged(position, fileInfoList.size() - position);//更新适配器这条后面
     }
 
     @Override
@@ -195,6 +178,7 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
         } else {
             socket.mClose();
         }
+
         fileInfoList.remove(recordFile);
         refreshData();
 

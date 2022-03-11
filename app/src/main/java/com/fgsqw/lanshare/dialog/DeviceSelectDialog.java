@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
@@ -22,6 +23,7 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
 
     RecyclerView recyclerView;
     TextView tvCount;
+    TextView tvNotDev;
     int count;
 
     public DeviceSelectDialog(@NonNull Context context, int count) {
@@ -40,6 +42,7 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
     public void initView() {
         recyclerView = findViewById(R.id.dev_dialog_recy);
         tvCount = findViewById(R.id.dev_dialog_count_tv);
+        tvNotDev = findViewById(R.id.dev_dialog_not_dev_tv);
     }
 
     @SuppressLint("SetTextI18n")
@@ -50,11 +53,12 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
         List<Device> deviceList;
         if (deviceMap.size() > 0) {
             deviceList = new ArrayList<>(deviceMap.values());
+            tvNotDev.setVisibility(View.GONE);
         } else {
             deviceList = new ArrayList<>();
         }
 
-        DeviceDialogAdapter adapter = new DeviceDialogAdapter(deviceList);
+        DeviceDialogAdapter adapter = new DeviceDialogAdapter(getContext(), deviceList);
         adapter.setOnItemClickListener(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
