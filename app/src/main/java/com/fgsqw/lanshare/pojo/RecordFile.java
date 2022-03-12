@@ -3,12 +3,15 @@ package com.fgsqw.lanshare.pojo;
 
 import static java.lang.System.identityHashCode;
 
+/**
+ * 弃用
+ */
+@Deprecated
 public class RecordFile extends FileInfo {
     private int progress;
     private Boolean success;
     private String message;
     private mSocket socket;
-    private Integer cmd;
     private int index;
     private boolean isRecv;
 
@@ -28,13 +31,6 @@ public class RecordFile extends FileInfo {
         this.index = index;
     }
 
-    public Integer getCmd() {
-        return cmd;
-    }
-
-    public void setCmd(Integer cmd) {
-        this.cmd = cmd;
-    }
 
     public int getProgress() {
         return progress;

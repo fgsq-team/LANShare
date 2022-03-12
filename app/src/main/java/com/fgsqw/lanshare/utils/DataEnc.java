@@ -121,8 +121,11 @@ public class DataEnc {
     }
 
     public DataEnc putBytes(byte[] bs) {
+        if (index + bs.length > byteLen) {
+            return null;
+        }
         DataEnc dataEnc = putBytes(bs, bs.length, index);
-        index += length;
+        index += bs.length;
         return dataEnc;
     }
 
@@ -143,12 +146,9 @@ public class DataEnc {
     public DataEnc putString(String val) {
         try {
             byte[] bs = val.getBytes("UTF-8");
-            if (index + bs.length <= byteLen) {
-                putInt(bs.length);
-                putBytes(bs);
-                index += bs.length;
-                return this;
-            }
+            putInt(bs.length);
+            putBytes(bs);
+            return this;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

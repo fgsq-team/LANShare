@@ -6,12 +6,18 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class UDPTools {
-    public static void sendData(DatagramSocket ds, byte[] buf, int length, String IP, int port) {
+
+    public static synchronized void sendData(DatagramSocket ds, byte[] buf, int length, String IP, int port) {
         try {
             ds.send(new DatagramPacket(buf, length, InetAddress.getByName(IP), port));
         } catch (IOException e) {
             e.printStackTrace();
         }
         ds.close();
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

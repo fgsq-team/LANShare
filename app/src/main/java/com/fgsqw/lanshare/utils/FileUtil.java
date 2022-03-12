@@ -563,14 +563,7 @@ public class FileUtil {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
 
         //文件的类型
-        String type = "";
-        String end = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
-        if (!end.equals("")) {
-            for (int i = 0; i < MIME_MapTable.length; i++) {
-                if (end.equals(MIME_MapTable[i][0]))
-                    type = MIME_MapTable[i][1];
-            }
-        }
+        String type = getMyMIMEType(new File(path));
 
         try {
             File out = new File(path);
@@ -681,11 +674,11 @@ public class FileUtil {
             return type;
         }
         /* 获取文件的后缀名 */
-        String end = fName.substring(dotIndex, fName.length()).toLowerCase();
-        if (end == "") return type;
+        String end = fName.substring(dotIndex);
+        if (end.equals("")) return type;
         //在MIME和文件类型的匹配表中找到对应的MIME类型。
         for (int i = 0; i < MIME_MapTable.length; i++) { //MIME_MapTable??在这里你一定有疑问，这个MIME_MapTable是什么？
-            if (end.equals(MIME_MapTable[i][0]))
+            if (end.equalsIgnoreCase(MIME_MapTable[i][0]))
                 type = MIME_MapTable[i][1];
         }
         return type;

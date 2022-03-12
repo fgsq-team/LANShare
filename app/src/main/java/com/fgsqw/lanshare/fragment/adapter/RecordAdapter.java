@@ -19,7 +19,10 @@ import com.fgsqw.lanshare.utils.mUtil;
 
 import java.util.List;
 
-
+/**
+ * 弃用
+ */
+@Deprecated
 public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder> {
     private List<RecordFile> filelist;
     OnItemClickListener onItemClickListener;

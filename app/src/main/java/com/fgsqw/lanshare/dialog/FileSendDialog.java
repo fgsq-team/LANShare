@@ -12,20 +12,23 @@ import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.dialog.adapter.DeviceDialogAdapter;
-import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.service.LANService;
+import com.fgsqw.lanshare.pojo.Device;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.OnItemClickListener {
+public class FileSendDialog extends Dialog implements DeviceDialogAdapter.OnItemClickListener {
+
     RecyclerView recyclerView;
     TextView tvCount;
     TextView tvNotDev;
+    int count;
 
-    public DeviceSelectDialog(@NonNull Context context) {
+    public FileSendDialog(@NonNull Context context, int count) {
         super(context);
+        this.count = count;
     }
 
     @Override
@@ -40,20 +43,19 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
         recyclerView = findViewById(R.id.dev_dialog_recy);
         tvCount = findViewById(R.id.dev_dialog_count_tv);
         tvNotDev = findViewById(R.id.dev_dialog_not_dev_tv);
-        tvCount.setVisibility(View.GONE);
     }
 
     @SuppressLint("SetTextI18n")
     public void initList() {
+        tvCount.setText("已选择" + count + "个文件");
         Map<String, Device> deviceMap = LANService.service.devices;
 
-        List<Device> deviceList = new ArrayList<>();
-        Device device = new Device();
-        device.setDevName("所有设备");
-        deviceList.add(device);
+        List<Device> deviceList;
         if (deviceMap.size() > 0) {
-            deviceList.addAll(deviceMap.values());
+            deviceList = new ArrayList<>(deviceMap.values());
             tvNotDev.setVisibility(View.GONE);
+        } else {
+            deviceList = new ArrayList<>();
         }
 
         DeviceDialogAdapter adapter = new DeviceDialogAdapter(getContext(), deviceList);
@@ -64,9 +66,9 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
     }
 
 
-    FileSendDialog.OnDeviceSelect onDeviceSelect;
+    OnDeviceSelect onDeviceSelect;
 
-    public void setOnDeviceSelect(FileSendDialog.OnDeviceSelect onDeviceSelect) {
+    public void setOnDeviceSelect(OnDeviceSelect onDeviceSelect) {
         this.onDeviceSelect = onDeviceSelect;
     }
 
@@ -81,4 +83,5 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
     public interface OnDeviceSelect {
         void deviceSelect(Device device);
     }
+
 }

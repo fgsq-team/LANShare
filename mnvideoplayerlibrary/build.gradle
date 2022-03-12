@@ -4,13 +4,16 @@ apply plugin: 'com.android.library'
 group='com.github.maning0303'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 28
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        //multiDexEnabled true
+        consumerProguardFiles 'consumer-rules.pro'
     }
     buildTypes {
         release {

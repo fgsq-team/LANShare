@@ -3,7 +3,7 @@
     <string name="record">记录</string>
     <string name="send">发送</string>
     <string name="file">文件</string>
-    <string name="cencel">取消</string>
+    <string name="cancel">取消</string>
     <string name="name">名称</string>
     <string name="size">大小</string>
     <string name="not_file">无记录</string>
@@ -18,4 +18,8 @@
     <string name="version">V0.0.1_beta</string>
     <string name="privacy">隐私声明</string>
     <string name="lan_not_device">在局域网中没有搜索到设备</string>
+    <string name="send_message_hint">向局域网中装有LANShare的设备发送消息</string>
+    <string name="cancelled">已取消</string>
+    <string name="all_device">所有设备</string>
+    <string name="copy_text">复制文本</string>
 </resources>

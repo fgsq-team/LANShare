@@ -10,37 +10,37 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.fragment.adapter.RecordAdapter;
-import com.fgsqw.lanshare.pojo.mCmd;
-import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.pojo.DataObject;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.RecordFile;
+import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mSocket;
+import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.utils.FileUtil;
-import com.fgsqw.lanshare.utils.ViewUpdate;
-import com.fgsqw.lanshare.utils.mUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * 弃用
+ */
+@Deprecated
 public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClickListener {
 
 
     View view;
     private final List<RecordFile> fileInfoList = new ArrayList<>();
-    RecyclerView recyclerView;    //列表
+    RecyclerView recyclerView;
     RecordAdapter recordAdapter;
     LinearLayoutManager layoutManager;
     TextView notFile;
@@ -53,15 +53,15 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
         super.onAttach(context);
     }
 
-    // 用户接收LANService的消息
+    // 接收LANService的消息
     @SuppressWarnings("all")
     private final Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == mCmd.SERVICE_IF_RECIVE_FILES) {   // 是否接收文件弹窗
+
                 DataObject dataObject = (DataObject) msg.obj;
                 Device device = (Device) dataObject.getObj1();
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
                         .setIcon(R.mipmap.ic_launcher)
                         .setCancelable(false)
@@ -74,16 +74,19 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
                             dialogInterface.dismiss();
                             LANService.service.startRecvFile(dataObject, false);
                         });
-
                 builder.create().show();
             } else if (msg.what == mCmd.SERVICE_SHOW_PROGRESS) {     // 创建一条数据
+
                 List<RecordFile> recordFileList = (List<RecordFile>) msg.obj;
                 fileInfoList.addAll(recordFileList);
                 refreshData();
                 recyclerView.scrollToPosition(recordAdapter.getItemCount() - 1);
             } else if (msg.what == mCmd.SERVICE_PROGRESS) {          // 更新进度
+
                 RecordFile recordFile = (RecordFile) msg.obj;
+                // 获取数据在列表中的下标
                 int dataPosition = recordAdapter.getDataPosition(recordFile);
+                // 获取视图并更新视图数据
                 RecordAdapter.ViewHolder viewHolder = (RecordAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
                 if (viewHolder != null) {
                     viewHolder.mProgressBar.setProgress(recordFile.getProgress());
@@ -91,9 +94,11 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
                     recordAdapter.notifyItemChanged(dataPosition);
                 }
             } else if (msg.what == mCmd.SERVICE_CLOSE_PROGRESS) {    // 完成
-                RecordFile recordFile = (RecordFile) msg.obj;
-                int dataPosition = recordAdapter.getDataPosition(recordFile);
 
+                RecordFile recordFile = (RecordFile) msg.obj;
+                // 获取数据在列表中的下标
+                int dataPosition = recordAdapter.getDataPosition(recordFile);
+                // 获取视图并更新视图数据
                 RecordAdapter.ViewHolder viewHolder = (RecordAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
                 if (viewHolder != null) {
                     viewHolder.mProgressBar.setProgress(recordFile.getProgress());
@@ -168,18 +173,20 @@ public class FragRecord extends BaseFragment implements RecordAdapter.OnItemClic
         }
     }
 
+    // 点击了取消按钮
     @Override
     public void onCloseClick(int position) {
         RecordFile recordFile = fileInfoList.get(position);
         mSocket socket = recordFile.getSocket();
 
         if (recordFile.isRecv()) {
-            LANService.service.sendCmd(recordFile, socket.getOut());
+            //  LANService.service.sendCloseCmd(recordFile, socket.getOut());
         } else {
             socket.mClose();
         }
-
+        // 移除数据
         fileInfoList.remove(recordFile);
+        // 更新列表
         refreshData();
 
     }

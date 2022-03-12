@@ -3,9 +3,13 @@ package com.fgsqw.lanshare.fragment.child;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -99,7 +103,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("请选择操作");
         String[] items;
-        items = new String[]{"发送", "备份", "取消",};
+        items = new String[]{"发送", "备份", "打开", "卸载", "取消",};
         // 绑定选项和点击事件
         builder.setItems(items, (arg0, arg1) -> {
             switch (arg1) {
@@ -107,9 +111,18 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
                     dataCenterActivity.sendFiles(Arrays.asList(fileUtils));
                     break;
                 case 1:
+                    // 备份至本地
                     new CopFileTask(getContext(), fileUtils.getPath(), Config.FILE_SAVE_PATH + "备份/" + fileUtils.getName()).execute(0);
                     break;
                 case 2:
+                    // 打开程序
+                    startApp(fileUtils.getPackageName());
+                    break;
+                case 3:
+                    // 卸载程序
+                    unstallApp(fileUtils.getPackageName());
+                    break;
+                case 4:
                     //取消
                     break;
             }
@@ -157,6 +170,20 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         }*/
     }
 
+    //卸载应用
+    public void unstallApp(String packageName) {
+        Intent uninstall_intent = new Intent();
+        uninstall_intent.setAction(Intent.ACTION_DELETE);
+        uninstall_intent.setData(Uri.parse("package:" + packageName));
+        startActivity(uninstall_intent);
+    }
+
+    // 开启应用
+    public void startApp(String packageName) {
+        getContext().startActivity(getContext().getPackageManager().getLaunchIntentForPackage(packageName));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

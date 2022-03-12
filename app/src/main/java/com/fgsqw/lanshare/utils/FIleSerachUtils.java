@@ -177,6 +177,7 @@ public class FIleSerachUtils {
             apkInfo.setIcon(app.loadIcon(pm));
             apkInfo.setLength(length);
             apkInfo.setPath(apkPath);
+            apkInfo.setPackageName(app.activityInfo.packageName);
             apkInfoList.add(apkInfo);
         }
         return apkInfoList;

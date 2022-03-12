@@ -30,7 +30,6 @@ public class HelloActivity extends AppCompatActivity {
     }
 
     public void init() {
-
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             int storagePermission = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             //检测是否有权限，如果没有权限，就需要申请
@@ -39,10 +38,8 @@ public class HelloActivity extends AppCompatActivity {
                 dialog();
                 return;
             }
-
         }
         startActivity();
-
     }
 
     public void startActivity() {
@@ -55,6 +52,7 @@ public class HelloActivity extends AppCompatActivity {
     public void dialog() {
         AlertDialog.Builder dialog = new AlertDialog.Builder(HelloActivity.this);
         dialog.setTitle("提示");
+        dialog.setCancelable(false);
         dialog.setMessage("您必须同意储存使用权限才能正常使用本软件,软件并不会上传任何数据");
         dialog.setPositiveButton("确定", (dialogInterface, i) -> requestPermissions(PERMISSIONS_CAMERA_AND_STORAGE, 0));
         dialog.setNegativeButton("取消", (dialogInterface, i) -> finish());

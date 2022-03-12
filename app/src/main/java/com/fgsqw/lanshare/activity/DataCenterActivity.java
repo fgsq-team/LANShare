@@ -18,18 +18,20 @@ import android.widget.Toast;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
+import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
-import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
+import com.fgsqw.lanshare.dialog.FileSendDialog;
+import com.fgsqw.lanshare.fragment.FragChat;
 import com.fgsqw.lanshare.fragment.FragFiles;
-import com.fgsqw.lanshare.fragment.FragRecord;
-import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.pojo.FileInfo;
+import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.utils.PrefUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @SuppressLint("NonConstantResourceId")
 public class DataCenterActivity extends BaseActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener {
@@ -48,23 +50,28 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     private Toolbar mainToobar;
 
+    private LinearLayout bottomLayout;
+
     private final List<Fragment> fragmentList = new ArrayList<>();
-    private Fragment currentFragment;
+    private BaseFragment currentFragment;
     private FragFiles fragFiles;
-    private FragRecord fragRecord;
+    //    private FragRecord fragRecord;
+    private FragChat fragChat;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
         initView();
         initFragment();
 
-        Intent musicService = new Intent();
-        musicService.setClass(this, LANService.class);
-        musicService.putExtra("messenger", new Messenger(fragRecord.getHandler()));
-        startService(musicService);
+
+        Intent lanService = new Intent();
+        lanService.setClass(this, LANService.class);
+        lanService.putExtra("messenger", new Messenger(fragChat.getHandler()));
+        startService(lanService);
     }
 
     @Override
@@ -102,6 +109,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         imgFiles = bind(R.id.img_files);
         tvFiles = bind(R.id.bottom_files_tv);
 
+        bottomLayout = bind(R.id.bottom_container);
+
         mainToobar = bind(R.id.main_toolbar);
         mainToobar.inflateMenu(R.menu.toolbar_menu);
         mainToobar.setOnMenuItemClickListener(this);
@@ -113,8 +122,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
 
     private void initFragment() {
-        fragRecord = new FragRecord();
-        fragmentList.add(fragRecord);
+//        fragRecord = new FragRecord();
+//        fragmentList.add(fragRecord);
+        fragChat = new FragChat();
+        fragmentList.add(fragChat);
         fragFiles = new FragFiles();
         fragmentList.add(fragFiles);
         switchFragment(0);
@@ -155,7 +166,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                     transaction.add(frameLayoutId, fragment);
                 }
             }
-            currentFragment = fragment;
+            currentFragment = (BaseFragment) fragment;
             transaction.commit();
         }
     }
@@ -188,7 +199,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     List fileInfos = new ArrayList<>();
 
     public void sendFiles(List<FileInfo> fileInfos) {
-        DeviceSelectDialog dialog = new DeviceSelectDialog(this, fileInfos.size());
+        FileSendDialog dialog = new FileSendDialog(this, fileInfos.size());
         dialog.setOnDeviceSelect(device -> LANService.service.fileSend(device, fileInfos));
         dialog.show();
     }
@@ -229,16 +240,21 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     @Override
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
-        if ((n != 4) || (keyEvent.getRepeatCount() != 0)) return super.onKeyDown(n, keyEvent);
-        if (currentFragment == fragFiles) {
-            if (!fragFiles.onKeyDown(n, keyEvent)) {
-                finish();
-            }
+        if ((n != KeyEvent.KEYCODE_BACK) || (keyEvent.getRepeatCount() != 0)) return super.onKeyDown(n, keyEvent);
+        if (!currentFragment.onKeyDown(n, keyEvent)) {
+            moveTaskToBack(true);
         }
         return true;
 
     }
 
+    public void hideBottom() {
+        bottomLayout.setVisibility(View.GONE);
+    }
+
+    public void showBottom() {
+        bottomLayout.setVisibility(View.VISIBLE);
+    }
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {

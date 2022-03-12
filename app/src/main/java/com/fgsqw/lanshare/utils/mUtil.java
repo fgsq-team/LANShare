@@ -8,6 +8,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -25,6 +26,14 @@ import java.lang.reflect.Field;
 import java.util.Random;
 
 public class mUtil {
+
+
+    public static void copy(String content, Context context) {
+// 得到剪贴板管理器
+        ClipboardManager cmb = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        cmb.setText(content.trim());
+    }
+
     /**
      * 使服务更好的运行在后台， 不被销毁（手机内存低时不优先销毁）
      */
@@ -168,6 +177,7 @@ public class mUtil {
 
     /**
      * 获取程序版本
+     *
      * @param context
      * @return
      */

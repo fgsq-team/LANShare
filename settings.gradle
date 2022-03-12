@@ -1,1 +1,1 @@
-include ':app','mnvideoplayerlibrary'
+include ':app', 'mnvideoplayerlibrary'
