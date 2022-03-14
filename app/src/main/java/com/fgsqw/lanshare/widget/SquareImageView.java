@@ -1,4 +1,4 @@
-package com.fgsqw.lanshare.view;
+package com.fgsqw.lanshare.widget;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatImageView;

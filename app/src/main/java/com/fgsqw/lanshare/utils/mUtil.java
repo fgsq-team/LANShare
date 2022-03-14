@@ -195,5 +195,18 @@ public class mUtil {
         return versionName;
     }
 
+    /**
+     * 获取自身apk路径
+     **/
+    public static String getSelfApkPath(Context context) {
+        String appDir = null;
+        try {
+            //通过包名获取程序源文件路径
+            appDir = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).sourceDir;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return appDir;
+    }
 
 }

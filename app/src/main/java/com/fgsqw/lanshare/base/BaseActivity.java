@@ -11,10 +11,15 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 public abstract class BaseActivity extends AppCompatActivity {
     public <T extends View> T bind(int id) {
         return super.findViewById(id);
+    }
+
+    public void log(String str) {
+        Log.d(this.getClass().getSimpleName(), str);
     }
 }

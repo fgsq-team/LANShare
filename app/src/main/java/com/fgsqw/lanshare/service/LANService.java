@@ -66,6 +66,7 @@ public class LANService extends BaseService {
     String locAddrIndex = "255.255.255.255";
     NetWorkReceiver netWorkReceiver;
     PrefUtil prefUtil;
+    private boolean isRun = true;
 
     @Nullable
     @Override
@@ -438,18 +439,15 @@ public class LANService extends BaseService {
      */
     public void startRecvCmd(List<MessageFileContent> fileContentList, InputStream input) {
         ViewUpdate.runThread(() -> {
-            Log.d(TAG, "startRecvCmd:start");
             DataDec dataDec = new DataDec();
             try {
-                while (true) {
+                while (isRun) {
                     int read = IOUtil.read(input, dataDec.getData(), 0, dataDec.getByteLen());
                     if (read > 0) {
                         if (read == dataDec.getByteLen()) {
                             int cmd = dataDec.getByteCmd();
-                            Log.d(TAG, "cmd:" + cmd);
                             if (cmd == mCmd.FS_CLOSE) {
                                 int index = dataDec.getCount();
-                                Log.d(TAG, "取消:" + index);
                                 for (MessageFileContent messageFileContent : fileContentList) {
                                     if (messageFileContent.getIndex() == index) {
                                         messageFileContent.getSocket().mClose();
@@ -463,9 +461,7 @@ public class LANService extends BaseService {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.d(TAG, "startRecvCmd:" + e.getMessage());
             }
-            Log.d(TAG, "startRecvCmd:end");
         });
     }
 
@@ -649,7 +645,7 @@ public class LANService extends BaseService {
             e.printStackTrace();
         }
         ViewUpdate.runThread(() -> {
-            while (true) {
+            while (isRun) {
                 try {
                     // 等待客户端连接
                     Socket client = fileRecive.accept();
@@ -794,14 +790,15 @@ public class LANService extends BaseService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        IOUtil.closeIO(ipGetSocket);
+        isRun = false;
+        IOUtil.closeIO(ipGetSocket, fileRecive);
         unregisterReceiver(netWorkReceiver);
     }
 
     // 局域网扫描设备
     public void scannDevice() {
         ViewUpdate.runThread(() -> {
-            while (true) {
+            while (isRun) {
                 try {
                     DataEnc dataEnc = new DataEnc(1024);
                     dataEnc.setCmd(mCmd.UDP_GET_DEVICES);

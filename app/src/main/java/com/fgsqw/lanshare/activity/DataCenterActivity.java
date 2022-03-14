@@ -266,6 +266,9 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             case R.id.menu_about:
                 startActivity(new Intent(this, AboutActivity.class));
                 break;
+            case R.id.menu_http_share:
+                startActivity(new Intent(this, HttpShareActivity.class));
+                break;
 
         }
         return true;

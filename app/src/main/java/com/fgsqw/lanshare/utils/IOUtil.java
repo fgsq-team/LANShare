@@ -1,8 +1,13 @@
 package com.fgsqw.lanshare.utils;
 
+import android.content.Context;
+
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 public class IOUtil {
 
@@ -19,6 +24,45 @@ public class IOUtil {
                 }
             }
         }
+    }
+
+    public static long writeAlData(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[2048];
+        int ten = 0;
+        long total = 0;
+        while ((ten = input.read(buffer)) != -1) {
+            output.write(buffer, 0, ten);
+            total += ten;
+        }
+        return total;
+    }
+
+
+    public static String readInputTxt(InputStream inputStream) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 读取Assets下的txt文件
+     */
+    public static String readAssetsTxt(Context context, String fileName) {
+        try {
+            return readInputTxt(context.getAssets().open(fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static int read(InputStream is, byte[] buf, int index, int len) throws IOException {

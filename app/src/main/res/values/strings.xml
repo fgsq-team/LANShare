@@ -22,4 +22,6 @@
     <string name="cancelled">已取消</string>
     <string name="all_device">所有设备</string>
     <string name="copy_text">复制文本</string>
+    <string name="http_share">通过Web分享软件</string>
+    <string name="http_share_info">开启按钮启动Web分享服务\n开启后可点击此处复制链接</string>
 </resources>

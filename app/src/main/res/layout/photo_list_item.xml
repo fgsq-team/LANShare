@@ -5,7 +5,7 @@
     android:layout_gravity="center"
     android:layout_margin="1dp">
 
-    <com.fgsqw.lanshare.view.SquareImageView
+    <com.fgsqw.lanshare.widget.SquareImageView
         android:id="@+id/photo_item_img"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -13,7 +13,7 @@
         android:background="#010101"
         android:scaleType="centerCrop" />
 
-    <com.fgsqw.lanshare.view.SquareImageView
+    <com.fgsqw.lanshare.widget.SquareImageView
         android:id="@+id/photo_item_masking"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

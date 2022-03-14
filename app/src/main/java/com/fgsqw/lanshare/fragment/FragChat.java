@@ -279,7 +279,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, Chat
                 messageContent.setLeft(false);
                 messageContent.setContent(message);
                 messageContent.setUserName(LANService.service.getDevName());
-                messageContent.setToUser("所有设备");
+                messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
                 LANService.service.broadcastMessage(selectedDevice, message);
                 addMessage(messageContent);
                 editContent.setText("");
