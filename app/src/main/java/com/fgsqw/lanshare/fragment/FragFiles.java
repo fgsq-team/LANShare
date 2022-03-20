@@ -1,11 +1,13 @@
 package com.fgsqw.lanshare.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +17,14 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.fragment.adapter.ViewGroupAdapter;
 import com.fgsqw.lanshare.fragment.child.*;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
-public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeListener {
+public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeListener, ChildBaseMethod {
 
     View view;
 
@@ -37,6 +41,19 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     ViewPager viewPager;
 
     int currentPosition;
+
+    public List fileSelects = new LinkedList<>();
+
+    public FragFiles() {
+        fragAppList = new FragAppList();
+        fragments.add(fragAppList);
+        fragPhotoList = new FragPhotoList();
+        fragments.add(fragPhotoList);
+        fragFileList = new FragFileList();
+        fragments.add(fragFileList);
+        fragTest = new FragTest();
+        fragments.add(fragTest);
+    }
 
 
     @Nullable
@@ -60,20 +77,7 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     }
 
     public void initFragment() {
-        fragAppList = new FragAppList();
-        fragments.add(fragAppList);
-        fragPhotoList = new FragPhotoList();
-        fragments.add(fragPhotoList);
-        fragFileList = new FragFileList();
-        fragments.add(fragFileList);
-        fragTest = new FragTest();
-        fragments.add(fragTest);
-
-//        fragChat = new FragChat();
-//        fragments.add(fragChat);
-
         ViewGroupAdapter mAdapter = new ViewGroupAdapter(getActivity().getSupportFragmentManager(), tabTitles, fragments);
-
         viewPager.setAdapter(mAdapter);
         viewPager.addOnPageChangeListener(this);
         tabFiles.setTabMode(TabLayout.MODE_FIXED);
@@ -100,6 +104,20 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
         BaseFragment fragment = (BaseFragment) fragments.get(viewPager.getCurrentItem());
         return fragment.onKeyDown(n, keyEvent);
+    }
+
+    public List getFileSelects() {
+        return fileSelects;
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    public void clearSelect() {
+        for (Fragment fragment : fragments) {
+            if (fragment instanceof ChildBaseMethod) {
+                ((ChildBaseMethod) fragment).clearSelect();
+            }
+        }
     }
 }
 

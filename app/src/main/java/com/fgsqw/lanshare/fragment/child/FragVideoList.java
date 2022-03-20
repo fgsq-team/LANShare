@@ -9,8 +9,9 @@ import android.view.ViewGroup;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 
-public class FragVideoList extends BaseFragment {
+public class FragVideoList extends BaseFragment implements ChildBaseMethod {
 
 
     View view;
@@ -30,6 +31,11 @@ public class FragVideoList extends BaseFragment {
     }
 
     public void initView() {
+
+    }
+
+    @Override
+    public void clearSelect() {
 
     }
 }

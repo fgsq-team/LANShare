@@ -3,8 +3,10 @@ package com.fgsqw.lanshare.fragment.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,125 +15,168 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
-import com.fgsqw.lanshare.fragment.adapter.viewolder.LeftFileMsgHolder;
-import com.fgsqw.lanshare.fragment.adapter.viewolder.LeftMsgHolder;
+import com.fgsqw.lanshare.fragment.adapter.viewolder.FileMsgHolder;
+import com.fgsqw.lanshare.fragment.adapter.viewolder.MediaMsgHloder;
 import com.fgsqw.lanshare.fragment.adapter.viewolder.MsgHolder;
-import com.fgsqw.lanshare.fragment.adapter.viewolder.RightFileMsgHolder;
-import com.fgsqw.lanshare.fragment.adapter.viewolder.RightMsgHolder;
 import com.fgsqw.lanshare.fragment.FragChat;
 import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
+import com.fgsqw.lanshare.pojo.MessageMediaContent;
 import com.fgsqw.lanshare.utils.FileUtil;
+
+import java.util.Objects;
 
 public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private Context mContext;
-    private LayoutInflater mInflater;
+    public static final int TYPE_MSG_LEFT = 1;
+    public static final int TYPE_MSG_RIGHT = 2;
+    public static final int TYPE_FILE_MSG_LEFT = 3;
+    public static final int TYPE_FILE_MSG_RIGHT = 4;
+    public static final int TYPE_MEDIA_MSG_LEFT = 5;
+    public static final int TYPE_MEDIA_MSG_RIGHT = 6;
+
+    private final Context mContext;
+    private final LayoutInflater mInflater;
+    private final RequestOptions options;
+    private final FragChat fragChat;
+    private final int stateTvColor;
+
     private OnItemLongClickListener mLongListener;
     private OnItemClickListener mListener;
-    private RequestOptions options;
-    private FragChat fragChat;
-    private int stateTvColor;
 
     public ChatAdabper(FragChat fragChat) {
         mContext = fragChat.getContext();
-        stateTvColor = mContext.getResources().getColor(R.color.item_text);
+        stateTvColor = Objects.requireNonNull(mContext).getResources().getColor(R.color.item_text);
         this.fragChat = fragChat;
         mInflater = LayoutInflater.from(mContext);
-        options = new RequestOptions().centerCrop();
+        options = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        if (viewType == ITEM_TYPE.TYPE_LEFT_MSG.ordinal()) {
-            return new LeftMsgHolder(mInflater, viewGroup);
-        } else if (viewType == ITEM_TYPE.TYPE_LEFT_FILE_MSG.ordinal()) {
-            return new LeftFileMsgHolder(mInflater, viewGroup);
-        } else if (viewType == ITEM_TYPE.TYPE_RIGHT_FILE_MSG.ordinal()) {
-            return new RightFileMsgHolder(mInflater, viewGroup);
-        } else {
-            return new RightMsgHolder(mInflater, viewGroup);
+        MsgHolder msgHolder;
+        if (viewType == TYPE_MSG_LEFT) {
+            msgHolder = new MsgHolder(true, mInflater, viewGroup);
+        } else if (viewType == TYPE_MSG_RIGHT) {
+            msgHolder = new MsgHolder(false, mInflater, viewGroup);
+        } else if (viewType == TYPE_FILE_MSG_LEFT) {
+            msgHolder = new FileMsgHolder(true, mInflater, viewGroup);
+        } else if (viewType == TYPE_FILE_MSG_RIGHT) {
+            msgHolder = new FileMsgHolder(false, mInflater, viewGroup);
+        } else if (viewType == TYPE_MEDIA_MSG_LEFT) {
+            msgHolder = new MediaMsgHloder(true, mInflater, viewGroup);
+        } else/* if (viewType == TYPE_MEDIA_MSG_RIGHT)*/ {
+            msgHolder = new MediaMsgHloder(false, mInflater, viewGroup);
         }
+        return msgHolder;
     }
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-        MessageContent messageContent = fragChat.getMessageContents().get(i);
-        int itemViewType = getItemViewType(i);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        MessageContent messageContent = fragChat.getMessageContents().get(position);
 
         MsgHolder msgHolder = (MsgHolder) viewHolder;
-        msgHolder.content.setText(messageContent.getContent());
+        // 头像
         Glide.with(mContext).load(messageContent.getHeader())
-                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
+                .apply(options)
                 .into(msgHolder.header);
-        if (itemViewType == ITEM_TYPE.TYPE_LEFT_MSG.ordinal()) {
+        // 设置消息
+        msgHolder.content.setText(messageContent.getContent());
+
+        // 设置用户名
+        if (messageContent.isLeft()) {
             msgHolder.user.setText(messageContent.getUserName());
-        } else if (itemViewType == ITEM_TYPE.TYPE_LEFT_FILE_MSG.ordinal()) {
-            LeftFileMsgHolder leftFileMsgHolder = (LeftFileMsgHolder) viewHolder;
-            MessageFileContent messageFileContent = (MessageFileContent) messageContent;
-            leftFileMsgHolder.content.setText(messageFileContent.getContent());
-            leftFileMsgHolder.progressBar.setProgress(messageFileContent.getProgress());
-            leftFileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
-
-            if (messageFileContent.getSuccess() != null) {
-                leftFileMsgHolder.progressBar.setVisibility(View.GONE);
-                leftFileMsgHolder.stateTv.setVisibility(View.VISIBLE);
-                leftFileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
-                if (!messageFileContent.getSuccess()) {
-                    leftFileMsgHolder.stateTv.setTextColor(Color.RED);
-                } else {
-                    leftFileMsgHolder.stateTv.setTextColor(stateTvColor);
-                }
-            } else {
-                leftFileMsgHolder.progressBar.setVisibility(View.VISIBLE);
-                leftFileMsgHolder.stateTv.setVisibility(View.GONE);
-                leftFileMsgHolder.stateTv.setTextColor(stateTvColor);
-            }
-
-        } else if (itemViewType == ITEM_TYPE.TYPE_RIGHT_FILE_MSG.ordinal()) {
-
-            RightFileMsgHolder rightFileMsgHolder = (RightFileMsgHolder) viewHolder;
-            MessageFileContent messageFileContent = (MessageFileContent) messageContent;
-            rightFileMsgHolder.progressBar.setProgress(messageFileContent.getProgress());
-            rightFileMsgHolder.user.setText(messageContent.getToUser() + " ← " + messageContent.getUserName());
-            rightFileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
-            if (messageFileContent.getSuccess() != null) {
-                rightFileMsgHolder.progressBar.setVisibility(View.GONE);
-                rightFileMsgHolder.stateTv.setVisibility(View.VISIBLE);
-                rightFileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
-                if (!messageFileContent.getSuccess()) {
-                    rightFileMsgHolder.stateTv.setTextColor(Color.RED);
-                } else {
-                    rightFileMsgHolder.stateTv.setTextColor(stateTvColor);
-                }
-            } else {
-                rightFileMsgHolder.progressBar.setVisibility(View.VISIBLE);
-                rightFileMsgHolder.stateTv.setVisibility(View.GONE);
-                rightFileMsgHolder.stateTv.setTextColor(stateTvColor);
-            }
         } else {
             msgHolder.user.setText(messageContent.getToUser() + " ← " + messageContent.getUserName());
         }
 
+        int itemViewType = messageContent.getViewType();
+
+        // 判断为文件
+        if (itemViewType == TYPE_FILE_MSG_LEFT || itemViewType == TYPE_FILE_MSG_RIGHT) {
+            FileMsgHolder fileMsgHolder = (FileMsgHolder) viewHolder;
+            MessageFileContent messageFileContent = (MessageFileContent) messageContent;
+
+            fileMsgHolder.progressBar.setProgress(messageFileContent.getProgress());
+            fileMsgHolder.content.setText(messageFileContent.getContent());
+            fileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
+
+            if (messageFileContent.getSuccess() != null) {
+                fileMsgHolder.progressBar.setVisibility(View.GONE);
+                fileMsgHolder.stateTv.setVisibility(View.VISIBLE);
+                fileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
+                if (messageFileContent.getSuccess()) {
+                    fileMsgHolder.stateTv.setTextColor(stateTvColor);
+                } else {
+                    fileMsgHolder.stateTv.setTextColor(Color.RED);
+                }
+            } else {
+                fileMsgHolder.progressBar.setVisibility(View.VISIBLE);
+                fileMsgHolder.stateTv.setVisibility(View.GONE);
+                fileMsgHolder.stateTv.setTextColor(stateTvColor);
+            }
+            // 判断为媒体文件
+        } else if (itemViewType == TYPE_MEDIA_MSG_LEFT || itemViewType == TYPE_MEDIA_MSG_RIGHT) {
+            MediaMsgHloder mediaMsgHloder = (MediaMsgHloder) viewHolder;
+            MessageMediaContent mediaContent = (MessageMediaContent) messageContent;
+            mediaMsgHloder.tvSize.setText(FileUtil.computeSize(mediaContent.getLength()));
+            mediaMsgHloder.progressBar.setProgress(mediaContent.getProgress());
+
+            // 判断是否为视频
+            if (mediaContent.isVideo()) {
+                mediaMsgHloder.videTimeLay.setVisibility(View.VISIBLE);
+                mediaMsgHloder.videTime.setText(mediaContent.getVideoTime());
+            } else {
+                mediaMsgHloder.videTimeLay.setVisibility(View.GONE);
+            }
+
+            // 判断文件传输是否已完成
+            if (mediaContent.getSuccess() != null) {
+                mediaMsgHloder.stateTv.setVisibility(View.VISIBLE);
+                mediaMsgHloder.progressBar.setVisibility(View.GONE);
+                mediaMsgHloder.stateTv.setText(mediaContent.getStateMessage());
+
+                if (mediaContent.getSuccess()) {
+                    mediaMsgHloder.mediaInfo.setVisibility(View.GONE);
+                    mediaMsgHloder.stateTv.setTextColor(stateTvColor);
+                    Glide.with(mContext).load(mediaContent.getPath())
+                            .apply(options)
+                            .into(mediaMsgHloder.media);
+                } else {
+                    mediaMsgHloder.mediaInfo.setVisibility(View.VISIBLE);
+                    mediaMsgHloder.stateTv.setTextColor(Color.RED);
+                    Glide.with(mContext).load((Drawable) null)
+                            .apply(options)
+                            .into(mediaMsgHloder.media);
+                }
+
+            } else {
+                mediaMsgHloder.videTime.setVisibility(View.VISIBLE);
+                mediaMsgHloder.progressBar.setVisibility(View.VISIBLE);
+                mediaMsgHloder.stateTv.setVisibility(View.GONE);
+                mediaMsgHloder.mediaInfo.setVisibility(View.VISIBLE);
+
+                Glide.with(mContext).load(R.drawable.image_background)
+                        .apply(options)
+                        .into(mediaMsgHloder.media);
+
+            }
+        }
+
         viewHolder.itemView.setOnClickListener((v) -> {
             if (mListener != null)
-                mListener.onItemClick(messageContent, i);
+                mListener.onItemClick(messageContent, position);
         });
+
         viewHolder.itemView.setOnLongClickListener((v) -> {
             if (mLongListener != null)
-                return mLongListener.onItemLongClick(messageContent, viewHolder.itemView, i);
+                return mLongListener.onItemLongClick(messageContent, viewHolder.itemView, position);
             return false;
         });
     }
 
-    public enum ITEM_TYPE {
-        TYPE_LEFT_MSG,
-        TYPE_RIGHT_MSG,
-        TYPE_LEFT_FILE_MSG,
-        TYPE_RIGHT_FILE_MSG,
-    }
 
     public int getDataPosition(MessageContent messageContent) {
         return fragChat.getMessageContents().indexOf(messageContent);

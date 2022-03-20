@@ -1,5 +1,6 @@
 package com.fgsqw.lanshare.activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -50,7 +51,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
                 e.printStackTrace();
             }
             while (true) {
-                Socket socket = null;
+                Socket socket;
                 InputStream input;
                 OutputStream output;
                 try {
@@ -59,9 +60,6 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
                     output = socket.getOutputStream();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return;
-                }
-                if (socket == null) {
                     return;
                 }
                 try {
@@ -125,6 +123,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
         stopHttpServer();
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
@@ -141,7 +140,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     public void onClick(View v) {
         if (start.isChecked()) {
             String locAddress = NetWorkUtil.getLocAddress(this);
-            mUtil.copy("http://" + locAddress + ":8080/LANShare.apk", this);
+            mUtil.copyString("http://" + locAddress + ":8080/LANShare.apk", this);
             T.s("已复制");
         } else {
             T.s("请先开启按钮");

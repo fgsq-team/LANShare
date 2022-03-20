@@ -10,8 +10,9 @@ import android.view.ViewGroup;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 
-public class FragTest extends BaseFragment {
+public class FragTest extends BaseFragment implements  ChildBaseMethod {
 
 
     public static final String TAG = "ddddddddd";
@@ -98,4 +99,8 @@ public class FragTest extends BaseFragment {
     }
 
 
+    @Override
+    public void clearSelect() {
+
+    }
 }

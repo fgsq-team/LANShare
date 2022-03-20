@@ -26,7 +26,7 @@ import android.widget.TextView;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.preview.adapter.PreViewPagerAdapter;
 import com.fgsqw.lanshare.activity.preview.viewpager.PreViewViewPager;
-import com.fgsqw.lanshare.pojo.PhotoInfo;
+import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.utils.mUtil;
 
 import java.util.List;
@@ -44,11 +44,11 @@ public class ReviewImages extends AppCompatActivity {
     //tempImages和tempSelectImages用于图片列表数据的页面传输。
     //之所以不要Intent传输这两个图片列表，因为要保证两位页面操作的是同一个列表数据，同时可以避免数据量大时，
     // 用Intent传输发生的错误问题。
-    private static List<PhotoInfo> tempFileUtils;
-    private static List<PhotoInfo> tempSelectFileUtils;
+    private static List<MediaInfo> tempFileUtils;
+    private static List<MediaInfo> tempSelectFileUtils;
 
-    private List<PhotoInfo> mFileUtils;
-    private List<PhotoInfo> mSelectFileUtils;
+    private List<MediaInfo> mFileUtils;
+    private List<MediaInfo> mSelectFileUtils;
     private boolean isShowBar = true;
     private boolean isConfirm = false;
     // private boolean isSingle;
@@ -57,8 +57,8 @@ public class ReviewImages extends AppCompatActivity {
     private BitmapDrawable mSelectDrawable;
     private BitmapDrawable mUnSelectDrawable;
 
-    public static void openActivity(Activity activity, List<PhotoInfo> fileUtils,
-                                    List<PhotoInfo> selectFileUtils, boolean isSingle,
+    public static void openActivity(Activity activity, List<MediaInfo> fileUtils,
+                                    List<MediaInfo> selectFileUtils, boolean isSingle,
                                     int maxSelectCount, int position) {
         tempFileUtils = fileUtils;
         tempSelectFileUtils = selectFileUtils;
@@ -113,12 +113,7 @@ public class ReviewImages extends AppCompatActivity {
     }
 
     private void initListener() {
-        findViewById(R.id.preview_btn_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        findViewById(R.id.preview_btn_back).setOnClickListener(v -> finish());
     }
 
     /**

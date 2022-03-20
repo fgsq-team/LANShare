@@ -1,6 +1,6 @@
 package com.fgsqw.lanshare.pojo;
 
-public class PhotoInfo extends FileInfo {
+public class MediaInfo extends FileInfo {
 
     boolean isGif;
     boolean isVideo;

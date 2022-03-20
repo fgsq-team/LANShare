@@ -9,10 +9,16 @@
             android:defaultValue="/sdcard/LANShare/"
             android:key="filePath"
             android:title="文件储存路径" />
+
         <SwitchPreference
             android:defaultValue="false"
             android:key="not_recv_dialog"
             android:title="接收文件无需确认" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="open_media_on_internal_player"
+            android:title="使用内置播放器打开媒体" />
 
     </PreferenceCategory>
 

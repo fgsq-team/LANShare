@@ -15,7 +15,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
-import com.fgsqw.lanshare.pojo.PhotoInfo;
+import com.fgsqw.lanshare.pojo.MediaInfo;
 
 import java.io.File;
 import java.util.List;
@@ -44,11 +44,11 @@ public class SortPhotoAdapter extends RecyclerView.Adapter<SortPhotoAdapter.View
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final PhotoFolder folder = mFolders.get(position);
-        List<PhotoInfo> fileUtils = folder.getImages();
+        List<MediaInfo> mediaInfos = folder.getImages();
         holder.tvFolderName.setText(folder.getName());
-        if (fileUtils != null && !fileUtils.isEmpty()) {
-            holder.tvFolderSize.setText(fileUtils.size() + "");
-            Glide.with(mContext).load(new File(fileUtils.get(0).getPath()))
+        if (mediaInfos != null && !mediaInfos.isEmpty()) {
+            holder.tvFolderSize.setText(mediaInfos.size() + "");
+            Glide.with(mContext).load(new File(mediaInfos.get(0).getPath()))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.RESOURCE))
                     .into(holder.ivImage);
         } else {

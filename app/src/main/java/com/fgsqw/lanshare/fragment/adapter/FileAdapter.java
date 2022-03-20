@@ -2,6 +2,7 @@ package com.fgsqw.lanshare.fragment.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +26,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
-    private LayoutInflater mInflater;
-    private Context context;
+    private final LayoutInflater mInflater;
+    private final Context context;
     List<FileSource> path;//列表数据
     OnClickListener mListener;
 
@@ -36,8 +37,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         this.mInflater = LayoutInflater.from(context);
     }
 
+    @NonNull
     @Override
-    public FileAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FileAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.file_list_item, parent, false);
         return new ViewHolder(view);
     }
@@ -76,6 +78,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         return path == null ? 0 : path.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void refresh(List<FileSource> path) {      //更换列表数据
         this.path = path;
         notifyDataSetChanged();

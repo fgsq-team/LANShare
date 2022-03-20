@@ -12,11 +12,7 @@ public class MessageFileContent extends MessageContent {
     private String stateMessage;
 
     public int getViewType() {
-        if (isLeft()) {
-            return ChatAdabper.ITEM_TYPE.TYPE_LEFT_FILE_MSG.ordinal();
-        } else {
-            return ChatAdabper.ITEM_TYPE.TYPE_RIGHT_FILE_MSG.ordinal();
-        }
+        return isLeft() ? ChatAdabper.TYPE_FILE_MSG_LEFT : ChatAdabper.TYPE_FILE_MSG_RIGHT;
     }
 
     public Boolean getSuccess() {

@@ -28,7 +28,7 @@ import java.util.Random;
 public class mUtil {
 
 
-    public static void copy(String content, Context context) {
+    public static void copyString(String content, Context context) {
 // 得到剪贴板管理器
         ClipboardManager cmb = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         cmb.setText(content.trim());
@@ -42,7 +42,7 @@ public class mUtil {
         if (!(context instanceof Service)) {
             return;
         }
-        final int NOTIFICATION_ID = 12234;
+        final int NOTIFICATION_ID = 0x1989;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         //准备intent
         Intent intent = new Intent();
@@ -79,11 +79,9 @@ public class mUtil {
 
         } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             String CHANNEL_ID = "my_channel_01";
-            CharSequence name = title;
-            String Description = content;
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
-            mChannel.setDescription(Description);
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, title, importance);
+            mChannel.setDescription(content);
             mChannel.enableLights(true);
             mChannel.setLightColor(Color.RED);
             mChannel.enableVibration(true);
@@ -99,49 +97,9 @@ public class mUtil {
                     .setContentText(content)
                     .build();
         }
-        ((Service) context).startForeground(0x1989, notification);
+        ((Service) context).startForeground(NOTIFICATION_ID, notification);
     }
 
-
-    public static void reflex(final TabLayout tabLayout) {
-        //了解源码得知 线的宽度是根据 tabView的宽度来设置的
-        tabLayout.post(() -> {
-            try {
-                //拿到tabLayout的mTabStrip属性
-                Field mTabStripField = tabLayout.getClass().getDeclaredField("mTabStrip");
-                mTabStripField.setAccessible(true);
-                LinearLayout mTabStrip = (LinearLayout) mTabStripField.get(tabLayout);
-                int dp10 = dip2px1(tabLayout.getContext(), 10);
-                for (int i = 0; i < mTabStrip.getChildCount(); i++) {
-                    View tabView = mTabStrip.getChildAt(i);
-                    //拿到tabView的mTextView属性
-                    Field mTextViewField = tabView.getClass().getDeclaredField("mTextView");
-                    mTextViewField.setAccessible(true);
-                    TextView mTextView = (TextView) mTextViewField.get(tabView);
-                    tabView.setPadding(0, 0, 0, 0);
-                    //因为我想要的效果是   字多宽线就多宽，所以测量mTextView的宽度
-                    int width = 0;
-                    width = mTextView.getWidth();
-                    if (width == 0) {
-                        mTextView.measure(0, 0);
-                        width = mTextView.getMeasuredWidth();
-                    }
-                    //设置tab左右间距为10dp  注意这里不能使用Padding 因为源码中线的宽度是根据 tabView的宽度来设置的
-                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tabView.getLayoutParams();
-                    params.width = width;
-                    params.leftMargin = dp10;
-                    params.rightMargin = dp10;
-                    tabView.setLayoutParams(params);
-                    tabView.invalidate();
-                }
-
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     public static String StringSize(String str, int i) {
         String getstr = null;
@@ -173,7 +131,6 @@ public class mUtil {
     public static int random(int min, int max) {
         return new Random().nextInt((max - min) + 1) + min;
     }
-
 
     /**
      * 获取程序版本

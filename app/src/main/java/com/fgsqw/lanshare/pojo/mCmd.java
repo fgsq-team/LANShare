@@ -27,4 +27,8 @@ public class mCmd {
     public static final int SERVICE_ADD_MESSGAGE = 1206;       // 添加一条消息
 
 
+    public static final int FILE_IMAGE = 3001;       // 图片
+    public static final int FILE_VIEDO = 3002;       // 视频
+    public static final int FILE_FILE = 3003;        // 文件
+
 }

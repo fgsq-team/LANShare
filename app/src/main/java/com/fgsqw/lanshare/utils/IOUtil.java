@@ -65,9 +65,9 @@ public class IOUtil {
         return null;
     }
 
-    public static int read(InputStream is, byte[] buf, int index, int len) throws IOException {
+    public static int read(InputStream is, byte[] buf, int offset, int len) throws IOException {
         int totalRecv = 0;
-        int off = index;
+        int off = offset;
         int size = len;
 
         while (size > 0) {
@@ -81,6 +81,19 @@ public class IOUtil {
         }
 
         return totalRecv;
+    }
+
+    public static void write(OutputStream out, byte[] buf) throws IOException {
+        write(out, buf, buf.length);
+    }
+
+    public static void write(OutputStream out, byte[] buf, int len) throws IOException {
+        write(out, buf, 0, len);
+    }
+
+    public static void write(OutputStream out, byte[] buf, int offset, int len) throws IOException {
+        out.write(buf, offset, len);
+        out.flush();
     }
 
 

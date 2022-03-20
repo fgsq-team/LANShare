@@ -24,16 +24,19 @@ import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.FileSendDialog;
 import com.fgsqw.lanshare.fragment.FragChat;
 import com.fgsqw.lanshare.fragment.FragFiles;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.utils.PrefUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 
-@SuppressLint("NonConstantResourceId")
+@SuppressWarnings("all")
 public class DataCenterActivity extends BaseActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener {
 
 
@@ -55,7 +58,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private final List<Fragment> fragmentList = new ArrayList<>();
     private BaseFragment currentFragment;
     private FragFiles fragFiles;
-    //    private FragRecord fragRecord;
     private FragChat fragChat;
 
 
@@ -122,8 +124,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
 
     private void initFragment() {
-//        fragRecord = new FragRecord();
-//        fragmentList.add(fragRecord);
         fragChat = new FragChat();
         fragmentList.add(fragChat);
         fragFiles = new FragFiles();
@@ -180,11 +180,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 break;
             }
             case R.id.bottom_send: {
-                if (fileInfos.size() <= 0) {
+                if (fragFiles.getFileSelects().size() <= 0) {
                     Toast.makeText(this, "请选择文件", Toast.LENGTH_LONG).show();
                     return;
                 }
-                sendFiles(fileInfos);
+                sendFiles(fragFiles.getFileSelects());
                 break;
             }
             case R.id.bottom_files: {
@@ -196,11 +196,24 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         }
     }
 
-    List fileInfos = new ArrayList<>();
 
-    public void sendFiles(List<FileInfo> fileInfos) {
-        FileSendDialog dialog = new FileSendDialog(this, fileInfos.size());
-        dialog.setOnDeviceSelect(device -> LANService.service.fileSend(device, fileInfos));
+    public void sendOneFile(FileInfo fileInfo) {
+        FileSendDialog dialog = new FileSendDialog(this, 1);
+        dialog.setOnDeviceSelect(device -> {
+            LANService.service.fileSend(device, Arrays.asList(fileInfo));
+        });
+        dialog.show();
+    }
+
+
+    public void sendFiles(List<FileInfo> fileSelects) {
+        FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
+        dialog.setOnDeviceSelect(device -> {
+            LANService.service.fileSend(device, new LinkedList<>(fileSelects));
+            ((ChildBaseMethod) fragFiles).clearSelect();
+            fileSelects.clear();
+            setSelectCount(fileSelects.size());
+        });
         dialog.show();
     }
 
@@ -218,24 +231,28 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     @SuppressLint("SetTextI18n")
     public boolean addASendFile(FileInfo fileInfo) {
-        if (fileInfos.size() >= 1000) return false;
-        fileInfos.add(fileInfo);
-        setSelectCount(fileInfos.size());
+        if (fragFiles.getFileSelects().size() >= 1000) return false;
+        List fileSelects = fragFiles.getFileSelects();
+        fileSelects.add(fileInfo);
+        setSelectCount(fileSelects.size());
         return true;
     }
 
     public void removeSendFile(FileInfo fileInfo) {
-        fileInfos.remove(fileInfo);
-        setSelectCount(fileInfos.size());
+        List fileSelects = fragFiles.getFileSelects();
+        fileSelects.remove(fileInfo);
+        setSelectCount(fileSelects.size());
     }
 
     public void removeSendALL(List infos) {
-        fileInfos.removeAll(infos);
-        setSelectCount(fileInfos.size());
+        List fileSelects = fragFiles.getFileSelects();
+        fileSelects.removeAll(infos);
+        setSelectCount(fileSelects.size());
     }
 
     public void removeSendALL() {
-        fileInfos.clear();
+        List fileSelects = fragFiles.getFileSelects();
+        fileSelects.clear();
     }
 
     @Override

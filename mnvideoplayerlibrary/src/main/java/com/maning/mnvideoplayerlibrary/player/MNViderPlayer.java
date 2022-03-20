@@ -1,5 +1,6 @@
 package com.maning.mnvideoplayerlibrary.player;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -614,9 +615,9 @@ public class MNViderPlayer extends FrameLayout implements View.OnClickListener, 
         return true;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onPrepared(final MediaPlayer mediaPlayer) {
-
         mediaPlayer.start(); // 开始播放
         //是否开始播放
         if (!isPlaying) {
@@ -628,18 +629,17 @@ public class MNViderPlayer extends FrameLayout implements View.OnClickListener, 
         isPrepare = true;
         // 把得到的总长度和进度条的匹配
         mn_seekBar.setMax(mediaPlayer.getDuration());
-        mn_tv_time.setText(PlayerUtils.converLongTimeToStr(mediaPlayer.getCurrentPosition()) + "/" + PlayerUtils.converLongTimeToStr(mediaPlayer.getDuration()));
-        //延时：避免出现上一个视频的画面闪屏
-        myHandler.postDelayed(() -> {
-            initBottomMenuState();
-            mn_player_rl_progress.setVisibility(View.GONE);
-            //跳转指定位置
-            if (video_position > 0) {
-                Log.i(TAG, "onPrepared---video_position:" + video_position);
-                MNViderPlayer.this.mediaPlayer.seekTo(video_position);
-                video_position = 0;
-            }
-        }, 500);
+        mn_tv_time.setText(PlayerUtils.converLongTimeToStr(mediaPlayer.getCurrentPosition())
+                + "/" + PlayerUtils.converLongTimeToStr(mediaPlayer.getDuration()));
+        //会出现上一个视频的画面闪屏,待解决
+        mn_player_rl_progress.setVisibility(View.GONE);
+        initBottomMenuState();
+        //跳转指定位置
+        if (video_position > 0) {
+            Log.i(TAG, "onPrepared---video_position:" + video_position);
+            MNViderPlayer.this.mediaPlayer.seekTo(video_position);
+            video_position = 0;
+        }
         //适配大小
         fitVideoSize();
         //恢复显示,隐藏列缩图
@@ -1158,8 +1158,6 @@ public class MNViderPlayer extends FrameLayout implements View.OnClickListener, 
                 } else {
                     mn_iv_battery.setVisibility(View.GONE);
                 }
-
-
             }
         }
     }

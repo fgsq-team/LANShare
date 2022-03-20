@@ -38,11 +38,7 @@ public class MessageContent {
     }
 
     public int getViewType() {
-        if (isLeft) {
-            return ChatAdabper.ITEM_TYPE.TYPE_LEFT_MSG.ordinal();
-        } else {
-            return ChatAdabper.ITEM_TYPE.TYPE_RIGHT_MSG.ordinal();
-        }
+        return isLeft ? ChatAdabper.TYPE_MSG_LEFT : ChatAdabper.TYPE_MSG_RIGHT;
     }
 
 

@@ -31,30 +31,16 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     private final LayoutInflater mInflater;
 
     FragAppList fragAppList;
-    //保存选中的图片
-    private List<ApkInfo> mFileUtils;
-    private List<ApkInfo> mSelectlist;
-
     private OnItemClickListener mItemClickListener;
 
 
-    /**
-     * @param isViewImage 是否点击放大图片查看
-     */
     //构造方法
-    public AppAdapter(FragAppList fragAppList, boolean isViewImage) {
+    public AppAdapter(FragAppList fragAppList) {
         this.fragAppList = fragAppList;
 
         mContext = fragAppList.getContext();
         mInflater = LayoutInflater.from(mContext);
 
-        if (fragAppList.mSelectlist != null) {
-            if (fragAppList.mSelectlist.size() != 0) {
-                this.mSelectlist = fragAppList.mSelectlist;
-            }
-        } else {
-            mSelectlist = new ArrayList<>();
-        }
     }
 
 
@@ -68,14 +54,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final ApkInfo apkInfo = mFileUtils.get(position);
+        final ApkInfo apkInfo = fragAppList.getApkFileList().get(position);
         Glide.with(mContext).load(apkInfo.getIcon())
                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
                 .into(holder.mIcon);
         setItemSelect(holder, isSelect(apkInfo));
         holder.mName.setText(mUtil.StringSize(apkInfo.getName().replace(".apk", ""), 6));
         holder.mSize.setText(FileUtil.computeSize(apkInfo.getLength()));
-        holder.itemView.setOnClickListener(v -> checkedImage(holder, apkInfo, v));
+        holder.itemView.setOnClickListener(v -> checkedImage(holder, apkInfo, position));
         holder.itemView.setOnLongClickListener(view -> {
             int p = holder.getAdapterPosition();
             mItemClickListener.OnLongItenClick(apkInfo, p);
@@ -85,9 +71,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     private boolean isSelect(ApkInfo apkInfo) {
-        if (mSelectlist != null && mSelectlist.size() != 0) {
-            for (int i = 0; i < mSelectlist.size(); i++) {
-                if (apkInfo.getPath().equals(mSelectlist.get(i).getPath())) {
+        List<ApkInfo> selectlist = fragAppList.getSelectlist();
+        if (selectlist != null && selectlist.size() != 0) {
+            for (int i = 0; i < selectlist.size(); i++) {
+                if (apkInfo.getPath().equals(selectlist.get(i).getPath())) {
                     return true;
                 }
             }
@@ -96,15 +83,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     /*选中图片效果*/
-    private void checkedImage(ViewHolder holder, ApkInfo apkInfo, View view) {
+    private void checkedImage(ViewHolder holder, ApkInfo apkInfo, int position) {
         if (isSelect(apkInfo)) {//如果图片已经选中，就取消选中
             fragAppList.dataCenterActivity.removeSendFile(apkInfo);
-            unSelectImage(apkInfo, view);//取消选中图片
+            unSelectImage(apkInfo, position);//取消选中图片
             setItemSelect(holder, false);//设置图片选中效果
 
         } else {//如果未选中就选中
             if (fragAppList.dataCenterActivity.addASendFile(apkInfo)) {
-                selectImage(apkInfo, view);//选中图片
+                selectImage(apkInfo, position);//选中图片
                 setItemSelect(holder, true);//设置图片选中效果
             }
         }
@@ -114,10 +101,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     /**
      * 选中软件
      */
-    private void selectImage(ApkInfo apkInfo, View view) {
-        mSelectlist.add(apkInfo);
+    private void selectImage(ApkInfo apkInfo, int position) {
+        fragAppList.getSelectlist().add(apkInfo);
         if (mItemClickListener != null) {
-            mItemClickListener.OnItemClick(apkInfo, true, mSelectlist, view);
+            mItemClickListener.OnItemClick(apkInfo, true, position);
         }
 
     }
@@ -125,18 +112,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     /**
      * 取消选中软件
      */
-    private void unSelectImage(ApkInfo apkInfo, View view) {
-        if (mSelectlist != null && mSelectlist.size() != 0) {
-            for (int i = 0; i < mSelectlist.size(); i++) {
-                if (apkInfo.getPath().equals(mSelectlist.get(i).getPath())) {
-                    mSelectlist.remove(i);
+    private void unSelectImage(ApkInfo apkInfo, int position) {
+        if (fragAppList.getSelectlist() != null && fragAppList.getSelectlist().size() != 0) {
+            for (int i = 0; i < fragAppList.getSelectlist().size(); i++) {
+                if (apkInfo.getPath().equals(fragAppList.getSelectlist().get(i).getPath())) {
+                    fragAppList.getSelectlist().remove(i);
                     break;
                 }
             }
         }
         // mSelectFileUtils.remove(fileUtils);
         if (mItemClickListener != null) {
-            mItemClickListener.OnItemClick(apkInfo, false, mSelectlist, view);
+            mItemClickListener.OnItemClick(apkInfo, false, position);
         }
     }
 
@@ -146,25 +133,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     private int getImageCount() {
-        return mFileUtils == null ? 0 : mFileUtils.size();
+        return fragAppList.getApkFileList() == null ? 0 : fragAppList.getApkFileList().size();
     }
 
-    /*
-     *获取列表所有内容
-     */
-    public List<ApkInfo> getData() {
-        return mFileUtils;
-    }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void refresh(List<ApkInfo> data) {
-        mFileUtils = data;
+    public void refresh() {
         notifyDataSetChanged();
     }
 
     public ApkInfo getFirstVisibleImage(int firstVisibleItem) {
-        if (mFileUtils != null && !mFileUtils.isEmpty()) {
-            return mFileUtils.get(firstVisibleItem);
+        if (fragAppList.getApkFileList() != null && !fragAppList.getApkFileList().isEmpty()) {
+            return fragAppList.getApkFileList().get(firstVisibleItem);
         }
         return null;
     }
@@ -183,10 +163,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     public void clearImageSelect() {
-        if (mSelectlist.size() != 0) {
-            fragAppList.dataCenterActivity.removeSendALL(mSelectlist);
-            mSelectlist.clear();
-            notifyItemRangeChanged(0, mFileUtils.size());
+        if (fragAppList.getSelectlist().size() != 0) {
+            fragAppList.dataCenterActivity.removeSendALL(fragAppList.getSelectlist());
+            fragAppList.getSelectlist().clear();
+            notifyItemRangeChanged(0, fragAppList.getApkFileList().size());
         }
     }
 
@@ -195,11 +175,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     public void setSelecteByApkinfo(List<ApkInfo> selected) {
         if (selected != null) {
             for (ApkInfo select : selected) {
-                for (ApkInfo apkInfo : mFileUtils) {
+                for (ApkInfo apkInfo : fragAppList.getApkFileList()) {
                     if (select.equals(apkInfo)) {
-                        if (!mSelectlist.contains(apkInfo)) {
+                        if (!fragAppList.getSelectlist().contains(apkInfo)) {
                             if (fragAppList.dataCenterActivity.addASendFile(apkInfo)) {
-                                mSelectlist.add(apkInfo);
+                                fragAppList.getSelectlist().add(apkInfo);
                             }
                         }
                         break;
@@ -216,8 +196,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     public void remove(ApkInfo apkInfo, int position) {
-        mSelectlist.remove(apkInfo);
-        mFileUtils.remove(apkInfo);
+        fragAppList.getSelectlist().remove(apkInfo);
+        fragAppList.getApkFileList().remove(apkInfo);
         notifyItemRemoved(position); // 提醒item删除指定数据，这里有RecyclerView的动画效果
     }
 
@@ -241,8 +221,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
 
 
     public interface OnItemClickListener {
-        void OnLongItenClick(ApkInfo fileUtils, int position);
+        void OnLongItenClick(ApkInfo apkInfo, int position);
 
-        void OnItemClick(ApkInfo fileUtils, boolean isSelect, List<ApkInfo> mSelectFileUtils, View view);//选择取消选择软件
+        void OnItemClick(ApkInfo apkInfo, boolean isSelect, int position);//选择取消选择软件
     }
 }

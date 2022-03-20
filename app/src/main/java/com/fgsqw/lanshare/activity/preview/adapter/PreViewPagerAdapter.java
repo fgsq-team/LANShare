@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +12,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.fgsqw.lanshare.pojo.PhotoInfo;
-
+import com.fgsqw.lanshare.pojo.MediaInfo;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -29,12 +25,12 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class PreViewPagerAdapter extends PagerAdapter {
 
-    private Context mContext;
-    private List<PhotoView> viewList = new ArrayList<>(4);
-    List<PhotoInfo> mImgList;
+    private final Context mContext;
+    private final List<PhotoView> viewList = new ArrayList<>(4);
+    List<MediaInfo> mImgList;
     private OnItemClickListener mListener;
 
-    public PreViewPagerAdapter(Context context, List<PhotoInfo> imgList) {
+    public PreViewPagerAdapter(Context context, List<MediaInfo> imgList) {
         this.mContext = context;
         createImageViews();
         mImgList = imgList;
@@ -54,12 +50,12 @@ public class PreViewPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
         return view == object;
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public void destroyItem(@NonNull ViewGroup container, int position,@NonNull Object object) {
         if (object instanceof PhotoView) {
             PhotoView view = (PhotoView) object;
             view.setImageDrawable(null);
@@ -71,15 +67,21 @@ public class PreViewPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, final int position) {
         final PhotoView currentView = viewList.remove(0);
-        final PhotoInfo fileUtils = mImgList.get(position);
+        final MediaInfo fileUtils = mImgList.get(position);
         container.addView(currentView);
         if (fileUtils.isGif()) {
             currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
             Glide.with(mContext).load(new File(fileUtils.getPath()))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
                     .into(currentView);
         } else {
-            Glide.with(mContext).asBitmap()
+            currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            Glide.with(mContext).load(fileUtils.getPath())
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
+                    .into(currentView);
+
+           /* Glide.with(mContext).asBitmap()
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
                     .load(new File(fileUtils.getPath())).into(new SimpleTarget<Bitmap>() {
                 @Override
@@ -93,7 +95,7 @@ public class PreViewPagerAdapter extends PagerAdapter {
                         setBitmap(currentView, resource);
                     }
                 }
-            });
+            });*/
         }
         currentView.setOnClickListener(v -> {
             if (mListener != null) {
@@ -127,7 +129,7 @@ public class PreViewPagerAdapter extends PagerAdapter {
     }
 
     public interface OnItemClickListener {
-        void onItemClick(int position, PhotoInfo photoInfo);
+        void onItemClick(int position, MediaInfo mediaInfo);
     }
 
     private void adjustOffset(PhotoView view, float offset) {

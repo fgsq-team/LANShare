@@ -20,8 +20,10 @@ import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.pojo.DataObject;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
+import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
+import com.fgsqw.lanshare.pojo.MessageMediaContent;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mOutputStream;
 import com.fgsqw.lanshare.pojo.mSocket;
@@ -214,22 +216,45 @@ public class LANService extends BaseService {
                 long fileSize = dataDec.getLong();
                 // 文件名称
                 String fileName = dataDec.getString();
+                int fileType = dataDec.getInt();
+                String videoTime = dataDec.getString();
 
                 Log.d(TAG, "filename:" + fileName + " fileSize:" + fileSize);
 
-                MessageFileContent messageFileContent = new MessageFileContent();
-                messageFileContent.setContent(fileName);
-                messageFileContent.setLength(fileSize);
-                messageFileContent.setSocket(new mSocket(input, out));
-                messageFileContent.setIndex(i);
-                messageFileContent.setLeft(true);
-                messageFileContent.setUserName(name);
-                if (device.getDevMode() == Device.ANDROID) {
-                    messageFileContent.setHeader(R.drawable.ic_phone);
-                } else if (device.getDevMode() == Device.WIN) {
-                    messageFileContent.setHeader(R.drawable.ic_win);
+                if (fileType == mCmd.FILE_IMAGE || fileType == mCmd.FILE_VIEDO) {
+                    MessageMediaContent mediaContent = new MessageMediaContent();
+                    mediaContent.setContent(fileName);
+                    mediaContent.setLength(fileSize);
+                    mediaContent.setSocket(new mSocket(input, out));
+                    mediaContent.setIndex(i);
+                    mediaContent.setLeft(true);
+                    mediaContent.setUserName(name);
+                    mediaContent.setVideo(fileType == mCmd.FILE_VIEDO);
+                    mediaContent.setVideoTime(videoTime);
+
+                    if (device.getDevMode() == Device.ANDROID) {
+                        mediaContent.setHeader(R.drawable.ic_phone);
+                    } else if (device.getDevMode() == Device.WIN) {
+                        mediaContent.setHeader(R.drawable.ic_win);
+                    }
+
+                    fileContentList.add(mediaContent);
+                } else {
+                    MessageFileContent fileContent = new MessageFileContent();
+                    fileContent.setContent(fileName);
+                    fileContent.setLength(fileSize);
+                    fileContent.setSocket(new mSocket(input, out));
+                    fileContent.setIndex(i);
+                    fileContent.setLeft(true);
+                    fileContent.setUserName(name);
+                    if (device.getDevMode() == Device.ANDROID) {
+                        fileContent.setHeader(R.drawable.ic_phone);
+                    } else if (device.getDevMode() == Device.WIN) {
+                        fileContent.setHeader(R.drawable.ic_win);
+                    }
+                    fileContentList.add(fileContent);
                 }
-                fileContentList.add(messageFileContent);
+
 
             }
 
@@ -270,10 +295,10 @@ public class LANService extends BaseService {
             try {
                 if (isAgree) {
                     dataEnc.setCmd(mCmd.FS_AGREE);
-                    out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
+                    IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                 } else {
                     dataEnc.setCmd(mCmd.FS_NOT_AGREE);
-                    out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
+                    IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                     IOUtil.closeIO(input, out, client);
                     return;
                 }
@@ -348,7 +373,7 @@ public class LANService extends BaseService {
                             if (cmd == mCmd.FS_DATA) {          // 数据
                                 int length = dataDec.getLength();
                                 if (IOUtil.read(mInput, recvBuffer, DataEnc.getHeaderSize(), length) != length) break;
-                                outFileStream.write(recvBuffer, DataEnc.getHeaderSize(), length);
+                                IOUtil.write(outFileStream, recvBuffer, DataEnc.getHeaderSize(), length);
                                 totalRecv += length;
                                 int progeress = (int) (totalRecv * 100.0F / fileContent.getLength());
                                 if (progeress != p) {
@@ -372,11 +397,13 @@ public class LANService extends BaseService {
                         e.printStackTrace();
                         totalRecv = 0;
                     }
+
                     // 接收成功设置文件路径 失败则删除文件
                     if (totalRecv != fileContent.getLength()) {
                         outFile.delete();
                         fileContent.setSuccess(false);
                         fileContent.setStateMessage("接收失败");
+
                     } else {
                         fileContent.setPath(outFile.getPath());
                         fileContent.setSuccess(true);
@@ -403,6 +430,9 @@ public class LANService extends BaseService {
     }
 
 
+    /**
+     * 通过后缀名判断文件类型
+     */
     public String getNameType(String name) {
         if (name.contains(".")) {
             String suffix = name.substring(name.lastIndexOf(".") + 1);
@@ -416,26 +446,24 @@ public class LANService extends BaseService {
     }
 
 
-    // 接收文件时发送取消接收某一文件命令
+    /**
+     * 接收文件时发送取消接收某一文件命令
+     */
     public void sendCloseCmd(MessageFileContent fileContent, OutputStream out) {
         ViewUpdate.runThread(() -> {
             DataEnc dataEnc = new DataEnc();
             dataEnc.setByteCmd(mCmd.FS_CLOSE);
             dataEnc.setCount(fileContent.getIndex());
             try {
-                out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
+                IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         });
     }
 
     /**
      * 发送文件同时接收指令 此线程用于接收端取消接收文件
-     *
-     * @param fileContentList
-     * @param input
      */
     public void startRecvCmd(List<MessageFileContent> fileContentList, InputStream input) {
         ViewUpdate.runThread(() -> {
@@ -503,6 +531,7 @@ public class LANService extends BaseService {
 
     public void fileSend(InputStream input, OutputStream out, Device device, List<FileInfo> fileList) {
         List<MessageFileContent> messageFileContents = new ArrayList<>();
+
         synchronized (sendBuffer) {
             try {
                 DataEnc dataEnc = new DataEnc(sendBuffer);
@@ -512,25 +541,61 @@ public class LANService extends BaseService {
                 dataEnc.putString(mDevice.getDevIP());
                 dataEnc.putString(prefUtil.getString(PreConfig.USER_NAME));
 
-                out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
+                IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
+
                 for (int i = 0; i < fileList.size(); i++) {
                     FileInfo fileInfo = fileList.get(i);
-                    MessageFileContent messageFileContent = new MessageFileContent();
-                    messageFileContent.setContent(fileInfo.getName());
-                    messageFileContent.setLength(fileInfo.getLength());
-                    messageFileContent.setPath(fileInfo.getPath());
-                    messageFileContent.setSocket(new mSocket(input, out));
-                    messageFileContent.setIndex(i);
-                    messageFileContent.setLeft(false);
-                    messageFileContent.setUserName(prefUtil.getString(PreConfig.USER_NAME));
-                    messageFileContent.setToUser(device.getDevName());
-
-                    messageFileContents.add(messageFileContent);
-
                     dataEnc.reset();
                     dataEnc.putLong(fileInfo.getLength());
                     dataEnc.putString(fileInfo.getName());
-                    out.write(dataEnc.getData(), 0, dataEnc.getDataLen());
+
+
+                    // 判断文件类型
+                    if (fileInfo instanceof MediaInfo) {
+
+                        MediaInfo mediaInfo = (MediaInfo) fileInfo;
+                        MessageMediaContent mediaContent = new MessageMediaContent();
+
+                        if (mediaInfo.isVideo()) {
+                            dataEnc.putInt(mCmd.FILE_VIEDO);
+                            mediaContent.setVideo(true);
+                        } else {
+                            dataEnc.putInt(mCmd.FILE_IMAGE);
+                            mediaContent.setVideo(false);
+                        }
+
+                        String videoTime = ((MediaInfo) fileInfo).getVideoTime();
+                        dataEnc.putString(videoTime == null ? "" : videoTime);
+
+                        mediaContent.setContent(fileInfo.getName());
+                        mediaContent.setLength(fileInfo.getLength());
+                        mediaContent.setPath(fileInfo.getPath());
+                        mediaContent.setSocket(new mSocket(input, out));
+                        mediaContent.setIndex(i);
+                        mediaContent.setLeft(false);
+                        mediaContent.setUserName(prefUtil.getString(PreConfig.USER_NAME));
+                        mediaContent.setToUser(device.getDevName());
+                        mediaContent.setVideoTime(videoTime);
+                        messageFileContents.add(mediaContent);
+
+                    } else {
+
+                        dataEnc.putInt(mCmd.FILE_FILE);
+                        dataEnc.putString("");
+
+                        MessageFileContent fileContent = new MessageFileContent();
+                        fileContent.setContent(fileInfo.getName());
+                        fileContent.setLength(fileInfo.getLength());
+                        fileContent.setPath(fileInfo.getPath());
+                        fileContent.setSocket(new mSocket(input, out));
+                        fileContent.setIndex(i);
+                        fileContent.setLeft(false);
+                        fileContent.setUserName(prefUtil.getString(PreConfig.USER_NAME));
+                        fileContent.setToUser(device.getDevName());
+                        messageFileContents.add(fileContent);
+                    }
+
+                    IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -559,13 +624,21 @@ public class LANService extends BaseService {
 
             for (MessageFileContent messageFileContent : messageFileContents) {
 
-                InputStream fileIs = null;
-                mOutputStream mOut = messageFileContent.getSocket().getOutputStream();
+                DataEnc dataEnc = new DataEnc(sendBuffer);
 
+                // mOutputStream 是用来判断文件取消的，下面写出文件必须要用它
+                mOutputStream mOut = messageFileContent.getSocket().getOutputStream();
+                InputStream fileIs;
                 try {
                     fileIs = new FileInputStream(messageFileContent.getPath());
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
+                    dataEnc.setByteCmd(mCmd.FS_CLOSE);
+                    try {
+                        IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                     continue;
                 }
 
@@ -576,13 +649,13 @@ public class LANService extends BaseService {
                 int ten = 0;
                 int p = 0;
 
-                DataEnc dataEnc = new DataEnc(sendBuffer);
                 dataEnc.setByteCmd(mCmd.FS_DATA);
 
                 try {
+                    // 读取时偏移掉头的位置
                     while ((ten = fileIs.read(sendBuffer, DataEnc.getHeaderSize(), sendBuffer.length - DataEnc.getHeaderSize())) != -1) {
                         dataEnc.setDataIndex(ten);
-                        mOut.write(dataEnc);
+                        IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
                         totalSend += ten;
                         int prngeress = (int) (totalSend * 100.0F / messageFileContent.getLength());
                         if (prngeress != p) {
@@ -611,7 +684,7 @@ public class LANService extends BaseService {
                         dataEnc.reset();
                         dataEnc.setByteCmd(mCmd.FS_END);
                     }
-                    out.write(dataEnc.getData(), 0, DataEnc.getHeaderSize());
+                    IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -767,9 +840,6 @@ public class LANService extends BaseService {
                         }
                         String devName = dataDec.getString();
                         String message = dataDec.getString();
-                        Log.d(TAG, "devName:" + devName);
-                        Log.d(TAG, "message:" + message);
-                        Log.d(TAG, "");
 
                         MessageContent content = new MessageContent();
                         content.setUserName(devName);
@@ -830,12 +900,12 @@ public class LANService extends BaseService {
         if (message.length() > 700) {
             return;
         }
-
         DataEnc dataEnc = new DataEnc(1024 + message.getBytes().length);
         dataEnc.setCmd(mCmd.UDP_DEVICES_MESSAGE);
         dataEnc.putString(mDevice.getDevIP());
         dataEnc.putString(getDevName());
         dataEnc.putString(message);
+
         ViewUpdate.runThread(() -> {
             try {
                 if (device == null) {

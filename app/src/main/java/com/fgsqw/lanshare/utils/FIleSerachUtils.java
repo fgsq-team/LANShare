@@ -12,7 +12,7 @@ import android.provider.MediaStore;
 
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
-import com.fgsqw.lanshare.pojo.PhotoInfo;
+import com.fgsqw.lanshare.pojo.MediaInfo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class FIleSerachUtils {
                 null,
                 MediaStore.Images.Media.DATE_ADDED);
 
-        List<PhotoInfo> photoInfos = new ArrayList<>();
+        List<MediaInfo> mediaInfos = new ArrayList<>();
 
         //读取扫描到的图片
         if (mCursor != null) {
@@ -69,20 +69,20 @@ public class FIleSerachUtils {
                 if (!"downloading".equals(getExtensionName(path)) && checkImgExists(path)) {
                     long length = new File(path).length();
                     if (length <= 0) continue;
-                    PhotoInfo photoInfo = new PhotoInfo();
-                    photoInfo.setName(name);
-                    photoInfo.setPath(path);
-                    photoInfo.setTime(time);
-                    photoInfo.setLength(length);
-                    photoInfo.setGif("image/gif".equals(mimeType));
-                    photoInfos.add(photoInfo);
+                    MediaInfo mediaInfo = new MediaInfo();
+                    mediaInfo.setName(name);
+                    mediaInfo.setPath(path);
+                    mediaInfo.setTime(time);
+                    mediaInfo.setLength(length);
+                    mediaInfo.setGif("image/gif".equals(mimeType));
+                    mediaInfos.add(mediaInfo);
                 }
             }
             mCursor.close();
         }
-        Collections.reverse(photoInfos);
+        Collections.reverse(mediaInfos);
 
-        return splitFolder(photoInfos, loadVideoForSDCard(context));
+        return splitFolder(mediaInfos, loadVideoForSDCard(context));
     }
 
 
@@ -91,7 +91,7 @@ public class FIleSerachUtils {
      *
      * @param context
      */
-    public static List<PhotoInfo> loadVideoForSDCard(final Context context) {
+    public static List<MediaInfo> loadVideoForSDCard(final Context context) {
         //由于扫描图片是耗时的操作，所以要在子线程处理。
         //扫描图片
         Uri mImageUri;
@@ -109,7 +109,7 @@ public class FIleSerachUtils {
                 null,
                 MediaStore.Images.Media.DATE_ADDED);
 
-        List<PhotoInfo> photoInfos = new ArrayList<>();
+        List<MediaInfo> mediaInfos = new ArrayList<>();
 
         //读取扫描到的视频
         if (mCursor != null) {
@@ -132,20 +132,20 @@ public class FIleSerachUtils {
                 if (!"downloading".equals(getExtensionName(path)) && checkImgExists(path)) {
                     long length = new File(path).length();
                     if (length <= 0) continue;
-                    PhotoInfo photoInfo = new PhotoInfo();
-                    photoInfo.setName(name);
-                    photoInfo.setPath(path);
-                    photoInfo.setTime(time);
-                    photoInfo.setLength(length);
-                    photoInfo.setGif(false);
-                    photoInfo.setVideo(true);
-                    photoInfo.setVideoTime(getAudioPlayTime(path));
-                    photoInfos.add(photoInfo);
+                    MediaInfo mediaInfo = new MediaInfo();
+                    mediaInfo.setName(name);
+                    mediaInfo.setPath(path);
+                    mediaInfo.setTime(time);
+                    mediaInfo.setLength(length);
+                    mediaInfo.setGif(false);
+                    mediaInfo.setVideo(true);
+                    mediaInfo.setVideoTime(getAudioPlayTime(path));
+                    mediaInfos.add(mediaInfo);
                 }
             }
             mCursor.close();
         }
-        return photoInfos;
+        return mediaInfos;
     }
 
     public static List<ApkInfo> loadApkForSDCard(Context context) {
@@ -214,9 +214,9 @@ public class FIleSerachUtils {
      * @return
      */
 
-    private static List<PhotoFolder> splitFolder(List<PhotoInfo> photoList, List<PhotoInfo> videoList) {
+    private static List<PhotoFolder> splitFolder(List<MediaInfo> photoList, List<MediaInfo> videoList) {
         List<PhotoFolder> folders = new ArrayList<>();
-        List<PhotoInfo> allMedia = new ArrayList<>();
+        List<MediaInfo> allMedia = new ArrayList<>();
 
         allMedia.addAll(photoList);
         allMedia.addAll(videoList);

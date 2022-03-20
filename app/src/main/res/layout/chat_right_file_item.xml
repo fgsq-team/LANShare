@@ -45,7 +45,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/chat_item_tv_user"
+            android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
+            android:layout_toStartOf="@id/chat_item_header"
             android:layout_toLeftOf="@id/chat_item_header"
             android:background="@drawable/message_text_send"
             android:orientation="vertical">
@@ -77,7 +79,7 @@
                         android:singleLine="true"
                         android:text="test Name"
                         android:textColor="#343434"
-                        android:textSize="14dp" />
+                        android:textSize="14sp" />
 
 
                     <TextView

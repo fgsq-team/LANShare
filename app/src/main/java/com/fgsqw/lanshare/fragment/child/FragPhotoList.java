@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -34,9 +35,10 @@ import com.fgsqw.lanshare.activity.video.VideoPlayer;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.fragment.adapter.PhotoAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
-import com.fgsqw.lanshare.pojo.PhotoInfo;
+import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.utils.DateUtils;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.ViewUpdate;
@@ -44,9 +46,11 @@ import com.fgsqw.lanshare.utils.ViewUpdate;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class FragPhotoList extends BaseFragment implements View.OnClickListener {
+public class FragPhotoList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
 
     private ViewPager vp;
     private View view;
@@ -54,25 +58,27 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
     private TextView sizImgTv;
     private TextView timeTv;
     private CheckBox selectAll;
+    private CheckBox selectMode;
     private SwipeRefreshLayout swipe;
     private RecyclerView recyclerView;
     private RelativeLayout backLayout;
     private LinearLayout selectLayout;
     private boolean isOpenFolder;
     private boolean isShowTime;
-    private boolean isViewImage = true;
 
     private int posiition;
     private PhotoAdapter mPhotoAdapter;
     private GridLayoutManager mLayoutManager;
     private List<PhotoFolder> mFolders;
-    public List<PhotoInfo> mSelectFile = new ArrayList<>();
+    public final List<MediaInfo> mSelectList = new LinkedList<>();
+
 
     private final Handler mHideHandler = new Handler();
     private final Runnable mHide = this::hideTime;
 
     public DataCenterActivity dataCenterActivity;
 
+    private List<MediaInfo> cruuentPhotoList;
 
     @Override
     public void onAttach(Context context) {
@@ -105,8 +111,10 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
         swipe = view.findViewById(R.id.photo_swipe);
         backLayout = view.findViewById(R.id.photo_back_layout);
         selectAll = view.findViewById(R.id.photo_check_select_all);
+        selectMode = view.findViewById(R.id.photo_check_select_mode);
         backLayout.setOnClickListener(this);
         selectAll.setOnClickListener(this);
+        selectMode.setOnCheckedChangeListener(this);
         swipe.setOnRefreshListener(this::loadImageForSDCard);
     }
 
@@ -130,18 +138,19 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
     }
 
     public void initPhotoList(PhotoFolder photoFolder) {
+        cruuentPhotoList = photoFolder.getImages();
+
         if (mLayoutManager == null) {
             mLayoutManager = new GridLayoutManager(getActivity(), 4);
         }
 
-
         if (mPhotoAdapter == null) {
-            mPhotoAdapter = new PhotoAdapter(this, isViewImage);
-
+            mPhotoAdapter = new PhotoAdapter(this, !selectMode.isChecked());
         }
+
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(mPhotoAdapter);
-        mPhotoAdapter.refresh(photoFolder.getImages());
+        mPhotoAdapter.refresh();
 
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -167,18 +176,17 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
 
         mPhotoAdapter.setOnItemClickListener(new PhotoAdapter.OnItemClickListener() {
             @Override
-            public void OnItemClick(PhotoInfo photoInfo, int position) {
-                if (photoInfo.isVideo()) {
-                    toPreviewVideoActivity(photoInfo);
+            public void OnItemClick(MediaInfo mediaInfo, int position) {
+                if (mediaInfo.isVideo()) {
+                    VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                 } else {
-                    toPreviewActivity(mPhotoAdapter.getData(), position);
-
+                    toPreviewActivity(cruuentPhotoList, position);
                 }
             }
 
             @Override
-            public void OnLongItenClick(final PhotoInfo photoInfo, final int position) {
-                final String path = photoInfo.getPath();
+            public void OnLongItenClick(final MediaInfo mediaInfo, final int position) {
+                final String path = mediaInfo.getPath();
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("请选择操作");
                 String[] items;
@@ -194,17 +202,17 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
                     switch (arg1) {
                         case 0:
                             // 发送
-                            dataCenterActivity.sendFiles(Arrays.asList(photoInfo));
+                            dataCenterActivity.sendOneFile(mediaInfo);
                             break;
                         case 1:
                             Toast.makeText(getContext(), f.getPath(), Toast.LENGTH_LONG).show();
                             break;
                         case 2:
                             //打开
-                            if (photoInfo.isVideo()) {
-                                toPreviewVideoActivity(photoInfo);
+                            if (mediaInfo.isVideo()) {
+                                VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                             } else {
-                                toPreviewActivity(Arrays.asList(photoInfo), 1);
+                                toPreviewActivity(Collections.singletonList(mediaInfo), 1);
                             }
                             break;
                         case 4:
@@ -295,9 +303,9 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
      */
     private void changeTime() {
         int firstVisibleItem = getFirstVisibleItem();    //获取屏幕第一个item 位置
-        PhotoInfo photoInfo = mPhotoAdapter.getFirstVisibleImage(firstVisibleItem); //获取图片列表工具类
-        if (photoInfo != null) {
-            String time = DateUtils.getImageTime(photoInfo.getTime() * 1000);
+        MediaInfo mediaInfo = mPhotoAdapter.getFirstVisibleImage(firstVisibleItem); //获取图片列表工具类
+        if (mediaInfo != null) {
+            String time = DateUtils.getImageTime(mediaInfo.getTime() * 1000);
             timeTv.setText(time);
             showTime();
             mHideHandler.removeCallbacks(mHide);
@@ -310,19 +318,10 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
     }
 
 
-    private void toPreviewActivity(List<PhotoInfo> photoInfos, int position) {
-        if (photoInfos != null && !photoInfos.isEmpty()) {
-            ReviewImages.openActivity(getActivity(), photoInfos,
+    private void toPreviewActivity(List<MediaInfo> mediaInfos, int position) {
+        if (mediaInfos != null && !mediaInfos.isEmpty()) {
+            ReviewImages.openActivity(getActivity(), mediaInfos,
                     mPhotoAdapter.getSelectImages(), false, 0, position);
-        }
-    }
-
-    private void toPreviewVideoActivity(FileInfo images) {
-        if (images != null) {
-            File name = new File(images.getPath());
-            Intent intent = new Intent(getContext(), VideoPlayer.class);
-            intent.putExtra("path", name.getPath());
-            dataCenterActivity.startActivity(intent);
         }
     }
 
@@ -348,9 +347,9 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
             case R.id.photo_check_select_all: {
                 CheckBox checkBox = (CheckBox) v;
                 if (checkBox.isChecked()) {
-                    mPhotoAdapter.setSelecteAll(mPhotoAdapter.getData());
-                    mSelectFile.clear();
-                    mSelectFile.addAll(mPhotoAdapter.getData());
+                    mPhotoAdapter.setSelecteAll(cruuentPhotoList);
+                    mSelectList.clear();
+                    mSelectList.addAll(cruuentPhotoList);
                 } else {
                     mPhotoAdapter.clearThisFolderAllSelect();
                 }
@@ -360,6 +359,36 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener 
         }
     }
 
+    public List<MediaInfo> getSelectList() {
+        return mSelectList;
+    }
+
+    public List<MediaInfo> getCruuentPhotoList() {
+        return cruuentPhotoList;
+    }
+
+    @Override
+    public void clearSelect() {
+        if (mSelectList != null) {
+            mSelectList.clear();
+        }
+        if (isVisible()) {
+            mPhotoAdapter.refresh();
+            selectAll.setChecked(mPhotoAdapter.isSelectAll());
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.photo_check_select_mode: {
+                mPhotoAdapter.setViewImage(!isChecked);
+                break;
+            }
+
+        }
+    }
 }
 
 

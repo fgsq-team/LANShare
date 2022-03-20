@@ -2,7 +2,9 @@ package com.fgsqw.lanshare.activity.video;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.pojo.FileInfo;
 import com.maning.mnvideoplayerlibrary.player.MNViderPlayer;
 
 import java.io.File;
@@ -58,6 +61,16 @@ public class VideoPlayer extends AppCompatActivity {
         initPlayer();
         start();
 
+    }
+
+    public static void toPreviewVideoActivity(Activity activity, FileInfo images) {
+        if (images != null) {
+            File name = new File(images.getPath());
+            Intent intent = new Intent(activity, VideoPlayer.class);
+            intent.putExtra("path", name.getPath());
+            activity.startActivity(intent);
+//            dataCenterActivity.overridePendingTransition(0, 0);
+        }
     }
 
     private void initViews() {

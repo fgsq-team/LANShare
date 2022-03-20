@@ -27,6 +27,7 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
 import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.FileSource;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileUtil;
@@ -35,9 +36,10 @@ import com.fgsqw.lanshare.utils.mUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class FragFileList extends BaseFragment {
+public class FragFileList extends BaseFragment implements  ChildBaseMethod {
 
     private ViewPager vp;
     private View view;
@@ -266,7 +268,7 @@ public class FragFileList extends BaseFragment {
         builder.setItems(items, (arg0, arg1) -> {
             switch (arg1) {
                 case 0: {
-                    dataCenterActivity.sendFiles(Arrays.asList(fileSource));
+                    dataCenterActivity.sendOneFile(fileSource);
                     break;
                 }
                 case 1: {
@@ -291,5 +293,10 @@ public class FragFileList extends BaseFragment {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void clearSelect() {
+
     }
 }

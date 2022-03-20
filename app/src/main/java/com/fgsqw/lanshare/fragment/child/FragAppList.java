@@ -26,15 +26,19 @@ import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLayoutManager;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.fragment.adapter.AppAdapter;
+import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.utils.CopFileTask;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.ViewUpdate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
 
     private ViewPager vp;
     View view;
@@ -45,8 +49,8 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
     SwipeRefreshLayout appSwipe;
     RecyclerView appRecy;
 
-    private List<ApkInfo> apkFileList;//所有扫描到的Apk文件
-    public List<ApkInfo> mSelectlist;
+    public List<ApkInfo> apkFileList;//所有扫描到的Apk文件
+    public final List<ApkInfo> mSelectlist = new LinkedList<>();
 
     AppAdapter appAdapter;
     MLayoutManager mManagerLayout;
@@ -58,7 +62,6 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         dataCenterActivity = (DataCenterActivity) context;
         super.onAttach(context);
     }
-
 
     @Nullable
     @Override
@@ -78,19 +81,19 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
 
     }
 
+
     @SuppressLint("CutPasteId")
     public void initView() {
         tvCount = view.findViewById(R.id.app_tv_count);
         checkSelectAll = view.findViewById(R.id.app_check_select_all);
         appSwipe = view.findViewById(R.id.app_swipe);
         appRecy = view.findViewById(R.id.app_recy);
-
         checkSelectAll.setOnCheckedChangeListener(this);
     }
 
     public void initList() {
         mManagerLayout = new MLayoutManager(getActivity(), 4);
-        appAdapter = new AppAdapter(this, false);
+        appAdapter = new AppAdapter(this);
         appRecy.setLayoutManager(mManagerLayout);
         appRecy.setAdapter(appAdapter);
         appAdapter.setOnItemClickListener(this);
@@ -99,7 +102,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
 
 
     @Override
-    public void OnLongItenClick(ApkInfo fileUtils, int position) {
+    public void OnLongItenClick(ApkInfo apkInfo, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("请选择操作");
         String[] items;
@@ -108,19 +111,19 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         builder.setItems(items, (arg0, arg1) -> {
             switch (arg1) {
                 case 0:
-                    dataCenterActivity.sendFiles(Arrays.asList(fileUtils));
+                    dataCenterActivity.sendOneFile(apkInfo);
                     break;
                 case 1:
                     // 备份至本地
-                    new CopFileTask(getContext(), fileUtils.getPath(), Config.FILE_SAVE_PATH + "备份/" + fileUtils.getName()).execute(0);
+                    new CopFileTask(getContext(), apkInfo.getPath(), Config.FILE_SAVE_PATH + "备份/" + apkInfo.getName()).execute(0);
                     break;
                 case 2:
                     // 打开程序
-                    startApp(fileUtils.getPackageName());
+                    startApp(apkInfo.getPackageName());
                     break;
                 case 3:
                     // 卸载程序
-                    unstallApp(fileUtils.getPackageName());
+                    unstallApp(apkInfo.getPackageName());
                     break;
                 case 4:
                     //取消
@@ -131,8 +134,8 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
     }
 
     @Override
-    public void OnItemClick(ApkInfo fileUtils, boolean isSelect, List<ApkInfo> mSelectlist, View view) {
-        this.mSelectlist = mSelectlist;
+    public void OnItemClick(ApkInfo apkInfo, boolean isSelect, int position) {
+
     }
 
 
@@ -147,7 +150,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
             ViewUpdate.threadUi(() -> {
                 if (apkFileList != null && !apkFileList.isEmpty()) {
                     if (appAdapter != null) {
-                        appAdapter.refresh(apkFileList);
+                        appAdapter.refresh();
                         tvCount.setText(apkFileList.size() + "个应用");
                         appSwipe.setRefreshing(false);
                     }
@@ -199,5 +202,23 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
             default:
                 break;
         }
+    }
+
+    public List<ApkInfo> getApkFileList() {
+        return apkFileList;
+    }
+
+    public List<ApkInfo> getSelectlist() {
+        return mSelectlist;
+    }
+
+    @Override
+    public void clearSelect() {
+        mSelectlist.clear();
+        if (isVisible()) {
+            appAdapter.refresh();
+            checkSelectAll.setChecked(false);
+        }
+
     }
 }
