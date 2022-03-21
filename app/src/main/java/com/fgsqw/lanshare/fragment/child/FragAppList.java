@@ -214,8 +214,8 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
 
     @Override
     public void clearSelect() {
-        mSelectlist.clear();
-        if (isVisible()) {
+        if (mSelectlist.size() > 0 && isVisible()) {
+            mSelectlist.clear();
             appAdapter.refresh();
             checkSelectAll.setChecked(false);
         }

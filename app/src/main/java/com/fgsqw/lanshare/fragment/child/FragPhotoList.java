@@ -369,10 +369,9 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
 
     @Override
     public void clearSelect() {
-        if (mSelectList != null) {
+
+        if (mSelectList.size() > 0 && isVisible()) {
             mSelectList.clear();
-        }
-        if (isVisible()) {
             mPhotoAdapter.refresh();
             selectAll.setChecked(mPhotoAdapter.isSelectAll());
         }
