@@ -23,7 +23,6 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="10dp">
 
-
         <ImageView
             android:id="@+id/chat_item_header"
             android:layout_width="40dp"
@@ -158,8 +157,7 @@
                     android:layout_centerInParent="true"
                     android:text="@string/time_zero"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:visibility="visible" />
+                    android:textSize="12sp" />
 
             </RelativeLayout>
 

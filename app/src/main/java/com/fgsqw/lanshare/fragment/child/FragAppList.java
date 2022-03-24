@@ -41,19 +41,19 @@ import java.util.List;
 public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
 
     private ViewPager vp;
-    View view;
+    private View view;
 
 
-    TextView tvCount;
-    CheckBox checkSelectAll;
-    SwipeRefreshLayout appSwipe;
-    RecyclerView appRecy;
+    private TextView tvCount;
+    private CheckBox checkSelectAll;
+    private SwipeRefreshLayout appSwipe;
+    private RecyclerView appRecy;
 
     public List<ApkInfo> apkFileList;//所有扫描到的Apk文件
     public final List<ApkInfo> mSelectlist = new LinkedList<>();
 
-    AppAdapter appAdapter;
-    MLayoutManager mManagerLayout;
+    private AppAdapter appAdapter;
+    private MLayoutManager mManagerLayout;
 
     public DataCenterActivity dataCenterActivity;
 

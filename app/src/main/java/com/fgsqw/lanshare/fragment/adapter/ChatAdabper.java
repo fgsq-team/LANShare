@@ -103,19 +103,16 @@ public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             fileMsgHolder.content.setText(messageFileContent.getContent());
             fileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
 
+            fileMsgHolder.progressBar.setVisibility(messageFileContent.getSuccess() != null ? View.GONE : View.VISIBLE);
+            fileMsgHolder.stateTv.setVisibility(messageFileContent.getSuccess() != null ? View.VISIBLE : View.GONE);
+
             if (messageFileContent.getSuccess() != null) {
-                fileMsgHolder.progressBar.setVisibility(View.GONE);
-                fileMsgHolder.stateTv.setVisibility(View.VISIBLE);
                 fileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
                 if (messageFileContent.getSuccess()) {
                     fileMsgHolder.stateTv.setTextColor(stateTvColor);
                 } else {
                     fileMsgHolder.stateTv.setTextColor(Color.RED);
                 }
-            } else {
-                fileMsgHolder.progressBar.setVisibility(View.VISIBLE);
-                fileMsgHolder.stateTv.setVisibility(View.GONE);
-                fileMsgHolder.stateTv.setTextColor(stateTvColor);
             }
             // 判断为媒体文件
         } else if (itemViewType == TYPE_MEDIA_MSG_LEFT || itemViewType == TYPE_MEDIA_MSG_RIGHT) {
@@ -124,36 +121,29 @@ public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mediaMsgHloder.tvSize.setText(FileUtil.computeSize(mediaContent.getLength()));
             mediaMsgHloder.progressBar.setProgress(mediaContent.getProgress());
 
+
+            mediaMsgHloder.videTimeLay.setVisibility(mediaContent.isVideo() ? View.VISIBLE : View.GONE);
+
             // 判断是否为视频
             if (mediaContent.isVideo()) {
-                mediaMsgHloder.videTimeLay.setVisibility(View.VISIBLE);
                 mediaMsgHloder.videTime.setText(mediaContent.getVideoTime());
-            } else {
-                mediaMsgHloder.videTimeLay.setVisibility(View.GONE);
             }
 
             // 判断文件传输是否已完成
             if (mediaContent.getSuccess() != null) {
-                mediaMsgHloder.stateTv.setVisibility(View.VISIBLE);
                 mediaMsgHloder.progressBar.setVisibility(View.GONE);
+                mediaMsgHloder.stateTv.setVisibility(View.VISIBLE);
+
+                mediaMsgHloder.mediaInfo.setVisibility(mediaContent.getSuccess() ? View.GONE : View.VISIBLE);
+                mediaMsgHloder.stateTv.setTextColor(mediaContent.getSuccess() ? stateTvColor : Color.RED);
+
                 mediaMsgHloder.stateTv.setText(mediaContent.getStateMessage());
 
-                if (mediaContent.getSuccess()) {
-                    mediaMsgHloder.mediaInfo.setVisibility(View.GONE);
-                    mediaMsgHloder.stateTv.setTextColor(stateTvColor);
-                    Glide.with(mContext).load(mediaContent.getPath())
-                            .apply(options)
-                            .into(mediaMsgHloder.media);
-                } else {
-                    mediaMsgHloder.mediaInfo.setVisibility(View.VISIBLE);
-                    mediaMsgHloder.stateTv.setTextColor(Color.RED);
-                    Glide.with(mContext).load((Drawable) null)
-                            .apply(options)
-                            .into(mediaMsgHloder.media);
-                }
+                Glide.with(mContext).load(mediaContent.getSuccess() ? mediaContent.getPath() : ((Drawable) null))
+                        .apply(options)
+                        .into(mediaMsgHloder.media);
 
             } else {
-                mediaMsgHloder.videTime.setVisibility(View.VISIBLE);
                 mediaMsgHloder.progressBar.setVisibility(View.VISIBLE);
                 mediaMsgHloder.stateTv.setVisibility(View.GONE);
                 mediaMsgHloder.mediaInfo.setVisibility(View.VISIBLE);

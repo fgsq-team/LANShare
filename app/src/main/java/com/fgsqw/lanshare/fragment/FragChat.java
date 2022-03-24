@@ -55,7 +55,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class FragChat extends BaseFragment implements View.OnClickListener, ChatAdabper.OnItemClickListener, ChatAdabper.OnItemLongClickListener {
+public class FragChat extends BaseFragment implements View.OnClickListener, View.OnLongClickListener, ChatAdabper.OnItemClickListener, ChatAdabper.OnItemLongClickListener {
 
 
     public DataCenterActivity dataCenterActivity;
@@ -198,6 +198,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, Chat
         devSelectLTv = view.findViewById(R.id.chat_dev_select_tv);
 
         btnSned.setOnClickListener(this);
+        btnSned.setOnLongClickListener(this);
         devSelectLTv.setOnClickListener(this);
     }
 
@@ -342,7 +343,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, Chat
                 messageContent.setContent(message);
                 messageContent.setUserName(LANService.service.getDevName());
                 messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
-                LANService.service.broadcastMessage(selectedDevice, message);
+                LANService.service.broadcastMessage(selectedDevice, message, false);
                 addMessage(messageContent);
                 editContent.setText("");
                 break;
@@ -387,4 +388,30 @@ public class FragChat extends BaseFragment implements View.OnClickListener, Chat
     }
 
 
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onLongClick(View v) {
+        switch (v.getId()) {
+            case R.id.chat_btn_send: {
+                String message = editContent.getText().toString();
+                if (message.isEmpty()) {
+                    T.s("输入不能为空");
+                    return false;
+                } else if (message.length() > 700) {
+                    T.s("字符不长度能超出700个");
+                    return false;
+                }
+                MessageContent messageContent = new MessageContent();
+                messageContent.setLeft(false);
+                messageContent.setContent(message);
+                messageContent.setUserName(LANService.service.getDevName());
+                messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
+                LANService.service.broadcastMessage(selectedDevice, message, true);
+                addMessage(messageContent);
+                editContent.setText("");
+                break;
+            }
+        }
+        return true;
+    }
 }

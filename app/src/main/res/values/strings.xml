@@ -18,7 +18,7 @@
     <string name="version">V0.0.1_beta</string>
     <string name="privacy">隐私声明</string>
     <string name="lan_not_device">在局域网中没有搜索到设备</string>
-    <string name="send_message_hint">向局域网中装有LANShare的设备发送消息</string>
+    <string name="send_message_hint">长按发送至设备剪切板</string>
     <string name="cancelled">已取消</string>
     <string name="all_device">所有设备</string>
     <string name="copy_text">复制文本</string>
@@ -27,4 +27,13 @@
     <string name="test_text">test text</string>
     <string name="time_zero">00:00</string>
     <string name="select_mode">选择模式</string>
+    <string name="confirm">确定</string>
+    <string name="set_dev_name">设置设备名称</string>
+    <string name="recv_file_path">接收文件时储存的路径</string>
+    <string name="after_opening_not_dialog">开启时收到文件将不再提示</string>
+    <string name="use_self_media_player">使用内置编辑器打开媒体</string>
+    <string name="recv_file_don_t_confirm">接收文件无需确认</string>
+    <string name="set_recv_file_path">设置文件储存路径</string>
+    <string name="media_default_model_select">媒体默认为选择模式</string>
+    <string name="after_opening_chick_media_only_select">开启后点击媒体将只会选中</string>
 </resources>

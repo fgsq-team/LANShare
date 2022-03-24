@@ -4,14 +4,12 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,31 +26,29 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.activity.preview.ReviewImages;
 import com.fgsqw.lanshare.activity.video.VideoPlayer;
 import com.fgsqw.lanshare.base.BaseFragment;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.PhotoAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
 import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
-import com.fgsqw.lanshare.pojo.FileInfo;
-import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.pojo.MediaInfo;
+import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.utils.DateUtils;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
+import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.ViewUpdate;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class FragPhotoList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
 
-    private ViewPager vp;
     private View view;
     private ImageView backImg;
     private TextView sizImgTv;
@@ -80,6 +76,10 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
 
     private List<MediaInfo> cruuentPhotoList;
 
+    private PrefUtil prefUtil;
+
+    private boolean isPhotoView;
+
     @Override
     public void onAttach(Context context) {
         dataCenterActivity = (DataCenterActivity) context;
@@ -92,6 +92,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_child_photo, container, false);
+            prefUtil = new PrefUtil(getContext());
             initView();
             loadImageForSDCard();
         }
@@ -116,6 +117,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
         selectAll.setOnClickListener(this);
         selectMode.setOnCheckedChangeListener(this);
         swipe.setOnRefreshListener(this::loadImageForSDCard);
+        selectMode.setChecked(prefUtil.getBoolean(PreConfig.MEDIA_SELECT_MODEL));
     }
 
     private void loadImageForSDCard() {
@@ -147,6 +149,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
         if (mPhotoAdapter == null) {
             mPhotoAdapter = new PhotoAdapter(this, !selectMode.isChecked());
         }
+        isPhotoView = true;
 
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(mPhotoAdapter);
@@ -225,6 +228,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
     }
 
     private void initfolderlist() {
+        isPhotoView = false;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         SortPhotoAdapter adapter = new SortPhotoAdapter(getContext(), mFolders);
@@ -382,7 +386,9 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
             case R.id.photo_check_select_mode: {
-                mPhotoAdapter.setViewImage(!isChecked);
+                if (isPhotoView) {
+                    mPhotoAdapter.setViewImage(!isChecked);
+                }
                 break;
             }
 

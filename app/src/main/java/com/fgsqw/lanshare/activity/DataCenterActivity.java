@@ -84,7 +84,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     public void getConfig() {
         PrefUtil prefUtil = new PrefUtil(this);
-        String filePath = prefUtil.getString(PreConfig.FILE_PATH, Config.FILE_SAVE_PATH);
+        String filePath = prefUtil.getString(PreConfig.FILE_PATH);
+        if(filePath.isEmpty()){
+            prefUtil.saveString(PreConfig.FILE_PATH, Config.FILE_SAVE_PATH);
+            filePath = Config.FILE_SAVE_PATH;
+        }
         if (filePath.charAt(filePath.length() - 1) != '/') {
             filePath += "/";
         }

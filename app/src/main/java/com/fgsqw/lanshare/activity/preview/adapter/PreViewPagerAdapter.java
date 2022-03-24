@@ -55,7 +55,7 @@ public class PreViewPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public void destroyItem(@NonNull ViewGroup container, int position,@NonNull Object object) {
+    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
         if (object instanceof PhotoView) {
             PhotoView view = (PhotoView) object;
             view.setImageDrawable(null);
@@ -69,17 +69,12 @@ public class PreViewPagerAdapter extends PagerAdapter {
         final PhotoView currentView = viewList.remove(0);
         final MediaInfo fileUtils = mImgList.get(position);
         container.addView(currentView);
-        if (fileUtils.isGif()) {
-            currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        Glide.with(mContext).load(fileUtils.getPath())
+                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
+                .into(currentView);
 
-            Glide.with(mContext).load(new File(fileUtils.getPath()))
-                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(currentView);
-        } else {
-            currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Glide.with(mContext).load(fileUtils.getPath())
-                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
-                    .into(currentView);
+
 
            /* Glide.with(mContext).asBitmap()
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
@@ -96,7 +91,7 @@ public class PreViewPagerAdapter extends PagerAdapter {
                     }
                 }
             });*/
-        }
+
         currentView.setOnClickListener(v -> {
             if (mListener != null) {
                 mListener.onItemClick(position, fileUtils);

@@ -7,6 +7,7 @@ public class mCmd {
     public static final int UDP_SET_DEVICES = 1002;        // 设置设备
     public static final int UDP_DEVICES_OFF_LINE = 1003;   // 设备下线
     public static final int UDP_DEVICES_MESSAGE = 1004;    // 广播消息
+    public static final int UDP_DEVICES_MESSAGE_TO_CLIPBOARD = 1005;    // 广播消息到剪切板
 
     // 文件服务命令
     public static final int FS_SHARE_FILE = 1101;    // 发送文件

@@ -15,7 +15,7 @@
     <color name="colorPrimaryDark">#21B58F</color><!--首要颜色暗色-->
     <color name="colorAccent">#004EFF</color><!--色彩强调-->
 
-
+    <color name="text_grey">#c1c1c2</color>
     <color name="textfile">#1296db</color>
     <color name="textfiles">#515151</color>
     <color name="black">#000000</color><!--黑色 -->

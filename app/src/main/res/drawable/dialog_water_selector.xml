@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 点击后水波纹的颜色效果 -->
+    <item android:state_pressed="false">
+        <shape android:shape="rectangle">
+            <!-- 填充的颜色 -->
+            <solid android:color="#fff"></solid>
+            <!-- 设置按钮的四个角为弧形 -->
+            <!-- android:radius 弧形的半径 -->
+
+            <!-- padding：Button里面的文字与Button边界的间隔 -->
+            <padding android:bottom="2dp" android:left="2dp" android:right="2dp" android:top="2dp" />
+            <corners android:bottomLeftRadius="5dp" android:bottomRightRadius="5dp" android:topLeftRadius="5dp" android:topRightRadius="5dp" />
+
+        </shape>
+    </item>
+    <item android:drawable="@color/text_grey" android:state_focused="true" />
+    <!-- 默认显示的颜色效果 -->
+    <item android:drawable="@color/white">
+
+    </item>
+
+</selector>

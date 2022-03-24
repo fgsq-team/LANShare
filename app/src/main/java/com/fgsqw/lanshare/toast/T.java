@@ -16,4 +16,10 @@ public class T {
     }
 
 
+    public static void ss(Object s) {
+        App application = App.getInstance();
+        if (application != null) {
+            ViewUpdate.threadUi(() -> Toast.makeText(application, s == null ? "" : s.toString(), Toast.LENGTH_SHORT).show());
+        }
+    }
 }

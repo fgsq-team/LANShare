@@ -56,6 +56,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     public void onBindViewHolder(final ViewHolder holder, int position) {
 
         final MediaInfo mediaInfo = fragPhotoList.getCruuentPhotoList().get(position);
+
         Glide
                 .with(mContext)
                 .load(mediaInfo.getPath())
@@ -63,15 +64,17 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
                 .placeholder(R.drawable.ic_null)
                 .into(holder.ivImage);
 
+
         setItemSelect(holder, isSelect(mediaInfo));
 
-        if (mediaInfo.isVideo()) {
+        if (mediaInfo.isVideo()) {  // 视频
             holder.timeLayout.setVisibility(View.VISIBLE);
             holder.time.setText(mediaInfo.getVideoTime());
-        } else {
+        } else {         // 图片
             holder.timeLayout.setVisibility(View.GONE);
             holder.ivGif.setVisibility(mediaInfo.isGif() ? View.VISIBLE : View.GONE);
         }
+
         //点击选中/取消选中图片
         holder.ivSelectIcon.setOnClickListener(v -> {
             checkedImage(holder, mediaInfo, position);

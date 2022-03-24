@@ -1,6 +1,8 @@
 package com.fgsqw.lanshare.service;
 
 import android.app.Service;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -809,10 +811,6 @@ public class LANService extends BaseService {
                         String devName = dataDec.getString();
                         int devMode = dataDec.getInt();
 
-//                        Log.d(TAG, "devPort:" + devPort);
-//                        Log.d(TAG, "devIP:" + devIp);
-//                        Log.d(TAG, "devName:" + devName);
-
                         // 排除自己发送的数据
                         if (devIp != null && devIp.equals(mDevice.getDevIP())) {
                             return;
@@ -832,8 +830,6 @@ public class LANService extends BaseService {
 
                     } else if (cmd == mCmd.UDP_DEVICES_MESSAGE) {
                         String devIp = dataDec.getString();
-
-                        Log.d(TAG, "devIp:" + devIp);
                         // 排除自己发送的数据
                         if (devIp != null && devIp.equals(mDevice.getDevIP())) {
                             return;
@@ -849,9 +845,28 @@ public class LANService extends BaseService {
                         mMessage.what = mCmd.SERVICE_ADD_MESSGAGE;
                         mMessage.obj = content;
                         messageSend(mMessage);
+                    } else if (cmd == mCmd.UDP_DEVICES_MESSAGE_TO_CLIPBOARD) {
+                        String devIp = dataDec.getString();
+                        // 排除自己发送的数据
+                        if (devIp != null && devIp.equals(mDevice.getDevIP())) {
+                            return;
+                        }
+                        String devName = dataDec.getString();
+                        String message = dataDec.getString();
+
+                        MessageContent content = new MessageContent();
+                        content.setUserName(devName);
+                        content.setContent(message);
+                        content.setLeft(true);
+                        Message mMessage = Message.obtain();
+                        mMessage.what = mCmd.SERVICE_ADD_MESSGAGE;
+                        mMessage.obj = content;
+                        messageSend(mMessage);
+
+                        ClipboardManager cb = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        cb.setPrimaryClip(ClipData.newPlainText("text", message));
                     }
                 });
-
             }
 
         }).start();
@@ -896,12 +911,12 @@ public class LANService extends BaseService {
     }
 
     // 广播发送信息
-    public void broadcastMessage(Device device, String message) {
+    public void broadcastMessage(Device device, String message, boolean isClip) {
         if (message.length() > 700) {
             return;
         }
         DataEnc dataEnc = new DataEnc(1024 + message.getBytes().length);
-        dataEnc.setCmd(mCmd.UDP_DEVICES_MESSAGE);
+        dataEnc.setCmd(isClip ? mCmd.UDP_DEVICES_MESSAGE_TO_CLIPBOARD : mCmd.UDP_DEVICES_MESSAGE);
         dataEnc.putString(mDevice.getDevIP());
         dataEnc.putString(getDevName());
         dataEnc.putString(message);
