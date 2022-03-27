@@ -1,6 +1,7 @@
 package com.fgsqw.lanshare.utils;
 
 
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
 //数据包装类
@@ -12,7 +13,7 @@ public class DataEnc {
 
     private int cmd;
     private int count;
-    private long length;
+    private int length;
 
     public DataEnc() {
         byteLen = HEADER_LEN;
@@ -72,40 +73,33 @@ public class DataEnc {
     }
 
     public DataEnc putByte(byte b, int i) {
-        if (i + 1 <= byteLen) {
-            bytes[i] = b;
-            return this;
-        }
-        return null;
+        bytes[i] = b;
+        return this;
     }
 
 
     public DataEnc putInt(int val) {
-        DataEnc dataEnc = putInt(val, index);
+        putInt(val, index);
         index += 4;
-        return dataEnc;
+        return this;
     }
 
     public DataEnc putInt(int val, int i) {
-        if (i + 4 <= byteLen) {
-            ByteUtil.intToBytes(val, bytes, i);
-            return this;
-        }
-        return null;
+        ByteUtil.intToBytes(val, bytes, i);
+        return this;
+
     }
 
     public DataEnc putLong(long val) {
-        DataEnc dataEnc = putLong(val, index);
+        putLong(val, index);
         index += 8;
-        return dataEnc;
+        return this;
     }
 
     public DataEnc putLong(long val, int i) {
-        if (i + 8 <= byteLen) {
-            ByteUtil.longToBytes(val, bytes, i);
-            return this;
-        }
-        return null;
+        ByteUtil.longToBytes(val, bytes, i);
+        return this;
+
     }
 
     public DataEnc putBool(boolean val) {
@@ -121,12 +115,9 @@ public class DataEnc {
     }
 
     public DataEnc putBytes(byte[] bs) {
-        if (index + bs.length > byteLen) {
-            return null;
-        }
-        DataEnc dataEnc = putBytes(bs, bs.length, index);
+        putBytes(bs, bs.length, index);
         index += bs.length;
-        return dataEnc;
+        return this;
     }
 
     public DataEnc putBytes(byte[] bs, int length) {
@@ -136,25 +127,26 @@ public class DataEnc {
     }
 
     public DataEnc putBytes(byte[] bs, int length, int i) {
-        if (i + length <= byteLen) {
-            System.arraycopy(bs, 0, bytes, i, length);
-            return this;
-        }
-        return null;
+        System.arraycopy(bs, 0, bytes, i, length);
+        return this;
     }
 
     public DataEnc putString(String val) {
+        return putString(val, "UTF-8");
+    }
+
+
+    public DataEnc putString(String val, String en) {
+        byte[] bs = null;
         try {
-            byte[] bs = val.getBytes("UTF-8");
-            putInt(bs.length);
-            putBytes(bs);
-            return this;
+            bs = val.getBytes(en);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        return null;
+        putInt(bs.length);
+        putBytes(bs);
+        return this;
     }
-
 
     public int getCmd() {
         return cmd;
@@ -164,7 +156,7 @@ public class DataEnc {
         return count;
     }
 
-    public long getLength() {
+    public int getLength() {
         return length;
     }
 

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="50dp"
     android:layout_marginTop="2dp"
-
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/file_item_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:clickable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/file_item_img"
@@ -35,8 +35,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:textSize="14sp"
-                android:text="文件选择" />
+                android:text="文件选择"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/file_item_info"
@@ -47,7 +47,26 @@
                 android:textColor="#939393"
                 android:textSize="10sp" />
         </LinearLayout>
+
+
     </LinearLayout>
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/file_item_select_layout"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/file_item_select"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_image_un_select" />
+
+    </LinearLayout>
+
+</RelativeLayout>
 

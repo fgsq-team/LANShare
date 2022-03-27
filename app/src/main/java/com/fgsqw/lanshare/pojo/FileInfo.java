@@ -59,7 +59,7 @@ public class FileInfo {
         this.length = length;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @SuppressWarnings("all")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

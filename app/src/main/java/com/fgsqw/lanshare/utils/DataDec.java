@@ -1,6 +1,7 @@
 package com.fgsqw.lanshare.utils;
 
 
+import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 
 
@@ -42,10 +43,7 @@ public class DataDec {
     }
 
     public byte getByte(int i) {
-        if ((i + i) <= byteLen) {
-            return bytes[i];
-        }
-        return 0;
+        return bytes[i];
     }
 
     public int getInt() {
@@ -55,10 +53,7 @@ public class DataDec {
     }
 
     public int getInt(int i) {
-        if ((i + 4) <= byteLen) {
-            return ByteUtil.bytesToInt(bytes, i);
-        }
-        return 0;
+        return ByteUtil.bytesToInt(bytes, i);
     }
 
     public boolean getBool() {
@@ -72,10 +67,7 @@ public class DataDec {
     }
 
     public long getLong(int i) {
-        if ((i + 8) <= byteLen) {
-            return ByteUtil.bytesToLong(bytes, i);
-        }
-        return 0;
+        return ByteUtil.bytesToLong(bytes, i);
     }
 
     public float getFloat() {
@@ -87,38 +79,27 @@ public class DataDec {
     }
 
     public byte[] getSurplusBytes() {
-        if (byteLen - index > 0) {
-            int surplus = byteLen - index;
-            byte[] temp = new byte[surplus];
-            System.arraycopy(bytes, index, temp, 0, surplus);
-            index = byteLen;
-            return temp;
-        }
-        return null;
+        int surplus = byteLen - index;
+        byte[] temp = new byte[surplus];
+        System.arraycopy(bytes, index, temp, 0, surplus);
+        index = byteLen;
+        return temp;
     }
 
 
     public byte[] getBytes() {
         // 获取byte数组长度
-        int byteLen = ByteUtil.bytesToInt(bytes, index);
-        index += 4;
-        if (bytes.length >= index + byteLen) {
-            byte[] tmp = getBytes(byteLen);
-            index += byteLen;
-            return tmp;
-        }
-        return null;
+        byte[] tmp = getBytes(index);
+        index += byteLen;
+        return tmp;
     }
 
 
-    public byte[] getBytes(int length) {
-        if (byteLen >= index + length) {
-            byte[] temp = new byte[length];
-            System.arraycopy(bytes, index, temp, 0, length);
-            index += length;
-            return temp;
-        }
-        return null;
+    public byte[] getBytes(int i) {
+        int byteLen = ByteUtil.bytesToInt(bytes, i);
+        byte[] temp = new byte[byteLen];
+        System.arraycopy(bytes, i + 4, temp, 0, byteLen);
+        return temp;
     }
 
 
@@ -149,13 +130,8 @@ public class DataDec {
         return getString("UTF-8");
     }
 
-
     public long getLastLong() {
-        long length = getLength();
-        if (length > 0) {
-            return ByteUtil.bytesToLong(bytes, HEADER_LEN - 8);
-        }
-        return 0;
+        return ByteUtil.bytesToLong(bytes, index - 8);
     }
 
     /**
@@ -191,7 +167,7 @@ public class DataDec {
         return getInt(8);
     }
 
-    public int getHeaderSize() {
+    public static int getHeaderSize() {
         return HEADER_LEN;
     }
 

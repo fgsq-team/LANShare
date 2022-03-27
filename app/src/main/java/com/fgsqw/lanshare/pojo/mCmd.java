@@ -31,5 +31,6 @@ public class mCmd {
     public static final int FILE_IMAGE = 3001;       // 图片
     public static final int FILE_VIEDO = 3002;       // 视频
     public static final int FILE_FILE = 3003;        // 文件
+    public static final int FILE_FOLDER = 3004;      // 文件夹
 
 }

@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 
 import com.fgsqw.lanshare.pojo.ApkInfo;
+import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 
@@ -182,6 +183,31 @@ public class FIleSerachUtils {
         }
         return apkInfoList;
 
+    }
+
+    /**
+     * 扫描文件夹下的文件并返回总文件大小
+     * @param path 文件夹路径
+     * @param fileInfolist 扫描储存list
+     * @return 总文件大小
+     */
+    public static long scanPathFiles(File path, List<FileInfo> fileInfolist) {
+        long totalSize = 0;
+        if (path.exists() && path.canRead()) {
+            if (path.isDirectory()) {
+                File[] files = path.listFiles();
+                for (File file : files) {
+                    totalSize += scanPathFiles(file, fileInfolist);
+                }
+            } else if (path.isFile() && path.length() > 0) {
+                FileInfo fileInfo = new FileInfo();
+                fileInfo.setName(path.getName());
+                fileInfo.setPath(path.getPath());
+                fileInfo.setLength(path.length());
+                fileInfolist.add(fileInfo);
+            }
+        }
+        return totalSize;
     }
 
     /**

@@ -4,8 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <SurfaceView
-        android:id="@+id/camera_surfaceView"
+    <com.fgsqw.lanshare.widget.JpegStreamView
+        android:id="@+id/ip_cam_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

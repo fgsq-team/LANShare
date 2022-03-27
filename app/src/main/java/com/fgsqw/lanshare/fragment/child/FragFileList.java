@@ -37,9 +37,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class FragFileList extends BaseFragment implements  ChildBaseMethod {
+public class FragFileList extends BaseFragment implements ChildBaseMethod {
 
     private ViewPager vp;
     private View view;
@@ -50,12 +51,13 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
     private FileAdapter mFileAdapter;
     private MLinearLayoutManager mLayoutManager;
 
-    private final List<Integer> mSign = new ArrayList<>();
-    private final List<FileSource> folder = new ArrayList<>();  // 当前文件所有列表
+    private final List<Integer> mSign = new ArrayList<>();      // 保存上一级item 位置
+    private final List<FileSource> fileList = new ArrayList<>();  // 当前文件所有列表
     private final List<FileSource> paths = new ArrayList<>();   // 当前文件列表
 
+    private final List<FileSource> selectFileList = new LinkedList<>();   // 当前文件列表
+
     private File currentDirectory;    // 当前文件夹路径
-    private File[] files;             // 当前文件列表
 
 
     public DataCenterActivity dataCenterActivity;
@@ -99,7 +101,7 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
     public void initList() {
         mLayoutManager = new MLinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mFileAdapter = new FileAdapter(getContext(), folder);
+        mFileAdapter = new FileAdapter(this);
         mFileAdapter.setOnClickListener(new FileAdapter.OnClickListener() {
             @Override
             public void OnClick(int position) {//列表点击事件
@@ -109,7 +111,7 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
                         upper();//文件列表返回上一级
                     }
                 } else {
-                    File mFile = new File(folder.get(position).getPath());
+                    File mFile = new File(fileList.get(position).getPath());
                     if (mFile.isDirectory()) {                 //点击的文件如果是文件夹的话
                         int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();//获取当前屏幕第一个显示的item
                         mSign.add(i);
@@ -126,7 +128,7 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
             @Override
             public void OnLongClick(int position) {//列表长按时间
                 if (position != 0) {
-                    final File mFile = new File(folder.get(position).getPath());
+                    final File mFile = new File(fileList.get(position).getPath());
                     if (!mFile.isDirectory()) {
                         dialog(position);
                     } else {
@@ -164,10 +166,11 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
                 // 显示当前路径到界面
                 mPathTv.setText("    " + f.getPath());
                 // 在文件列表视图添加子文件或目录
-                files = f.listFiles();
+                // 当前文件列表
+                File[] files = f.listFiles();
                 // 排序
                 Arrays.sort(files);
-                folder.clear();
+                fileList.clear();
                 paths.clear();
                 Resources sres = getResources();
 
@@ -176,10 +179,10 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
                 fileSource.setPreView(decodeResource(sres, R.drawable.ic_folder_upload));
                 fileSource.setIsPreView(false);
 
-                folder.add(fileSource);
+                fileList.add(fileSource);
 
                 for (File file : files) {
-
+                    // 如果是文件夹
                     if (file.isDirectory()) {
                         Resources res = getResources();
                         Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
@@ -189,9 +192,12 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
                         fileSource.setPreView(bmp);
                         fileSource.setIsPreView(false);
                         fileSource.setTime(file.lastModified());
+                        fileSource.setFile(false);
 
-                        folder.add(fileSource);
+                        fileList.add(fileSource);
+                        // 如果是文件
                     } else if (file.isFile()) {
+
                         Resources res = getResources();
                         Bitmap bmp = null;
                         String filest = file.getName();
@@ -229,14 +235,13 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
                         fileSource.setIsPreView(isPreView);
                         fileSource.setTime(file.lastModified());
                         fileSource.setLength(file.length());
+                        fileSource.setFile(true);
 
                         paths.add(fileSource);
                     }
                 }
-                if (paths.size() != 0) {
-                    folder.addAll(paths);
-                }
-                mFileAdapter.refresh(folder);
+                fileList.addAll(paths);
+                mFileAdapter.refresh();
             } else {
                 // 不能读取文件夹
                 T.s("此文件夹不能被读取");
@@ -247,7 +252,7 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
 
 
     private void dialog(final int position) {
-        FileSource fileSource = folder.get(position);
+        FileSource fileSource = fileList.get(position);
         File file = new File(fileSource.getPath());
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -286,6 +291,14 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
         builder.show();
     }
 
+    public List<FileSource> getFileList() {
+        return fileList;
+    }
+
+    public List<FileSource> getSelectFileList() {
+        return selectFileList;
+    }
+
     @Override
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
         if (mSign.size() != 0) {
@@ -297,6 +310,10 @@ public class FragFileList extends BaseFragment implements  ChildBaseMethod {
 
     @Override
     public void clearSelect() {
+        if (selectFileList.size() > 0 && isVisible()) {
+            selectFileList.clear();
+            mFileAdapter.refresh();
+        }
 
     }
 }

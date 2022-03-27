@@ -32,10 +32,8 @@ import com.fgsqw.lanshare.activity.video.VideoPlayer;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
-import com.fgsqw.lanshare.dialog.FileSendDialog;
 import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 import com.fgsqw.lanshare.fragment.adapter.viewolder.FileMsgHolder;
-import com.fgsqw.lanshare.pojo.DataObject;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.pojo.MessageContent;
@@ -154,8 +152,8 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
     }
 
     public void showIsRecyDialog(Message msg) {
-        DataObject dataObject = (DataObject) msg.obj;
-        Device device = (Device) dataObject.getObj1();
+        Object[] dataObject = (Object[]) msg.obj;
+        Device device = (Device) dataObject[0];
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
                 .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(false)
