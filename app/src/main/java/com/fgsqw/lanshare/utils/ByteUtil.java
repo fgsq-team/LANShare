@@ -167,7 +167,6 @@ public class ByteUtil {
      * @return
      */
     public static float[] bytesfloats(byte[] b, int offset) {
-
         float fs[] = new float[b.length / 4];
         for (int i = 0; i < fs.length; i++) {
 

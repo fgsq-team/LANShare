@@ -12,6 +12,7 @@ public class mInputStream extends InputStream {
         isClose = false;
     }
 
+    // 逻辑取消
     public void setClose(boolean close) {
         isClose = close;
     }

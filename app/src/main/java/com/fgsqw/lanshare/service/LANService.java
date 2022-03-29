@@ -308,7 +308,6 @@ public class LANService extends BaseService {
     // 发送文件缓存
     final byte[] sendBuffer = new byte[2 * 1024 * 1024];
 
-
     public long baseRecv(Object[] objects, DataDec dataDec,
                          long fileLength, long mTotalRecv,
                          long totalLength, String fileName,
@@ -390,7 +389,6 @@ public class LANService extends BaseService {
                         messageSend(mMessage);
                         p = progeress;
                     }
-
                 } else if (cmd == mCmd.FS_END) {    // 传输完毕
                     break;
                 } else {  // 被动关闭传输
@@ -654,7 +652,6 @@ public class LANService extends BaseService {
 
     public void fileSend(InputStream input, OutputStream out, Device device, List<FileInfo> fileList) {
         List<MessageFileContent> messageFileContents = new ArrayList<>();
-
         synchronized (sendBuffer) {
             try {
                 DataEnc dataEnc = new DataEnc(sendBuffer);
@@ -711,21 +708,20 @@ public class LANService extends BaseService {
                             continue;
                         }
                         List<FileInfo> fileInfos = new LinkedList<>();
-                        // 扫描文件
+                        // 扫描文件并返回扫描到的文件总大小
                         long totalSize = FIleSerachUtils.scanPathFiles(file, fileInfos);
-
-                        // 写入文件大小
                         if (fileInfos.isEmpty()) {
                             continue;
                         }
-
+                        // 写入总文件大小
                         dataEnc.putLong(totalSize);
+                        // 写入文件名称
                         dataEnc.putString(file.getName());
-
+                        // 写入文件类型
                         dataEnc.putInt(mCmd.FILE_FOLDER);
                         dataEnc.putString("");
                         dataEnc.putInt(fileInfos.size());
-
+                        // 创建Message实体类
                         MessageFolderContent folderContent = new MessageFolderContent();
                         folderContent.setFileCount(fileInfos.size());
                         folderContent.setLength(totalSize);
@@ -743,10 +739,11 @@ public class LANService extends BaseService {
 
                         // 其他文件
                     } else {
-
+                        // 写入文件大小
                         dataEnc.putLong(fileInfo.getLength());
+                        // 写入文件名称
                         dataEnc.putString(fileInfo.getName());
-
+                        // 写入文件类型
                         dataEnc.putInt(mCmd.FILE_FILE);
                         dataEnc.putString("");
 
@@ -760,7 +757,6 @@ public class LANService extends BaseService {
                         fileContent.setUserName(userName);
                         fileContent.setToUser(device.getDevName());
                         messageFileContents.add(fileContent);
-
                     }
                     IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                 }
@@ -771,12 +767,12 @@ public class LANService extends BaseService {
 
             // 读取对方是否同意接收文件
             try {
-                IOUtil.read(input, sendBuffer, 0, DataEnc.HEADER_LEN);
+                IOUtil.read(input, sendBuffer, 0, DataEnc.getHeaderSize());
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
             }
-            DataDec dataDec = new DataDec(sendBuffer, DataEnc.HEADER_LEN);
+            DataDec dataDec = new DataDec(sendBuffer, DataEnc.getHeaderSize());
             if (dataDec.getCmd() == mCmd.FS_NOT_AGREE) {
                 T.s(device.getDevName() + " 取消接收文件");
                 return;
@@ -789,6 +785,7 @@ public class LANService extends BaseService {
             mMessage.obj = messageFileContents;
             messageSend(mMessage);
 
+            // 取消文件接收监听
             startRecvCmd(messageFileContents, input);
 
             for (MessageFileContent fileContent : messageFileContents) {
@@ -811,15 +808,14 @@ public class LANService extends BaseService {
                         Log.d(TAG, "发送文件:" + fileName + " 大小:" + fileInfo.getLength());
 
                         try {
-                            IOUtil.write(
-                                    mOut,
-                                    dataEnc.getData(),
-                                    dataEnc.getDataLen());
+                            IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
                         } catch (IOException e) {
                             e.printStackTrace();
                             break;
                         }
 
+
+                        // 文件接收
                         long thatSend = baseSend(
                                 fileContent,
                                 fileInfo.getPath(),
@@ -842,6 +838,7 @@ public class LANService extends BaseService {
                         totalSend += thatSend;
                     }
                 } else {
+                    // 文件接收
                     totalSend += baseSend(
                             fileContent,
                             fileContent.getPath(),
@@ -870,7 +867,6 @@ public class LANService extends BaseService {
                 mMessage.obj = fileContent;
                 messageSend(mMessage);
                 Log.d(TAG, "发送成功:" + totalSend);
-
             }
         }
 
@@ -916,7 +912,6 @@ public class LANService extends BaseService {
         }
 
         if (thatSend != fileLength) {
-//            Log.d(TAG, "文件不等于 totalSend:" + totalSend + " fileLength:" + fileLength);
             dataEnc.reset();
             dataEnc.setByteCmd(mCmd.FS_CLOSE);
         } else {

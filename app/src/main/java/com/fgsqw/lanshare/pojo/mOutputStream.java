@@ -9,7 +9,7 @@ public class mOutputStream extends OutputStream {
     private boolean isClose;
     private final OutputStream os;
 
-
+    // 逻辑取消
     public void setClose(boolean close) {
         isClose = close;
     }

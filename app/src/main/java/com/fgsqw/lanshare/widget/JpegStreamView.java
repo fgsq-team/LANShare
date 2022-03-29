@@ -17,6 +17,7 @@ import android.util.AttributeSet;
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
 import com.fgsqw.lanshare.utils.IOUtil;
+import com.fgsqw.lanshare.utils.TypeLength;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +59,11 @@ public class JpegStreamView extends android.support.v7.widget.AppCompatImageView
                     int length = dataDec.getLength();
                     if (IOUtil.read(input, dataDec.getData(), DataDec.getHeaderSize(), length) != length)
                         return;
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(dataDec.getData(), DataDec.getHeaderSize(), length);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(
+                            dataDec.getData(),
+                            DataDec.getHeaderSize() + TypeLength.LONG_LEN,  // 偏移长度
+                            length
+                    );
                     post(() -> setImageBitmap(bitmap));
                 }
             } catch (IOException e) {

@@ -5,8 +5,8 @@ import java.io.UnsupportedEncodingException;
 
 //数据包装类
 public class DataEnc {
-    public static final int HEADER_LEN = DataDec.HEADER_LEN; // 头信息字节长度
-    private byte bytes[] = null;
+    private static final int HEADER_LEN = DataDec.getHeaderSize(); // 头信息字节长度
+    private byte[] bytes = null;
     private int index = HEADER_LEN;
     private int byteLen = 0;
 
@@ -47,8 +47,7 @@ public class DataEnc {
 
     public DataEnc setCmd(int cmd) {
         this.cmd = cmd;
-        ByteUtil.intToBytes(cmd, bytes, 0);
-        return this;
+        return putInt(cmd, 0);
     }
 
     public DataEnc setByteCmd(byte cmd) {
@@ -76,10 +75,9 @@ public class DataEnc {
         return this;
     }
 
-
     public DataEnc putInt(int val) {
         putInt(val, index);
-        index += 4;
+        index += TypeLength.INT_LEN;
         return this;
     }
 
@@ -91,7 +89,7 @@ public class DataEnc {
 
     public DataEnc putLong(long val) {
         putLong(val, index);
-        index += 8;
+        index += TypeLength.LONG_LEN;
         return this;
     }
 
@@ -114,19 +112,23 @@ public class DataEnc {
     }
 
     public DataEnc putBytes(byte[] bs) {
-        putBytes(bs, bs.length, index);
-        index += bs.length;
+        putBytes(bs, bs.length);
         return this;
     }
 
     public DataEnc putBytes(byte[] bs, int length) {
-        DataEnc dataEnc = putBytes(bs, length, index);
-        index += length;
-        return dataEnc;
+        return putBytes(bs, 0, length);
     }
 
-    public DataEnc putBytes(byte[] bs, int length, int i) {
-        System.arraycopy(bs, 0, bytes, i, length);
+    public DataEnc putBytes(byte[] bs, int off, int length) {
+        putInt(length);
+        putBytes(bs, off, length, index);
+        index += length;
+        return this;
+    }
+
+    public DataEnc putBytes(byte[] bs, int off, int length, int i) {
+        System.arraycopy(bs, off, bytes, i, length);
         return this;
     }
 
@@ -136,14 +138,11 @@ public class DataEnc {
 
 
     public DataEnc putString(String val, String en) {
-        byte[] bs = null;
         try {
-            bs = val.getBytes(en);
+            putBytes(val.getBytes(en));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        putInt(bs.length);
-        putBytes(bs);
         return this;
     }
 
@@ -160,13 +159,21 @@ public class DataEnc {
     }
 
     /**
-     * 设置偏移
+     * 设置读取偏移
+     **/
+    public void seek(int seek) {
+        index = HEADER_LEN + seek;
+    }
+
+    /**
+     * 跳过指定长度偏移
      *
      * @param skip
      */
     public void skip(int skip) {
-        index = HEADER_LEN + skip;
+        index += skip;
     }
+
 
     /**
      * 重置读取下标
