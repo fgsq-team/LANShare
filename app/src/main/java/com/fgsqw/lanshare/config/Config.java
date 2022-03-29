@@ -7,7 +7,7 @@ public class Config {
     public static final int FILE_SERVER_PORT = 5856;
     public static final int SCANN_TIME = 5;            // 扫描时间
     public static String FILE_SAVE_PATH = "/sdcard/LANShare/";            // 文件保存路径
-
+    public static String FORDER = "文件夹";
     public static final String[][] fileType =
             {
                     {"zip", "压缩包"},

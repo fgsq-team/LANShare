@@ -249,6 +249,26 @@ public class LANService extends BaseService {
                     }
 
                     fileContentList.add(mediaContent);
+                } else if (fileType == mCmd.FILE_FOLDER) {
+                    // 获取文件数量
+                    int fileCount = dataDec.getInt();
+
+                    MessageFolderContent folderContent = new MessageFolderContent();
+                    folderContent.setContent(fileName);
+                    folderContent.setLength(fileSize);
+                    folderContent.setSocket(new mSocket(input, out));
+                    folderContent.setIndex(i);
+                    folderContent.setLeft(true);
+                    folderContent.setUserName(name);
+                    folderContent.setFileCount(fileCount);
+
+                    if (device.getDevMode() == Device.ANDROID) {
+                        folderContent.setHeader(R.drawable.ic_phone);
+                    } else if (device.getDevMode() == Device.WIN) {
+                        folderContent.setHeader(R.drawable.ic_win);
+                    }
+
+                    fileContentList.add(folderContent);
                 } else {
                     MessageFileContent fileContent = new MessageFileContent();
                     fileContent.setContent(fileName);
@@ -275,7 +295,6 @@ public class LANService extends BaseService {
             } else {
                 // 弹出是否接收文件请求弹窗
                 mMessage = Message.obtain();
-
                 mMessage.what = mCmd.SERVICE_IF_RECIVE_FILES;
                 mMessage.arg1 = count;
                 mMessage.obj = objects;
@@ -288,6 +307,110 @@ public class LANService extends BaseService {
     final byte[] recvBuffer = new byte[2 * 1024 * 1024];
     // 发送文件缓存
     final byte[] sendBuffer = new byte[2 * 1024 * 1024];
+
+
+    public long baseRecv(Object[] objects, DataDec dataDec,
+                         long fileLength, long mTotalRecv,
+                         long totalLength, String fileName,
+                         MessageFileContent fileContent) {
+
+        Socket client = (Socket) objects[2];
+        InputStream input = (InputStream) objects[3];
+        OutputStream out = (OutputStream) objects[4];
+        File file;
+        if (fileContent instanceof MessageFolderContent) {
+            file = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/");
+        } else {
+            file = new File(Config.FILE_SAVE_PATH + getNameType(fileName) + "/");
+        }
+        File outFile = new File(file, fileName);
+        File parentFile = outFile.getParentFile();
+        // 文件夹存在创建文件夹
+        if (!parentFile.exists() && !parentFile.mkdirs()) {
+            IOUtil.closeIO(input, out, client);
+            return -1;
+        }
+        String name = outFile.getName();
+
+        // 防止重名文件覆盖
+        if (outFile.exists()) {
+            for (int s = 1; s < 65535; s++) {
+                String str;
+                if (name.contains(".")) {
+                    String prefix = name.substring(0, name.lastIndexOf(".")) + "(" + s + ")";
+                    String suffix = name.substring(name.lastIndexOf("."));
+                    str = prefix + suffix;
+                } else {
+                    str = name + "(" + s + ")";
+                }
+                outFile = new File(parentFile, str);
+                if (!outFile.exists()) {
+                    break;
+                }
+            }
+        }
+        // 文件输出流
+        OutputStream outFileStream = null;
+        try {
+            outFileStream = new FileOutputStream(outFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            IOUtil.closeIO(input, out, client);
+            return -1;
+        }
+
+        InputStream mInput = fileContent.getSocket().getInputStream();
+        dataDec.reset();
+
+        int p = 0;
+        long totalRecv = mTotalRecv;
+        long thatTotal = 0;
+        try {
+            // 接收文件
+            while (true) {
+                // 接收文件信息
+                if (IOUtil.read(mInput, recvBuffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
+                    break;
+                int cmd = dataDec.getByteCmd();
+                if (cmd == mCmd.FS_DATA) {          // 数据
+                    int thatLength = dataDec.getLength();
+                    if (IOUtil.read(mInput, recvBuffer, DataEnc.getHeaderSize(), thatLength) != thatLength)
+                        break;
+                    IOUtil.write(outFileStream, recvBuffer, DataEnc.getHeaderSize(), thatLength);
+                    totalRecv += thatLength;
+                    thatTotal += thatLength;
+                    int progeress = (int) (totalRecv * 100.0F / totalLength);
+
+                    if (progeress != p) {
+                        // 更新视图进度条
+                        fileContent.setProgress(progeress);
+                        Message mMessage = Message.obtain();
+                        mMessage.what = mCmd.SERVICE_PROGRESS;
+                        mMessage.obj = fileContent;
+                        messageSend(mMessage);
+                        p = progeress;
+                    }
+
+                } else if (cmd == mCmd.FS_END) {    // 传输完毕
+                    break;
+                } else {  // 被动关闭传输
+                    Log.d(TAG, "close");
+                    thatTotal = 0;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            thatTotal = 0;
+        }
+        IOUtil.closeIO(outFileStream);
+
+        if (thatTotal != fileLength) {
+            outFile.delete();
+        }
+
+        return thatTotal;
+    }
 
 
     public void startRecvFile(Object[] objects, boolean isAgree) {
@@ -334,92 +457,81 @@ public class LANService extends BaseService {
                 // 接收文件列表遍历
                 for (int i = 0; i < messageFileContents.size(); i++) {
                     MessageFileContent fileContent = messageFileContents.get(i);
-                    File file = new File(Config.FILE_SAVE_PATH + getNameType(fileContent.getContent()) + "/");
-                    // 如果创建文件夹失败就关闭流退出
-                    if (!file.exists() && !file.mkdirs()) {
-                        IOUtil.closeIO(input, out, client);
-                        return;
-                    }
-                    File outFile = new File(file, fileContent.getContent());
-                    // 防止重名文件覆盖
-                    if (outFile.exists()) {
-                        for (int s = 1; s < 65535; s++) {
-                            String str;
-                            if (fileContent.getContent().contains(".")) {
-                                String prefix = fileContent.getContent().substring(0, fileContent.getContent().lastIndexOf(".")) + "(" + s + ")";
-                                String suffix = fileContent.getContent().substring(fileContent.getContent().lastIndexOf("."));
-                                str = prefix + suffix;
-                            } else {
-                                str = fileContent.getContent() + "(" + s + ")";
-                            }
-                            outFile = new File(file, str);
-                            if (!outFile.exists()) {
-                                break;
-                            }
-                        }
-                    }
-
-                    // 文件输出流
-                    OutputStream outFileStream = null;
-                    try {
-                        outFileStream = new FileOutputStream(outFile);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        IOUtil.closeIO(input, out, client);
-                        return;
-                    }
-
                     long totalRecv = 0;
-                    int p = 0;
-                    InputStream mInput = fileContent.getSocket().getInputStream();
-                    DataDec dataDec = new DataDec(recvBuffer);
-                    try {
-                        // 接收文件
-                        while (true) {
-                            // 接收文件信息
-                            if (IOUtil.read(mInput, recvBuffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
-                                break;
-                            int cmd = dataDec.getByteCmd();
-                            if (cmd == mCmd.FS_DATA) {          // 数据
-                                int length = dataDec.getLength();
-                                if (IOUtil.read(mInput, recvBuffer, DataEnc.getHeaderSize(), length) != length)
+                    if (fileContent instanceof MessageFolderContent) {
+                        MessageFolderContent folderContent = (MessageFolderContent) fileContent;
+                        DataDec dataDec = new DataDec(recvBuffer);
+                        for (int j = 0; j < folderContent.getFileCount(); j++) {
+                            // 读取文件信息
+                            try {
+                                // 读取头数据
+                                if (IOUtil.read(input, recvBuffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
                                     break;
-                                IOUtil.write(outFileStream, recvBuffer, DataEnc.getHeaderSize(), length);
-                                totalRecv += length;
-                                int progeress = (int) (totalRecv * 100.0F / fileContent.getLength());
-                                if (progeress != p) {
-                                    // 更新视图进度条
-                                    fileContent.setProgress(progeress);
-                                    mMessage = Message.obtain();
-                                    mMessage.what = mCmd.SERVICE_PROGRESS;
-                                    mMessage.obj = fileContent;
-                                    messageSend(mMessage);
-                                    p = progeress;
-                                }
-                            } else if (cmd == mCmd.FS_END) {    // 传输完毕
-                                break;
-                            } else {  // 被动关闭传输
-                                Log.d(TAG, "close");
-                                totalRecv = 0;
+                                int dataLength = dataDec.getLength();
+                                if (IOUtil.read(input, recvBuffer, DataEnc.getHeaderSize(), dataLength) != dataLength)
+                                    break;
+                            } catch (IOException e) {
+                                e.printStackTrace();
                                 break;
                             }
+                            // 从头数据中获取数据包大小
+
+                            long fileLength = dataDec.getLong();
+                            String name = dataDec.getString();
+
+                            Log.d(TAG, "接收文件:" + name + " 大小:" + fileLength);
+
+                            long thatTotal = baseRecv(
+                                    objects,
+                                    dataDec,
+                                    fileLength,
+                                    totalRecv,
+                                    folderContent.getLength(),
+                                    name,
+                                    folderContent
+                            );
+
+                            // 传输过程中有问题直接break
+                            if (thatTotal <= 0) {
+                                break;
+                            } else {
+                                folderContent.setCompleteCount(folderContent.getCompleteCount() + 1);
+                                mMessage = Message.obtain();
+                                mMessage.what = mCmd.SERVICE_COMPLETE_COUNT;
+                                mMessage.obj = folderContent;
+                                messageSend(mMessage);
+                            }
+
+                            totalRecv += thatTotal;
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        totalRecv = 0;
+
+                    } else {
+
+                        DataDec dataDec = new DataDec(recvBuffer);
+                        totalRecv = baseRecv(
+                                objects,
+                                dataDec,
+                                fileContent.getLength(),
+                                0,
+                                fileContent.getLength(),
+                                fileContent.getContent(),
+                                fileContent
+                        );
+
+
                     }
+
 
                     // 接收成功设置文件路径 失败则删除文件
                     if (totalRecv != fileContent.getLength()) {
-                        outFile.delete();
                         fileContent.setSuccess(false);
                         fileContent.setStateMessage("接收失败");
-
                     } else {
-                        fileContent.setPath(outFile.getPath());
+//                        fileContent.setPath(outFile.getPath());
                         fileContent.setSuccess(true);
                         fileContent.setStateMessage("接收成功");
                     }
+
 
                     try {
                         Thread.sleep(100);
@@ -433,7 +545,6 @@ public class LANService extends BaseService {
                     mMessage.obj = fileContent;
                     messageSend(mMessage);
 
-                    IOUtil.closeIO(outFileStream);
                 }
                 IOUtil.closeIO(input, out, client);
             }
@@ -540,6 +651,7 @@ public class LANService extends BaseService {
 
     }
 
+
     public void fileSend(InputStream input, OutputStream out, Device device, List<FileInfo> fileList) {
         List<MessageFileContent> messageFileContents = new ArrayList<>();
 
@@ -559,13 +671,13 @@ public class LANService extends BaseService {
                 for (int i = 0; i < fileList.size(); i++) {
                     FileInfo fileInfo = fileList.get(i);
                     dataEnc.reset();
-                    dataEnc.putLong(fileInfo.getLength());
-                    dataEnc.putString(fileInfo.getName());
-
-                    // 判断文件类型
+                    // 媒体
                     if (fileInfo instanceof MediaInfo) {
                         MediaInfo mediaInfo = (MediaInfo) fileInfo;
                         MessageMediaContent mediaContent = new MessageMediaContent();
+
+                        dataEnc.putLong(fileInfo.getLength());
+                        dataEnc.putString(fileInfo.getName());
 
                         if (mediaInfo.isVideo()) {
                             dataEnc.putInt(mCmd.FILE_VIEDO);
@@ -589,54 +701,52 @@ public class LANService extends BaseService {
                         mediaContent.setVideoTime(videoTime);
                         messageFileContents.add(mediaContent);
 
-                    } else if (fileInfo instanceof FileSource) {
+                        // 文件夹
+                    } else if (fileInfo instanceof FileSource && !((FileSource) fileInfo).isFile()) {
                         FileSource fileSource = (FileSource) fileInfo;
-                        if (fileSource.isFile()) {
-                            dataEnc.putInt(mCmd.FILE_FILE);
-                            dataEnc.putString("");
 
-                            MessageFileContent fileContent = new MessageFileContent();
-                            fileContent.setContent(fileInfo.getName());
-                            fileContent.setLength(fileInfo.getLength());
-                            fileContent.setPath(fileInfo.getPath());
-                            fileContent.setSocket(new mSocket(input, out));
-                            fileContent.setIndex(i);
-                            fileContent.setLeft(false);
-                            fileContent.setUserName(userName);
-                            fileContent.setToUser(device.getDevName());
-                            messageFileContents.add(fileContent);
-
-                        } else {
-
-                            dataEnc.putInt(mCmd.FILE_FOLDER);
-                            dataEnc.putString("");
-
-                            File file = new File(fileSource.getPath());
-                            if (!file.exists()) {
-                                T.s("路径不存在");
-                                continue;
-                            }
-                            List<FileInfo> fileInfos = new LinkedList<>();
-                            // 扫描文件
-                            long totalSize = FIleSerachUtils.scanPathFiles(file, fileInfos);
-
-                            if (fileInfos.isEmpty()) {
-                                continue;
-                            }
-
-                            MessageFolderContent folderContent = new MessageFolderContent();
-                            folderContent.setFileCount(fileInfos.size());
-                            folderContent.setLength(totalSize);
-                            folderContent.setFileInfoList(fileList);
-                            folderContent.setBasePath(file.getPath());
-                            folderContent.setLeft(false);
-                            folderContent.setSocket(new mSocket(input, out));
-                            folderContent.setIndex(i);
-                            folderContent.setUserName(userName);
-
-                            messageFileContents.add(folderContent);
+                        File file = new File(fileSource.getPath());
+                        if (!file.exists()) {
+                            T.s("路径不存在");
+                            continue;
                         }
+                        List<FileInfo> fileInfos = new LinkedList<>();
+                        // 扫描文件
+                        long totalSize = FIleSerachUtils.scanPathFiles(file, fileInfos);
+
+                        // 写入文件大小
+                        if (fileInfos.isEmpty()) {
+                            continue;
+                        }
+
+                        dataEnc.putLong(totalSize);
+                        dataEnc.putString(file.getName());
+
+                        dataEnc.putInt(mCmd.FILE_FOLDER);
+                        dataEnc.putString("");
+                        dataEnc.putInt(fileInfos.size());
+
+                        MessageFolderContent folderContent = new MessageFolderContent();
+                        folderContent.setFileCount(fileInfos.size());
+                        folderContent.setLength(totalSize);
+                        folderContent.setFileInfoList(fileInfos);
+                        folderContent.setBasePath(file.getPath());
+                        folderContent.setLeft(false);
+                        folderContent.setContent(file.getName());
+                        folderContent.setSocket(new mSocket(input, out));
+                        folderContent.setIndex(i);
+                        folderContent.setUserName(userName);
+                        folderContent.setBasePath(fileSource.getPath());
+                        folderContent.setToUser(device.getDevName());
+
+                        messageFileContents.add(folderContent);
+
+                        // 其他文件
                     } else {
+
+                        dataEnc.putLong(fileInfo.getLength());
+                        dataEnc.putString(fileInfo.getName());
+
                         dataEnc.putInt(mCmd.FILE_FILE);
                         dataEnc.putString("");
 
@@ -672,6 +782,7 @@ public class LANService extends BaseService {
                 return;
             }
 
+            // 发送显示的文件
             Message mMessage;
             mMessage = Message.obtain();
             mMessage.what = mCmd.SERVICE_SHOW_PROGRESS;
@@ -680,111 +791,145 @@ public class LANService extends BaseService {
 
             startRecvCmd(messageFileContents, input);
 
-            long totalSend = 0;
-            for (MessageFileContent messageFileContent : messageFileContents) {
-
+            for (MessageFileContent fileContent : messageFileContents) {
                 DataEnc dataEnc = new DataEnc(sendBuffer);
                 // mOutputStream 是用来判断文件取消的，下面写出文件必须要用它
-                mOutputStream mOut = messageFileContent.getSocket().getOutputStream();
-                InputStream fileIs;
-                if (messageFileContent.getClass().equals(MessageFolderContent.class)) {
-                    MessageFolderContent folderContent = (MessageFolderContent) messageFileContent;
-                    int completeCount;
+                mOutputStream mOut = fileContent.getSocket().getOutputStream();
+                long totalSend = 0;
+                if (fileContent.getClass().equals(MessageFolderContent.class)) {
+                    MessageFolderContent folderContent = (MessageFolderContent) fileContent;
+
+                    // 遍历需要传输的文件
                     for (FileInfo fileInfo : folderContent.getFileInfoList()) {
+                        File file = new File(folderContent.getBasePath());
+                        String fileName = fileInfo.getPath().replace(file.getParent(), "");
+
+                        dataEnc.reset();
+                        dataEnc.putLong(fileInfo.getLength());
+                        dataEnc.putString(fileName);
+
+                        Log.d(TAG, "发送文件:" + fileName + " 大小:" + fileInfo.getLength());
+
                         try {
-                            fileIs = new FileInputStream(fileInfo.getPath());
-                        } catch (FileNotFoundException e) {
+                            IOUtil.write(
+                                    mOut,
+                                    dataEnc.getData(),
+                                    dataEnc.getDataLen());
+                        } catch (IOException e) {
                             e.printStackTrace();
-                            dataEnc.setByteCmd(mCmd.FS_CLOSE);
-                            try {
-                                IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
-                            } catch (IOException ioException) {
-                                ioException.printStackTrace();
-                            }
-                            continue;
+                            break;
                         }
 
+                        long thatSend = baseSend(
+                                fileContent,
+                                fileInfo.getPath(),
+                                dataEnc,
+                                totalSend,
+                                folderContent.getLength(),
+                                fileInfo.getLength()
+                        );
 
+                        if (thatSend <= 0) {
+                            break;
+                        } else {
+                            folderContent.setCompleteCount(folderContent.getCompleteCount() + 1);
+                            mMessage = Message.obtain();
+                            mMessage.what = mCmd.SERVICE_COMPLETE_COUNT;
+                            mMessage.obj = folderContent;
+                            messageSend(mMessage);
+                        }
+
+                        totalSend += thatSend;
                     }
-
                 } else {
+                    totalSend += baseSend(
+                            fileContent,
+                            fileContent.getPath(),
+                            dataEnc,
+                            0,
+                            fileContent.getLength(),
+                            fileContent.getLength()
+                    );
                     try {
-                        fileIs = new FileInputStream(messageFileContent.getPath());
-                    } catch (FileNotFoundException e) {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
-                        dataEnc.setByteCmd(mCmd.FS_CLOSE);
-                        try {
-                            IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                        }
-                        continue;
-                    }
-
-                    // 发送文件
-                    Log.d(TAG, "发送文件:" + messageFileContent.getPath() + " 大小:" + messageFileContent.getLength());
-
-                    int ten = 0;
-                    int p = 0;
-
-                    dataEnc.setByteCmd(mCmd.FS_DATA);
-
-                    try {
-                        // 读取时偏移掉头的位置
-                        while ((ten = fileIs.read(sendBuffer, DataEnc.getHeaderSize(), sendBuffer.length - DataEnc.getHeaderSize())) != -1) {
-                            dataEnc.setDataIndex(ten);
-                            IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
-                            totalSend += ten;
-                            int prngeress = (int) (totalSend * 100.0F / messageFileContent.getLength());
-                            if (prngeress != p) {
-                                messageFileContent.setProgress(prngeress);
-                                mMessage = Message.obtain();
-                                mMessage.what = mCmd.SERVICE_PROGRESS;
-                                mMessage.obj = messageFileContent;
-                                messageSend(mMessage);
-                                p = prngeress;
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        totalSend = 0;
                     }
                 }
 
-
-                try {
-                    if (totalSend != messageFileContent.getLength()) {
-                        messageFileContent.setSuccess(false);
-                        messageFileContent.setStateMessage("发送失败");
-                        dataEnc.reset();
-                        dataEnc.setByteCmd(mCmd.FS_CLOSE);
-                    } else {
-                        messageFileContent.setSuccess(true);
-                        messageFileContent.setStateMessage("发送成功");
-                        dataEnc.reset();
-                        dataEnc.setByteCmd(mCmd.FS_END);
-                    }
-                    IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (totalSend != fileContent.getLength()) {
+                    fileContent.setSuccess(false);
+                    fileContent.setStateMessage("发送失败");
+                } else {
+                    fileContent.setSuccess(true);
+                    fileContent.setStateMessage("发送成功");
                 }
 
                 mMessage = Message.obtain();
                 mMessage.what = mCmd.SERVICE_CLOSE_PROGRESS;
-                mMessage.obj = messageFileContent;
+                mMessage.obj = fileContent;
                 messageSend(mMessage);
-
                 Log.d(TAG, "发送成功:" + totalSend);
 
             }
         }
 
+    }
+
+
+    public long baseSend(MessageFileContent folderContent, String filePath, DataEnc dataEnc, long mTotalSend, long totalLength, long fileLength) {
+        mOutputStream mOut = folderContent.getSocket().getOutputStream();
+        InputStream fileIs;
+        try {
+            fileIs = new FileInputStream(filePath);
+        } catch (FileNotFoundException e) {
+            return -1;
+        }
+        // 发送文件
+//        Log.d(TAG, "发送文件:" + filePath + " 大小:" + fileLength);
+        int ten = 0;
+        int p = 0;
+        dataEnc.reset();
+        dataEnc.setByteCmd(mCmd.FS_DATA);
+        long totalSend = mTotalSend;
+        long thatSend = 0;
+        try {
+            // 读取时偏移掉头的位置
+            while ((ten = fileIs.read(sendBuffer, DataEnc.getHeaderSize(), sendBuffer.length - DataEnc.getHeaderSize())) != -1) {
+                dataEnc.setDataIndex(ten);
+                IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
+                totalSend += ten;
+                thatSend += ten;
+                int prngeress = (int) (totalSend * 100.0F / totalLength);
+                if (prngeress != p) {
+                    folderContent.setProgress(prngeress);
+                    Message mMessage = Message.obtain();
+                    mMessage.what = mCmd.SERVICE_PROGRESS;
+                    mMessage.obj = folderContent;
+                    messageSend(mMessage);
+                    p = prngeress;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            thatSend = 0;
+        }
+
+        if (thatSend != fileLength) {
+//            Log.d(TAG, "文件不等于 totalSend:" + totalSend + " fileLength:" + fileLength);
+            dataEnc.reset();
+            dataEnc.setByteCmd(mCmd.FS_CLOSE);
+        } else {
+            dataEnc.reset();
+            dataEnc.setByteCmd(mCmd.FS_END);
+        }
+
+        try {
+            IOUtil.write(folderContent.getSocket().getOut(), dataEnc.getData(), dataEnc.getDataLen());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return thatSend;
     }
 
 
@@ -1011,9 +1156,7 @@ public class LANService extends BaseService {
             } catch (SocketException e) {
                 e.printStackTrace();
             }
-
         });
-
 
     }
 

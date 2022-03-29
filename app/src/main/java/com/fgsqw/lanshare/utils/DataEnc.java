@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.utils;
 
 
-import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
 //数据包装类

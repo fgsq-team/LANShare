@@ -13,10 +13,10 @@ public class MessageFolderContent extends MessageFileContent {
 
     private List<FileInfo> fileInfoList;
 
-    @Override
+/*    @Override
     public String getContent() {
         return fileCount + "/" + completeCount;
-    }
+    }*/
 
     public int getFileCount() {
         return fileCount;

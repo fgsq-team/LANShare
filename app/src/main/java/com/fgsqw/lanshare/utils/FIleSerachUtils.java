@@ -187,7 +187,8 @@ public class FIleSerachUtils {
 
     /**
      * 扫描文件夹下的文件并返回总文件大小
-     * @param path 文件夹路径
+     *
+     * @param path         文件夹路径
      * @param fileInfolist 扫描储存list
      * @return 总文件大小
      */
@@ -205,6 +206,7 @@ public class FIleSerachUtils {
                 fileInfo.setPath(path.getPath());
                 fileInfo.setLength(path.length());
                 fileInfolist.add(fileInfo);
+                totalSize += fileInfo.getLength();
             }
         }
         return totalSize;

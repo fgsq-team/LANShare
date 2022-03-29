@@ -33,7 +33,6 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     FragFileList fragFileList;
     FragPhotoList fragPhotoList;
     FragTest fragTest;
-    FragChat fragChat;
 
     String[] tabTitles = {"应用", "媒体", "文件", "待添加"};
 

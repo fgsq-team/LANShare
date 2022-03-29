@@ -21,6 +21,7 @@ import com.fgsqw.lanshare.fragment.adapter.viewolder.MsgHolder;
 import com.fgsqw.lanshare.fragment.FragChat;
 import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
+import com.fgsqw.lanshare.pojo.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.MessageMediaContent;
 import com.fgsqw.lanshare.utils.FileUtil;
 
@@ -102,6 +103,16 @@ public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             fileMsgHolder.progressBar.setProgress(messageFileContent.getProgress());
             fileMsgHolder.content.setText(messageFileContent.getContent());
             fileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
+
+            if (messageFileContent instanceof MessageFolderContent) {
+                Glide.with(mContext).load(R.drawable.rc_file_blue_icon)
+                        .apply(options)
+                        .into(fileMsgHolder.fileTypeIcon);
+            }else {
+                Glide.with(mContext).load(R.drawable.rc_file_icon_file)
+                        .apply(options)
+                        .into(fileMsgHolder.fileTypeIcon);
+            }
 
             fileMsgHolder.progressBar.setVisibility(messageFileContent.getSuccess() != null ? View.GONE : View.VISIBLE);
             fileMsgHolder.stateTv.setVisibility(messageFileContent.getSuccess() != null ? View.VISIBLE : View.GONE);
@@ -190,7 +201,8 @@ public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        if (fragChat.getMessageContents() == null || fragChat.getMessageContents().size() == 0) return 0;
+        if (fragChat.getMessageContents() == null || fragChat.getMessageContents().size() == 0)
+            return 0;
         return fragChat.getMessageContents().size();
     }
 

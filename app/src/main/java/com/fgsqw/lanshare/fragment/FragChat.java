@@ -38,6 +38,7 @@ import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
+import com.fgsqw.lanshare.pojo.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.MessageMediaContent;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mSocket;
@@ -88,6 +89,8 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 addListData(msg);
             } else if (msg.what == mCmd.SERVICE_PROGRESS) {          // 更新文件进度
                 updateLocalItemProgress(msg);
+            } else if (msg.what == mCmd.SERVICE_COMPLETE_COUNT) {    // 更新文件夹传输文完成数量
+                updateLocalItemFolderCount(msg);
             } else if (msg.what == mCmd.SERVICE_CLOSE_PROGRESS) {    // 完成传输
                 updateLocalItemInfo(msg);
             } else if (msg.what == mCmd.SERVICE_ADD_MESSGAGE) {      // 新增消息
@@ -136,6 +139,17 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         messageContentList.addAll(messageContents);
         chatAdabper.notifyDataSetChanged();
         recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
+    }
+
+    public void updateLocalItemFolderCount(Message message) {
+        MessageFolderContent folderContent = (MessageFolderContent) message.obj;
+        int dataPosition = chatAdabper.getDataPosition(folderContent);
+        FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
+        if (viewHolder != null) {
+            viewHolder.content.setText(folderContent.getContent());
+        } else {
+            chatAdabper.notifyItemChanged(dataPosition);
+        }
     }
 
     public void updateLocalItemProgress(Message message) {
