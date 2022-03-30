@@ -310,19 +310,13 @@ public class LANService extends BaseService {
 
     public long baseRecv(Object[] objects, DataDec dataDec,
                          long fileLength, long mTotalRecv,
-                         long totalLength, String fileName,
+                         long totalLength, File outFile,
                          MessageFileContent fileContent) {
 
         Socket client = (Socket) objects[2];
         InputStream input = (InputStream) objects[3];
         OutputStream out = (OutputStream) objects[4];
-        File file;
-        if (fileContent instanceof MessageFolderContent) {
-            file = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/");
-        } else {
-            file = new File(Config.FILE_SAVE_PATH + getNameType(fileName) + "/");
-        }
-        File outFile = new File(file, fileName);
+
         File parentFile = outFile.getParentFile();
         // 文件夹存在创建文件夹
         if (!parentFile.exists() && !parentFile.mkdirs()) {
@@ -456,9 +450,12 @@ public class LANService extends BaseService {
                 for (int i = 0; i < messageFileContents.size(); i++) {
                     MessageFileContent fileContent = messageFileContents.get(i);
                     long totalRecv = 0;
+                    File file;
                     if (fileContent instanceof MessageFolderContent) {
                         MessageFolderContent folderContent = (MessageFolderContent) fileContent;
                         DataDec dataDec = new DataDec(recvBuffer);
+                        file = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/" + folderContent.getContent() + "/");
+
                         for (int j = 0; j < folderContent.getFileCount(); j++) {
                             // 读取文件信息
                             try {
@@ -475,9 +472,12 @@ public class LANService extends BaseService {
                             // 从头数据中获取数据包大小
 
                             long fileLength = dataDec.getLong();
-                            String name = dataDec.getString();
+                            String fileName = dataDec.getString();
 
-                            Log.d(TAG, "接收文件:" + name + " 大小:" + fileLength);
+                            Log.d(TAG, "接收文件:" + fileName + " 大小:" + fileLength);
+
+
+                            File outFile = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/", fileName);
 
                             long thatTotal = baseRecv(
                                     objects,
@@ -485,7 +485,7 @@ public class LANService extends BaseService {
                                     fileLength,
                                     totalRecv,
                                     folderContent.getLength(),
-                                    name,
+                                    outFile,
                                     folderContent
                             );
 
@@ -504,15 +504,15 @@ public class LANService extends BaseService {
                         }
 
                     } else {
-
                         DataDec dataDec = new DataDec(recvBuffer);
+                        file = new File(Config.FILE_SAVE_PATH + getNameType(fileContent.getContent()) + "/", fileContent.getContent());
                         totalRecv = baseRecv(
                                 objects,
                                 dataDec,
                                 fileContent.getLength(),
                                 0,
                                 fileContent.getLength(),
-                                fileContent.getContent(),
+                                file,
                                 fileContent
                         );
 
@@ -525,7 +525,7 @@ public class LANService extends BaseService {
                         fileContent.setSuccess(false);
                         fileContent.setStateMessage("接收失败");
                     } else {
-//                        fileContent.setPath(outFile.getPath());
+                        fileContent.setPath(file.getPath());
                         fileContent.setSuccess(true);
                         fileContent.setStateMessage("接收成功");
                     }
@@ -710,9 +710,7 @@ public class LANService extends BaseService {
                         List<FileInfo> fileInfos = new LinkedList<>();
                         // 扫描文件并返回扫描到的文件总大小
                         long totalSize = FIleSerachUtils.scanPathFiles(file, fileInfos);
-                        if (fileInfos.isEmpty()) {
-                            continue;
-                        }
+
                         // 写入总文件大小
                         dataEnc.putLong(totalSize);
                         // 写入文件名称

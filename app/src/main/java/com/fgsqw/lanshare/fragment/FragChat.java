@@ -1,8 +1,11 @@
 package com.fgsqw.lanshare.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -248,38 +251,42 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         if (messageContent instanceof MessageFileContent) {
             MessageFileContent fileContent = (MessageFileContent) messageContent;
             if (fileContent.getSuccess() != null && fileContent.getSuccess()) {
-                if (POEN_MEDIA_PLAYER) {
-                    if (messageContent.getClass().getName().equals(MessageFileContent.class.getName())) {
+
+                if (POEN_MEDIA_PLAYER && messageContent instanceof MessageMediaContent) {
+                    MessageMediaContent mediaContent = (MessageMediaContent) fileContent;
+
+                    MediaInfo mediaInfo = new MediaInfo();
+                    mediaInfo.setPath(mediaContent.getPath());
+                    mediaInfo.setLength(mediaContent.getLength());
+                    mediaInfo.setName(mediaContent.getContent());
+
+                    if (mediaContent.isVideo()) {
+                        VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
+                    } else {
+                        List<MediaInfo> mediaInfos = Arrays.asList(mediaInfo);
+                        ReviewImages.openActivity(getActivity(), mediaInfos,
+                                mediaInfos, false, 0, 1);
+                    }
+                } else {
+
+                    if (messageContent instanceof MessageFolderContent) {
+                        T.s("暂不支持打开文件夹,清在件管理器中查看");
+                    } else {
                         if (fileContent.getSuccess() != null && fileContent.getSuccess()) {
                             FileUtil.openFile(dataCenterActivity, new File(fileContent.getPath()));
                         }
-                    } else if (messageContent.getClass().getName().equals(MessageMediaContent.class.getName())) {
-                        MessageMediaContent mediaContent = (MessageMediaContent) fileContent;
-
-                        MediaInfo mediaInfo = new MediaInfo();
-                        mediaInfo.setPath(mediaContent.getPath());
-                        mediaInfo.setLength(mediaContent.getLength());
-                        mediaInfo.setName(mediaContent.getContent());
-
-                        if (mediaContent.isVideo()) {
-                            VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
-                        } else {
-                            List<MediaInfo> mediaInfos = Arrays.asList(mediaInfo);
-                            ReviewImages.openActivity(getActivity(), mediaInfos,
-                                    mediaInfos, false, 0, 1);
-                        }
-                    }
-                } else {
-                    if (fileContent.getSuccess() != null && fileContent.getSuccess()) {
-                        FileUtil.openFile(dataCenterActivity, new File(fileContent.getPath()));
                     }
                 }
+
+
             } else {
                 T.s("文件传输未完成");
             }
 
         }
     }
+
+
 
     @Override
     public boolean onItemLongClick(MessageContent messageContent, View view, int position) {

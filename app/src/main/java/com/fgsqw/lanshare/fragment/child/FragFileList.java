@@ -132,7 +132,8 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
                     if (!mFile.isDirectory()) {
                         dialog(position);
                     } else {
-                        T.s("暂不支持文件夹操作");
+                        dialogFolder(position);
+
                     }
                 }
 
@@ -248,6 +249,37 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
             }
         }
 
+    }
+
+    private void dialogFolder(final int position) {
+        FileSource fileSource = fileList.get(position);
+        File file = new File(fileSource.getPath());
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("请选择操作");
+        String[] items;
+
+        if (file.canRead()) {
+            items = new String[]{"发送", "取消",};
+        } else {
+            T.s("文件夹不能读取");
+            return;
+        }
+
+        // 绑定选项和点击事件
+        builder.setItems(items, (arg0, arg1) -> {
+            switch (arg1) {
+                case 0: {
+                    dataCenterActivity.sendOneFile(fileSource);
+                    break;
+                }
+                case 1: {
+                    break;
+                }
+            }
+            arg0.dismiss();
+        });
+        builder.show();
     }
 
 
