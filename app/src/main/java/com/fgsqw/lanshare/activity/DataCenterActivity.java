@@ -85,7 +85,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     public void getConfig() {
         PrefUtil prefUtil = new PrefUtil(this);
         String filePath = prefUtil.getString(PreConfig.FILE_PATH);
-        if(filePath.isEmpty()){
+        if (filePath.isEmpty()) {
             prefUtil.saveString(PreConfig.FILE_PATH, Config.FILE_SAVE_PATH);
             filePath = Config.FILE_SAVE_PATH;
         }
@@ -261,7 +261,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     @Override
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
-        if ((n != KeyEvent.KEYCODE_BACK) || (keyEvent.getRepeatCount() != 0)) return super.onKeyDown(n, keyEvent);
+        if ((n != KeyEvent.KEYCODE_BACK) || (keyEvent.getRepeatCount() != 0))
+            return super.onKeyDown(n, keyEvent);
         if (!currentFragment.onKeyDown(n, keyEvent)) {
             moveTaskToBack(true);
         }
@@ -289,6 +290,12 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 break;
             case R.id.menu_http_share:
                 startActivity(new Intent(this, HttpShareActivity.class));
+                break;
+            case R.id.menu_camera_send:
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            case R.id.menu_camera_recv:
+                startActivity(new Intent(this, TestActivity.class));
                 break;
 
         }

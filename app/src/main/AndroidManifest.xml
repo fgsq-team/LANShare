@@ -52,6 +52,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.fgsqw.lanshare.activity.MainActivity" />
+        <activity android:name="com.fgsqw.lanshare.activity.TestActivity" />
         <activity
             android:name="com.fgsqw.lanshare.activity.DataCenterActivity"
             android:configChanges="orientation|screenSize"

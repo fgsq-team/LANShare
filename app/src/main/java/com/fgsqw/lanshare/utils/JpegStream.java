@@ -43,7 +43,7 @@ public class JpegStream {
             throw new IllegalStateException("JpegStream is already running");
         }
         running = true;
-        worker = new Thread(() -> workerRun());
+        worker = new Thread(this::workerRun);
         worker.start();
     }
 

@@ -13,6 +13,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
@@ -36,7 +37,6 @@ public class JpegStreamView extends android.support.v7.widget.AppCompatImageView
 
     public JpegStreamView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
     }
 
     public JpegStreamView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -50,7 +50,7 @@ public class JpegStreamView extends android.support.v7.widget.AppCompatImageView
         streamThread = new Thread(() -> {
             try {
                 DataDec dataDec = new DataDec(1024 * 1024 * 2);
-                Socket socket = new Socket("192.168.31.228", 8080);
+                Socket socket = new Socket("192.168.31.129", 8080);
                 InputStream input = socket.getInputStream();
                 while (run) {
                     dataDec.reset();
@@ -61,7 +61,7 @@ public class JpegStreamView extends android.support.v7.widget.AppCompatImageView
                         return;
                     Bitmap bitmap = BitmapFactory.decodeByteArray(
                             dataDec.getData(),
-                            DataDec.getHeaderSize() + TypeLength.LONG_LEN,  // 偏移长度
+                            TypeLength.INT_LEN + DataDec.getHeaderSize(),  // 偏移长度
                             length
                     );
                     post(() -> setImageBitmap(bitmap));

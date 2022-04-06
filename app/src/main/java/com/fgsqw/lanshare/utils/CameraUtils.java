@@ -12,7 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class CameraUtils  {
+public class CameraUtils {
     Camera camera;
     private final int mPreviewFormat;
     private int mPreviewWidth;
@@ -105,6 +105,10 @@ public class CameraUtils  {
         return needSize;
     }
 
+    public void stop() {
+        mMJpegStream.stop();
+        camera.stopPreview();
+    }
 
     public static byte[] rotateYUV420Degree(byte[] input, int width, int height, int rotation) {
         int frameSize = width * height;

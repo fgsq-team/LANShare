@@ -5,13 +5,10 @@ group='com.github.maning0303'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
         //multiDexEnabled true
         consumerProguardFiles 'consumer-rules.pro'
     }
