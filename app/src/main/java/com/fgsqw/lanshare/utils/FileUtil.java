@@ -674,7 +674,7 @@ public class FileUtil {
             return type;
         }
         /* 获取文件的后缀名 */
-        String end = fName.substring(dotIndex);
+        String end = fName.substring(dotIndex + 1);
         if (end.equals("")) return type;
         //在MIME和文件类型的匹配表中找到对应的MIME类型。
         for (int i = 0; i < MIME_MapTable.length; i++) { //MIME_MapTable??在这里你一定有疑问，这个MIME_MapTable是什么？

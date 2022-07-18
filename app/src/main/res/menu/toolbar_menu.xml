@@ -19,7 +19,7 @@
         android:orderInCategory="100"
         android:title="@string/http_share"
         app:showAsAction="never" />
-    <item
+   <!-- <item
         android:id="@+id/menu_camera_send"
         android:orderInCategory="100"
         android:title="相机发送"
@@ -28,6 +28,6 @@
         android:id="@+id/menu_camera_recv"
         android:orderInCategory="100"
         android:title="相机接收"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
 
 </menu>
