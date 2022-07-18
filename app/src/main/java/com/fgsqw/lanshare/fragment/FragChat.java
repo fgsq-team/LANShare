@@ -99,6 +99,9 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
             } else if (msg.what == mCmd.SERVICE_ADD_MESSGAGE) {      // 新增消息
                 MessageContent messageContent = (MessageContent) msg.obj;
                 addMessage(messageContent);
+            } else if (msg.what == mCmd.SERVICE_NETWORK_CHANGES) {    // 网络变化
+                Device device = (Device) msg.obj;
+                dataCenterActivity.updateIP(device.getDevIP());
             }
         }
     };

@@ -19,7 +19,7 @@ public class NetWorkReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        WifiManager mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+       /* WifiManager mWifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo mWifiInfo = mWifiManager.getConnectionInfo();
         int wifi = mWifiInfo.getRssi();//获取wifi信号强度
         if (wifi > -100 && wifi < 0) {
@@ -27,8 +27,10 @@ public class NetWorkReceiver extends BroadcastReceiver {
             lanService.initData();
 //            T.s("WiFi已连接");
         } else {
-            T.s("WIFI已断开,LANShare可能搜索不到设备");
-        }
+//            T.s("WIFI已断开,LANShare可能搜索不到设备");
+        }*/
+
+        lanService.initData();
     }
 }
 

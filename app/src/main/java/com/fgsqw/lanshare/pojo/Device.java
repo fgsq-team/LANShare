@@ -10,8 +10,10 @@ public class Device {
 
     String devName;
     String devIP;
+    String devNetMask; // 子网掩码
+    String devBrotIP;  // 广播IP
     int devPort;
-    int devMode;    // 设备代号
+    int devMode;       // 设备代号
     long setTime;
 
     public Device() {
@@ -23,6 +25,21 @@ public class Device {
         this.devPort = devPort;
     }
 
+    public String getDevBrotIP() {
+        return devBrotIP;
+    }
+
+    public void setDevBrotIP(String devBrotIP) {
+        this.devBrotIP = devBrotIP;
+    }
+
+    public String getDevNetMask() {
+        return devNetMask;
+    }
+
+    public void setDevNetMask(String devNetMask) {
+        this.devNetMask = devNetMask;
+    }
 
     public long getSetTime() {
         return setTime;
@@ -86,8 +103,11 @@ public class Device {
         return "Device{" +
                 "devName='" + devName + '\'' +
                 ", devIP='" + devIP + '\'' +
+                ", devNetMask='" + devNetMask + '\'' +
+                ", devBrotIP='" + devBrotIP + '\'' +
                 ", devPort=" + devPort +
                 ", devMode=" + devMode +
+                ", setTime=" + setTime +
                 '}';
     }
 }

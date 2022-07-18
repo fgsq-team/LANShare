@@ -1,6 +1,5 @@
 package com.fgsqw.lanshare.service;
 
-import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -38,6 +37,7 @@ import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
 import com.fgsqw.lanshare.utils.PrefUtil;
+import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.UDPTools;
 import com.fgsqw.lanshare.utils.ViewUpdate;
 import com.fgsqw.lanshare.utils.mUtil;
@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LANService extends BaseService {
@@ -71,7 +70,7 @@ public class LANService extends BaseService {
     public Map<String, Device> devices = new ConcurrentHashMap<>();
     Messenger mMessenger;
     Device mDevice;
-    String locAddrIndex = "255.255.255.255";
+    //    String locAddrIndex = "255.255.255.255";
     NetWorkReceiver netWorkReceiver;
     PrefUtil prefUtil;
     private boolean isRun = true;
@@ -104,14 +103,14 @@ public class LANService extends BaseService {
         mUtil.showNotification(this, getString(R.string.app_name), "服务正在运行...");
         // 初始化数据
         initData();
-        // 监听wifi
+        // 监听网络
         receiver();
         // UDP广播监听
         runRecive();
         // 文件接收监听
         fileServer();
         // 通告局域网所有设备我已上线
-        ViewUpdate.runThread(() -> noticeDeviceOnLineByIp(locAddrIndex));
+        ViewUpdate.runThread(() -> noticeDeviceOnLineByIp(mDevice.getDevBrotIP()));
         // UDP 广播扫描设备
         scannDevice();
 
@@ -121,7 +120,11 @@ public class LANService extends BaseService {
     // 初始化数据
     public void initData() {
         mDevice = getDevice();
-        locAddrIndex = NetWorkUtil.getLocAddrIndex(mDevice.getDevIP()) + "255";
+        Message mMessage = Message.obtain();
+        mMessage.what = mCmd.SERVICE_NETWORK_CHANGES;
+        mMessage.obj = mDevice;
+        messageSend(mMessage);
+//        locAddrIndex = NetWorkUtil.getLocAddrIndex(mDevice.getDevIP()) + "255";
     }
 
 
@@ -146,8 +149,8 @@ public class LANService extends BaseService {
     // 监听接收文件信息
     public void handelFile(Socket client) {
 
-        InputStream input = null;
-        OutputStream out = null;
+        InputStream input;
+        OutputStream out;
 
         try {
             input = client.getInputStream();
@@ -343,7 +346,7 @@ public class LANService extends BaseService {
             }
         }
         // 文件输出流
-        OutputStream outFileStream = null;
+        OutputStream outFileStream;
         try {
             outFileStream = new FileOutputStream(outFile);
         } catch (FileNotFoundException e) {
@@ -881,7 +884,7 @@ public class LANService extends BaseService {
         }
         // 发送文件
 //        Log.d(TAG, "发送文件:" + filePath + " 大小:" + fileLength);
-        int ten = 0;
+        int ten;
         int p = 0;
         dataEnc.reset();
         dataEnc.setByteCmd(mCmd.FS_DATA);
@@ -951,11 +954,25 @@ public class LANService extends BaseService {
 
     // 获取自己的设备信息
     public Device getDevice() {
+        String locAddress = NetWorkUtil.getLocAddress(service);
+        String locMask = NetWorkUtil.getLocMask(service);
+
         Device device = new Device();
+
+        if (StringUtils.isEmpty(locAddress) || StringUtils.isEmpty(locMask)) {
+            locAddress = "127.0.0.1";
+            // 255.255.255.0
+            locMask = NetWorkUtil.getMaskMap(24);
+        }
+
         device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
-        device.setDevIP(NetWorkUtil.getLocAddress(service));
+        device.setDevIP(locAddress);
+        device.setDevNetMask(locMask);
         device.setDevPort(Config.FILE_SERVER_PORT);
         device.setDevMode(Device.ANDROID);
+        // 计算广播ip
+        device.setDevBrotIP(NetWorkUtil.getBroadcastAddress(locMask, locAddress));
+        //  T.s("IP:" + locAddress + " mask:" + locMask + " BrotIP:" + device.getDevBrotIP());
         return device;
     }
 
@@ -1046,7 +1063,7 @@ public class LANService extends BaseService {
 
                     } else if (cmd == mCmd.UDP_DEVICES_MESSAGE) {
                         String devIp = dataDec.getString();
-                        // 排除自己发送的数据
+                        // 排除自己发送的w数据
                         if (devIp != null && devIp.equals(mDevice.getDevIP())) {
                             return;
                         }
@@ -1101,20 +1118,24 @@ public class LANService extends BaseService {
         ViewUpdate.runThread(() -> {
             while (isRun) {
                 try {
-                    DataEnc dataEnc = new DataEnc(1024);
-                    dataEnc.setCmd(mCmd.UDP_GET_DEVICES);
-                    dataEnc.putString(mDevice.getDevIP());
-                    UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), locAddrIndex, Config.UDP_PORT);
+                    if (!StringUtils.isEmpty(mDevice.getDevBrotIP())) {
+                        DataEnc dataEnc = new DataEnc(1024);
+                        dataEnc.setCmd(mCmd.UDP_GET_DEVICES);
+                        dataEnc.putString(mDevice.getDevIP());
+                        UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), mDevice.getDevBrotIP(), Config.UDP_PORT);
+                    }
                     Thread.sleep(5000);
                     long currentTime = System.currentTimeMillis();
                     // 移除没有心跳的设备
                     for (String key : devices.keySet()) {
                         Device device = devices.get(key);
-                        long setTime = device.getSetTime();
-                        long timeOut = currentTime - setTime;
-                        // 超过20秒没有心跳的设备直接移除
-                        if (timeOut > (1000 * 20)) {
-                            devices.remove(key);
+                        if (device != null) {
+                            long setTime = device.getSetTime();
+                            long timeOut = currentTime - setTime;
+                            // 超过20秒没有心跳的设备直接移除
+                            if (timeOut > (1000 * 20)) {
+                                devices.remove(key);
+                            }
                         }
                     }
                 } catch (SocketException e) {

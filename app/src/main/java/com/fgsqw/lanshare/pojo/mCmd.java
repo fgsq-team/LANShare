@@ -26,7 +26,8 @@ public class mCmd {
     public static final int SERVICE_CLOSE_PROGRESS = 1204;     // 关闭文件进度框
     public static final int SERVICE_UPDATE_DEVICES = 1205;     // 更新设备列表
     public static final int SERVICE_ADD_MESSGAGE = 1206;       // 添加一条消息
-    public static final int SERVICE_COMPLETE_COUNT = 1207;       // 添加一条消息
+    public static final int SERVICE_COMPLETE_COUNT = 1207;     // 文件夹传输文完成数量
+    public static final int SERVICE_NETWORK_CHANGES = 1208;    // 网络变化
 
 
     public static final int FILE_IMAGE = 3001;       // 图片

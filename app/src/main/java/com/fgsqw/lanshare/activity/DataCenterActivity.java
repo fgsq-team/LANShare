@@ -76,6 +76,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         startService(lanService);
     }
 
+    public void updateIP(String ip) {
+        mainToobar.setSubtitle(ip);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
