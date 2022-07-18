@@ -22,6 +22,8 @@ import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Random;
 
@@ -164,6 +166,11 @@ public class mUtil {
             e.printStackTrace();
         }
         return appDir;
+    }
+
+
+    public static InputStream getAssetsInputStream(Context context, String name) throws IOException {
+        return context.getAssets().open(name);
     }
 
 }

@@ -32,6 +32,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     Switch start;
     TextView info;
     ServerSocket serverSocket;
+    public final static int HTTP_PORT = 8080;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,7 +47,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     public void startHttpServer() {
         ViewUpdate.runThread(() -> {
             try {
-                serverSocket = new ServerSocket(8080);
+                serverSocket = new ServerSocket(HTTP_PORT);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -88,7 +89,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
                         // 写出响应头
                         output.write(header.toString().getBytes());
                         // 写出响应体
-                        IOUtil.writeAlData(selfapkIO, output);
+                        IOUtil.writeAllData(selfapkIO, output);
                         output.flush();
                     } else {
                         byte[] body = "404 Not Found".getBytes();
@@ -128,7 +129,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
             String locAddress = NetWorkUtil.getLocAddress(this);
-            info.setText("地址:http://" + locAddress + ":8080/LANShare.apk");
+            info.setText("地址:http://" + locAddress + ":" + HTTP_PORT + "/LANShare.apk");
             startHttpServer();
         } else {
             info.setText(getString(R.string.http_share_info));
@@ -140,7 +141,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     public void onClick(View v) {
         if (start.isChecked()) {
             String locAddress = NetWorkUtil.getLocAddress(this);
-            mUtil.copyString("http://" + locAddress + ":8080/LANShare.apk", this);
+            mUtil.copyString("http://" + locAddress + HTTP_PORT + "/LANShare.apk", this);
             T.s("已复制");
         } else {
             T.s("请先开启按钮");

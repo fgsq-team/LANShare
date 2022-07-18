@@ -26,7 +26,7 @@ public class IOUtil {
         }
     }
 
-    public static long writeAlData(InputStream input, OutputStream output) throws IOException {
+    public static long writeAllData(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[2048];
         int ten = 0;
         long total = 0;
