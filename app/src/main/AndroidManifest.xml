@@ -63,6 +63,7 @@
         <activity android:name="com.fgsqw.lanshare.activity.SettingActivity" />
         <activity android:name="com.fgsqw.lanshare.activity.AboutActivity" />
         <activity android:name="com.fgsqw.lanshare.activity.HttpShareActivity" />
+        <activity android:name="com.fgsqw.lanshare.activity.web.PrivacyWebActivity" />
         <activity
             android:name="com.fgsqw.lanshare.activity.video.VideoPlayer"
             android:configChanges="keyboardHidden|orientation|screenSize"

@@ -173,4 +173,19 @@ public class mUtil {
         return context.getAssets().open(name);
     }
 
+
+    public static String readAssetsTxt(Context context, String pathName) {
+        try {
+            InputStream is = getAssetsInputStream(context, pathName);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            return new String(buffer, FileUtil.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

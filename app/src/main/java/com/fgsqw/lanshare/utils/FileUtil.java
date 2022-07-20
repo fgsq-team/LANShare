@@ -24,11 +24,36 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.List;
 
 public class FileUtil {
 
+    public static final Charset US_ASCII = Charset.forName("US-ASCII");
+    /**
+     * ISO Latin Alphabet No. 1, a.k.a. ISO-LATIN-1
+     */
+    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    /**
+     * Eight-bit UCS Transformation Format
+     */
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    /**
+     * Sixteen-bit UCS Transformation Format, big-endian byte order
+     */
+    public static final Charset UTF_16BE = Charset.forName("UTF-16BE");
+    /**
+     * Sixteen-bit UCS Transformation Format, little-endian byte order
+     */
+    public static final Charset UTF_16LE = Charset.forName("UTF-16LE");
+    /**
+     * Sixteen-bit UCS Transformation Format, byte order identified by an
+     * optional byte-order mark
+     */
+    public static final Charset UTF_16 = Charset.forName("UTF-16");
+
+    public static final String DEFAULT_TYPE = "*/*";
     public static final String[][] MIME_MapTable = {
             //{后缀名， MIME类型}
             {"3gp", "video/3gpp"},
@@ -443,7 +468,7 @@ public class FileUtil {
             {"yz1", "application/x-yz1"},
             {"z", "application/x-compress"},
             {"zac", "application/x-zaurus-zac"},
-            {"zip", "application/zip	"},
+            {"zip", "application/zip"},
     };
 
 
@@ -659,29 +684,34 @@ public class FileUtil {
         }
     }
 
+
     /**
      * 根据文件后缀名获得对应的MIME类型。
-     *
-     * @param file
-     */
-    private static String getMyMIMEType(File file) {
-
-        String type = "*/*";
-        String fName = file.getName();
-        //获取后缀名前的分隔符"."在fName中的位置。
-        int dotIndex = fName.lastIndexOf(".");
-        if (dotIndex < 0) {
-            return type;
-        }
-        /* 获取文件的后缀名 */
-        String end = fName.substring(dotIndex + 1);
-        if (end.equals("")) return type;
+     **/
+    public static String getMyMIMEType(String name) {
         //在MIME和文件类型的匹配表中找到对应的MIME类型。
         for (int i = 0; i < MIME_MapTable.length; i++) { //MIME_MapTable??在这里你一定有疑问，这个MIME_MapTable是什么？
-            if (end.equalsIgnoreCase(MIME_MapTable[i][0]))
-                type = MIME_MapTable[i][1];
+            if (name.equalsIgnoreCase(MIME_MapTable[i][0]))
+                return  MIME_MapTable[i][1];
         }
-        return type;
+        return DEFAULT_TYPE;
+    }
+
+    /**
+     * 根据文件后缀名获得对应的MIME类型。
+     **/
+    public static String getMyMIMEType(File file) {
+
+        String name = file.getName();
+        //获取后缀名前的分隔符"."在fName中的位置。
+        int dotIndex = name.lastIndexOf(".");
+        if (dotIndex < 0) {
+            return DEFAULT_TYPE;
+        }
+        /* 获取文件的后缀名 */
+        String end = name.substring(dotIndex + 1);
+        if (end.equals("")) return DEFAULT_TYPE;
+        return getMyMIMEType(end);
     }
 
 }

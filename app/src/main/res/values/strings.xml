@@ -28,6 +28,8 @@
     <string name="time_zero">00:00</string>
     <string name="select_mode">选择模式</string>
     <string name="confirm">确定</string>
+    <string name="agree">同意</string>
+    <string name="disagree">不同意</string>
     <string name="set_dev_name">设置设备名称</string>
     <string name="recv_file_path">接收文件时储存的路径</string>
     <string name="after_opening_not_dialog">开启时收到文件将不再提示</string>

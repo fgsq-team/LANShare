@@ -13,6 +13,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.config.Config;
+import com.fgsqw.lanshare.config.PreConfig;
+import com.fgsqw.lanshare.dialog.PrivacyDialog;
+import com.fgsqw.lanshare.utils.PrefUtil;
 
 
 public class HelloActivity extends AppCompatActivity {
@@ -20,13 +24,39 @@ public class HelloActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
+    PrefUtil prefUtil;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
 
+        prefUtil = new PrefUtil(this);
+        // 隐私政策
+        boolean privacyAgree = prefUtil.getBoolean(PreConfig.PRIVACY_AGREE);
+        int privacyVersion = prefUtil.getInt(PreConfig.PRIVACY_VERSION);
+        if (privacyAgree && privacyVersion == Config.PRIVACY_VERSION) {
+            init();
+        } else {
+            privacy();
+        }
 
+    }
+
+    public void privacy() {
+        PrivacyDialog privacyDialog = new PrivacyDialog(this);
+        privacyDialog.setOnClickListener(agree -> {
+            if (agree) {
+                prefUtil.saveBoolean(PreConfig.PRIVACY_AGREE, true);
+                prefUtil.saveInt(PreConfig.PRIVACY_VERSION, Config.PRIVACY_VERSION);
+                init();
+            } else {
+                prefUtil.saveBoolean(PreConfig.PRIVACY_AGREE, false);
+                finish();
+            }
+        });
+        privacyDialog.setCancelable(false);
+        privacyDialog.show();
     }
 
     public void init() {
@@ -53,7 +83,7 @@ public class HelloActivity extends AppCompatActivity {
         AlertDialog.Builder dialog = new AlertDialog.Builder(HelloActivity.this);
         dialog.setTitle("提示");
         dialog.setCancelable(false);
-        dialog.setMessage("您必须同意储存使用权限才能正常使用本软件,软件并不会上传任何数据");
+        dialog.setMessage("您需要同意储存使用权限才能正常使用本软件,软件并不会上传任何数据");
         dialog.setPositiveButton("确定", (dialogInterface, i) -> requestPermissions(PERMISSIONS_CAMERA_AND_STORAGE, 0));
         dialog.setNegativeButton("取消", (dialogInterface, i) -> finish());
         dialog.show();

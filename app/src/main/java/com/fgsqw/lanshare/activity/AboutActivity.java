@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.dialog.PrivacyDialog;
 import com.fgsqw.lanshare.utils.mUtil;
 
 public class AboutActivity extends AppCompatActivity implements View.OnClickListener {
@@ -68,12 +69,16 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
                 break;
             }
             case R.id.about_privacy: {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            /*    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                 dialog.setTitle("隐私声明");
                 dialog.setMessage("  本应用并不会收集用户任何信息并且已开源\n  当软件需要使用到权限并申请时，您有权拒绝授予权限");
                 dialog.setPositiveButton("确定", null);
                 final AlertDialog alertdialog1 = dialog.create();
-                alertdialog1.show();
+                alertdialog1.show();*/
+
+                PrivacyDialog t = new PrivacyDialog(this);
+                t.show();
+
                 break;
             }
             case R.id.about_exit_img: {

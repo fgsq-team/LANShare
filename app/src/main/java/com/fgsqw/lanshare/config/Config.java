@@ -4,9 +4,14 @@ package com.fgsqw.lanshare.config;
 public class Config {
 
     public static final int UDP_PORT = 4573;
+    // 隐私协议版本
+    public static final int PRIVACY_VERSION = 1;
+    // 接受文件服务端口号
     public static final int FILE_SERVER_PORT = 5856;
-    public static final int SCANN_TIME = 5;            // 扫描时间
-    public static String FILE_SAVE_PATH = "/sdcard/LANShare/";            // 文件保存路径
+    // 局域网设备扫描时间间隔
+    public static final int SCANN_TIME = 5;
+    // 文件保存路径
+    public static String FILE_SAVE_PATH = "/sdcard/LANShare/";
     public static String FORDER = "文件夹";
     public static final String[][] fileType =
             {
