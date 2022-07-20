@@ -49,9 +49,11 @@ public class HelloActivity extends AppCompatActivity {
             if (agree) {
                 prefUtil.saveBoolean(PreConfig.PRIVACY_AGREE, true);
                 prefUtil.saveInt(PreConfig.PRIVACY_VERSION, Config.PRIVACY_VERSION);
+                privacyDialog.dismiss();
                 init();
             } else {
                 prefUtil.saveBoolean(PreConfig.PRIVACY_AGREE, false);
+                privacyDialog.dismiss();
                 finish();
             }
         });
