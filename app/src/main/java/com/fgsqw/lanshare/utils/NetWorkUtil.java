@@ -181,7 +181,7 @@ public class NetWorkUtil {
                     if (interfaceAddress.getAddress() instanceof Inet4Address) {
                         //仅仅处理ipv4
                         //获取掩码位数，通过 calcMaskByPrefixLength 转换为字符串
-                        return calcMaskByPrefixLength(interfaceAddress.getNetworkPrefixLength());
+                        return getMaskMap(interfaceAddress.getNetworkPrefixLength());
                     }
                 }
             }
@@ -191,24 +191,20 @@ public class NetWorkUtil {
         return null;
     }
 
-    /*通过子网掩码的位数计算子网掩码*/
-    private static String calcMaskByPrefixLength(int length) {
+    //  通过子网长度获取子网掩码
+    public static String getMaskMap(int length) {
 
         int mask = 0xffffffff << (32 - length);
         int partsNum = 4;
         int bitsOfPart = 8;
         int maskParts[] = new int[partsNum];
         int selector = 0x000000ff;
-
         for (int i = 0; i < maskParts.length; i++) {
-
             int pos = maskParts.length - 1 - i;
             maskParts[pos] = (mask >> (i * bitsOfPart)) & selector;
         }
-
         String result = "";
         result = result + maskParts[0];
-
         for (int i = 1; i < maskParts.length; i++) {
             result = result + "." + maskParts[i];
         }
@@ -311,7 +307,7 @@ public class NetWorkUtil {
     }
 
 
-    // 通过子网长度获取子网掩码
+    /*// 通过子网长度获取子网掩码
     public static String getMaskMap(int maskBit) {
         if (maskBit == 1) return "128.0.0.0";
         if (maskBit == 2) return "192.0.0.0";
@@ -346,5 +342,5 @@ public class NetWorkUtil {
         if (maskBit == 31) return "255.255.255.254";
         if (maskBit == 32) return "255.255.255.255";
         return "-1";
-    }
+    }*/
 }
