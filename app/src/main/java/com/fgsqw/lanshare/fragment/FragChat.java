@@ -43,6 +43,7 @@ import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
 import com.fgsqw.lanshare.pojo.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.NetInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mSocket;
 import com.fgsqw.lanshare.service.LANService;
@@ -100,8 +101,8 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 MessageContent messageContent = (MessageContent) msg.obj;
                 addMessage(messageContent);
             } else if (msg.what == mCmd.SERVICE_NETWORK_CHANGES) {    // 网络变化
-                Device device = (Device) msg.obj;
-                dataCenterActivity.updateIP(device.getDevIP());
+                NetInfo netInfo = (NetInfo) msg.obj;
+                dataCenterActivity.updateIP(netInfo.getIp() + "  (" + netInfo.getName() + ")");
             }
         }
     };
@@ -288,7 +289,6 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
 
         }
     }
-
 
 
     @Override

@@ -1,6 +1,6 @@
 package com.fgsqw.lanshare.pojo;
 
-public class NetEntity {
+public class NetInfo {
 
     // 接口名
     String name;

@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
+import com.fgsqw.lanshare.pojo.NetInfo;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
@@ -128,8 +129,8 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-            String locAddress = NetWorkUtil.getLocAddress(this);
-            info.setText("地址:http://" + locAddress + ":" + HTTP_PORT + "/LANShare.apk");
+            NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(this);
+            info.setText("地址:http://" + oneNetWorkInfo.getIp() + ":" + HTTP_PORT + "/LANShare.apk");
             startHttpServer();
         } else {
             info.setText(getString(R.string.http_share_info));
@@ -140,8 +141,8 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     @Override
     public void onClick(View v) {
         if (start.isChecked()) {
-            String locAddress = NetWorkUtil.getLocAddress(this);
-            mUtil.copyString("http://" + locAddress + HTTP_PORT + "/LANShare.apk", this);
+            NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(this);
+            mUtil.copyString("http://" + oneNetWorkInfo.getIp() + ":" + HTTP_PORT + "/LANShare.apk", this);
             T.s("已复制");
         } else {
             T.s("请先开启按钮");

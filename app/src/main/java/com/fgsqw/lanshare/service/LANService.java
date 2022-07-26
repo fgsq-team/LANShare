@@ -26,6 +26,7 @@ import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
 import com.fgsqw.lanshare.pojo.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.NetInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mOutputStream;
 import com.fgsqw.lanshare.pojo.mSocket;
@@ -120,11 +121,6 @@ public class LANService extends BaseService {
     // 初始化数据
     public void initData() {
         mDevice = getDevice();
-        Message mMessage = Message.obtain();
-        mMessage.what = mCmd.SERVICE_NETWORK_CHANGES;
-        mMessage.obj = mDevice;
-        messageSend(mMessage);
-//        locAddrIndex = NetWorkUtil.getLocAddrIndex(mDevice.getDevIP()) + "255";
     }
 
 
@@ -132,7 +128,10 @@ public class LANService extends BaseService {
     public void receiver() {
         netWorkReceiver = new NetWorkReceiver(this);
         IntentFilter filter = new IntentFilter();
+        // 监听网络状态
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        // 监听AP状态
+        filter.addAction(NetWorkUtil.WIFI_AP_STATE_CHANGED_ACTION);
         registerReceiver(netWorkReceiver, filter);
     }
 
@@ -954,24 +953,31 @@ public class LANService extends BaseService {
 
     // 获取自己的设备信息
     public Device getDevice() {
-        String locAddress = NetWorkUtil.getLocAddress(service);
-        String locMask = NetWorkUtil.getLocMask(service);
-
         Device device = new Device();
+        device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
 
-        if (StringUtils.isEmpty(locAddress) || StringUtils.isEmpty(locMask)) {
-            locAddress = "127.0.0.1";
-            // 255.255.255.0
-            locMask = NetWorkUtil.getMaskMap(24);
+        NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(service);
+
+        if (StringUtils.isEmpty(oneNetWorkInfo.getIp())
+                || StringUtils.isEmpty(oneNetWorkInfo.getMask())) {
+            device.setDevIP("127.0.0.1");
+            device.setDevNetMask(NetWorkUtil.getMaskMap(24));
+            device.setDevBrotIP(NetWorkUtil.getBroadcastAddress(24, "127.0.0.1"));
+        } else {
+            device.setDevIP(oneNetWorkInfo.getIp());
+            device.setDevNetMask(oneNetWorkInfo.getMask());
+            device.setDevBrotIP(oneNetWorkInfo.getBrodIp());
         }
 
-        device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
-        device.setDevIP(locAddress);
-        device.setDevNetMask(locMask);
         device.setDevPort(Config.FILE_SERVER_PORT);
         device.setDevMode(Device.ANDROID);
+
+        Message mMessage = Message.obtain();
+        mMessage.what = mCmd.SERVICE_NETWORK_CHANGES;
+        mMessage.obj = oneNetWorkInfo;
+        messageSend(mMessage);
+
         // 计算广播ip
-        device.setDevBrotIP(NetWorkUtil.getBroadcastAddress(locMask, locAddress));
         //  T.s("IP:" + locAddress + " mask:" + locMask + " BrotIP:" + device.getDevBrotIP());
         return device;
     }
