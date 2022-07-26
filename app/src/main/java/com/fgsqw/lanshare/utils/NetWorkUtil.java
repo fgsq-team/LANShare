@@ -25,9 +25,18 @@ public class NetWorkUtil {
     public static final String ETH_0 = "eth0";
     // wifi网卡
     public static final String WLAN_0 = "wlan0";
+    // 热点网卡
+    public static final String WLAN_1 = "wlan1";
 
-    // 获取本机IP地址
+    // 获取本机IP地址,如果有开启热点默认会使用热点的ip
     public static String getLocAddress(Context context) {
+
+        // 如果有开启热点默认会使用热点的ip
+        String ip = getIP(WLAN_1);
+        if (!StringUtils.isEmpty(ip)) {
+            return ip;
+        }
+
         NetworkInfo info = ((ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
@@ -145,6 +154,7 @@ public class NetWorkUtil {
                     // 判断是否时我们获取的网口
                     continue;
                 }
+                Enumeration<NetworkInterface> subInterfaces = networkInterface.getSubInterfaces();
                 Enumeration<InetAddress> enInetAddress = networkInterface.getInetAddresses();   //getInetAddresses 方法返回绑定到该网卡的所有的 IP 地址。
                 while (enInetAddress.hasMoreElements()) {
                     InetAddress inetAddress = enInetAddress.nextElement();
@@ -182,6 +192,36 @@ public class NetWorkUtil {
                         //仅仅处理ipv4
                         //获取掩码位数，通过 calcMaskByPrefixLength 转换为字符串
                         return getMaskMap(interfaceAddress.getNetworkPrefixLength());
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // 获取接口广播ip
+    public static String getBrodIp(String interfaceName) {
+        try {
+            //获取本机所有的网络接口
+            Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
+            //判断 Enumeration 对象中是否还有数据
+            while (networkInterfaceEnumeration.hasMoreElements()) {
+                //获取 Enumeration 对象中的下一个数据
+                NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
+                if (!networkInterface.isUp()) {
+                    // 判断网口是否在使用
+                    continue;
+                }
+                if (!interfaceName.equals(networkInterface.getDisplayName())) {
+                    // 判断是否时我们获取的网口
+                    continue;
+                }
+                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                    if (interfaceAddress.getAddress() instanceof Inet4Address) {
+                        //仅仅处理ipv4
+                        return interfaceAddress.getBroadcast().getHostAddress();
                     }
                 }
             }
