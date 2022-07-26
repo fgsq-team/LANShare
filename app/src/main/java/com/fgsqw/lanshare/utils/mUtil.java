@@ -31,7 +31,7 @@ public class mUtil {
 
 
     public static void copyString(String content, Context context) {
-// 得到剪贴板管理器
+        // 得到剪贴板管理器
         ClipboardManager cmb = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         cmb.setText(content.trim());
     }
@@ -166,26 +166,6 @@ public class mUtil {
             e.printStackTrace();
         }
         return appDir;
-    }
-
-
-    public static InputStream getAssetsInputStream(Context context, String name) throws IOException {
-        return context.getAssets().open(name);
-    }
-
-
-    public static String readAssetsTxt(Context context, String pathName) {
-        try {
-            InputStream is = getAssetsInputStream(context, pathName);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            return new String(buffer, FileUtil.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }
