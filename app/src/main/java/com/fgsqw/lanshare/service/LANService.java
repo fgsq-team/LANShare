@@ -94,9 +94,15 @@ public class LANService extends BaseService {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    WifiManager.MulticastLock multicastLock;
+
     @Override
     public void onCreate() {
+        WifiManager mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        multicastLock = mWifiManager.createMulticastLock("multicastLock");
+//        multicastLock.setReferenceCounted(false);
         super.onCreate();
+
         service = this;
         // 自定义配置文件工具类
         prefUtil = new PrefUtil(this);
@@ -1018,12 +1024,8 @@ public class LANService extends BaseService {
     public void runRecive() {
         new Thread(() -> {
             byte[] buf = new byte[4096];
+            byte[] newBuf = new byte[4096];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
-            // 某些设备UDP不能接收广播数据需要使用下面这几行代码才能正常使用
-            WifiManager mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            WifiManager.MulticastLock multicastLock = mWifiManager.createMulticastLock("multicastLock");
-            multicastLock.setReferenceCounted(false);
-            multicastLock.acquire();
 
             try {
                 ipGetSocket = new DatagramSocket(null);
@@ -1036,15 +1038,22 @@ public class LANService extends BaseService {
 
             while (true) {
                 try {
+                    multicastLock.acquire();
                     ipGetSocket.receive(packet);
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
+                } finally {
+                    multicastLock.release();
                 }
-                byte[] clone = buf.clone();
+
+                byte[] data = packet.getData();
                 int len = packet.getLength();
+
+                System.arraycopy(data, 0, newBuf, 0, len);
+
                 ViewUpdate.runThread(() -> {
-                    DataDec dataDec = new DataDec(clone, len);
+                    DataDec dataDec = new DataDec(newBuf, len);
                     int cmd = dataDec.getCmd();
                     if (cmd == mCmd.UDP_GET_DEVICES) {
                         String devIp = dataDec.getString();

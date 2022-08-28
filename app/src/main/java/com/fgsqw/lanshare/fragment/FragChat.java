@@ -575,6 +575,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
      * 删除所有消息
      */
     public void deleteAllMessage() {
+        messsageDButil.delListMessage(messageContentList);
         messageContentList.clear();
         chatAdabper.refresh();
     }

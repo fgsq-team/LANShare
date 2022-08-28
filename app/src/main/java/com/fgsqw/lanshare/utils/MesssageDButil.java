@@ -63,6 +63,12 @@ public class MesssageDButil {
         db.execSQL(sql, new Object[]{messageContent.getId()});
     }
 
+    public void delListMessage(List<MessageContent> messageContent) {
+        for (MessageContent content : messageContent) {
+            delMessage(content);
+        }
+    }
+
 
     public List<MessageContent> queryMessage() {
 
