@@ -1,11 +1,8 @@
 package com.fgsqw.lanshare.fragment;
 
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +30,7 @@ import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.activity.preview.ReviewImages;
 import com.fgsqw.lanshare.activity.video.VideoPlayer;
 import com.fgsqw.lanshare.base.BaseFragment;
+import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
 import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
@@ -49,12 +47,15 @@ import com.fgsqw.lanshare.pojo.mSocket;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileUtil;
+import com.fgsqw.lanshare.utils.MesssageDButil;
 import com.fgsqw.lanshare.utils.PrefUtil;
+import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.mUtil;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -75,10 +76,13 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
     private final List<MessageContent> messageContentList = new ArrayList<>();
     private Device selectedDevice;
     private PrefUtil prefUtil;
+    private MesssageDButil messsageDButil;
+
 
     @Override
     public void onAttach(Context context) {
         dataCenterActivity = (DataCenterActivity) context;
+        messsageDButil = new MesssageDButil(context);
         super.onAttach(context);
     }
 
@@ -87,7 +91,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
     private final Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == mCmd.SERVICE_IF_RECIVE_FILES) {   // 是否接收文件弹窗
+            if (msg.what == mCmd.SERVICE_IF_RECIVE_FILES) {          // 是否接收文件弹窗
                 showIsRecyDialog(msg);
             } else if (msg.what == mCmd.SERVICE_SHOW_PROGRESS) {     // 新增一些数据
                 addListData(msg);
@@ -99,7 +103,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 updateLocalItemInfo(msg);
             } else if (msg.what == mCmd.SERVICE_ADD_MESSGAGE) {      // 新增消息
                 MessageContent messageContent = (MessageContent) msg.obj;
-                addMessage(messageContent);
+                addMessage(messageContent, true);
             } else if (msg.what == mCmd.SERVICE_NETWORK_CHANGES) {    // 网络变化
                 NetInfo netInfo = (NetInfo) msg.obj;
                 dataCenterActivity.updateIP(netInfo.getIp() + "  (" + netInfo.getName() + ")");
@@ -110,42 +114,14 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void updateLocalItemInfo(Message message) {
-        MessageFileContent fileContent = (MessageFileContent) message.obj;
-        // 获取数据在列表中的下标
-        int dataPosition = chatAdabper.getDataPosition(fileContent);
-        if (fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_RIGHT) {
-            // 获取视图并更新视图数据
-            FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
-            if (viewHolder != null) {
-                viewHolder.progressBar.setProgress(fileContent.getProgress());
-                if (fileContent.getSuccess() != null) {
-                    viewHolder.progressBar.setVisibility(View.GONE);
-                    viewHolder.stateTv.setVisibility(View.VISIBLE);
-                    viewHolder.stateTv.setText(fileContent.getStateMessage());
-                    if (!fileContent.getSuccess()) {
-                        viewHolder.stateTv.setTextColor(Color.RED);
-                    } else {
-                        viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
-                    }
-                } else {
-                    viewHolder.progressBar.setVisibility(View.VISIBLE);
-                    viewHolder.stateTv.setVisibility(View.GONE);
-                    viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
-                }
-            } else {
-                chatAdabper.notifyItemChanged(dataPosition);
-            }
-        } else {
-            chatAdabper.notifyItemChanged(dataPosition);
-        }
+        MessageContent messageContent = (MessageContent) message.obj;
+        updateMessage(messageContent, true);
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void addListData(Message message) {
-        List<MessageFileContent> messageContents = (List<MessageFileContent>) message.obj;
-        messageContentList.addAll(messageContents);
-        chatAdabper.notifyDataSetChanged();
-        recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
+        List<MessageContent> messageContents = (List<MessageContent>) message.obj;
+        addListMessage(messageContents, true);
     }
 
     public void updateLocalItemFolderCount(Message message) {
@@ -199,6 +175,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
             view = inflater.inflate(R.layout.fragment_chat, container, false);
             initView();
             initList();
+            initData();
         }
 
         mInputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -248,13 +225,18 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         });
     }
 
+    public void initData() {
+        List<MessageContent> messageContents = messsageDButil.queryMessage();
+        addListMessage(messageContents, false);
+    }
+
 
     @Override
     public void onItemClick(MessageContent messageContent, int position) {
         boolean POEN_MEDIA_PLAYER = prefUtil.getBoolean(PreConfig.POEN_MEDIA_PLAYER, true);
         if (messageContent instanceof MessageFileContent) {
             MessageFileContent fileContent = (MessageFileContent) messageContent;
-            if (fileContent.getSuccess() != null && fileContent.getSuccess()) {
+            if (fileContent.getStatus() == MessageContent.SUCCESS) {
 
                 if (POEN_MEDIA_PLAYER && messageContent instanceof MessageMediaContent) {
                     MessageMediaContent mediaContent = (MessageMediaContent) fileContent;
@@ -267,7 +249,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     if (mediaContent.isVideo()) {
                         VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                     } else {
-                        List<MediaInfo> mediaInfos = Arrays.asList(mediaInfo);
+                        List<MediaInfo> mediaInfos = Collections.singletonList(mediaInfo);
                         ReviewImages.openActivity(getActivity(), mediaInfos,
                                 mediaInfos, false, 0, 1);
                     }
@@ -276,7 +258,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     if (messageContent instanceof MessageFolderContent) {
                         T.s("暂不支持打开文件夹,清在件管理器中查看");
                     } else {
-                        if (fileContent.getSuccess() != null && fileContent.getSuccess()) {
+                        if (fileContent.getStatus() == MessageContent.SUCCESS) {
                             FileUtil.openFile(dataCenterActivity, new File(fileContent.getPath()));
                         }
                     }
@@ -299,21 +281,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         // 弹出式菜单的菜单项点击事件
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.menu_delete) {
-
-                if (messageContent instanceof MessageFileContent) {
-                    MessageFileContent fileContent = (MessageFileContent) messageContent;
-                    mSocket socket = fileContent.getSocket();
-                    if (fileContent.isLeft()) {
-                        LANService.service.sendCloseCmd(fileContent, socket.getOut());
-                    } else {
-                        socket.mClose();
-                    }
-                }
-                // 移除数据
-                messageContentList.remove(position);
-//                chatAdabper.notifyItemRemoved(position);
-                // 更新列表
-                chatAdabper.refresh();
+                delMessage(messageContent, true);
             } else if (item.getItemId() == R.id.menu_cppy) {
                 // 复制文本
                 mUtil.copyString(messageContent.getContent(), getContext());
@@ -332,11 +300,120 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         return handler;
     }
 
-    public void addMessage(MessageContent messageContent) {
+//
+//    @RequiresApi(api = Build.VERSION_CODES.M)
+//    public void updateLocalItemInfo(Message message) {
+//        MessageFileContent fileContent = (MessageFileContent) message.obj;
+//        // 获取数据在列表中的下标
+//        int dataPosition = chatAdabper.getDataPosition(fileContent);
+//        if (fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_RIGHT) {
+//            // 获取视图并更新视图数据
+//            FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
+//            if (viewHolder != null) {
+//                viewHolder.progressBar.setProgress(fileContent.getProgress());
+//
+//                if (fileContent.getSuccess() != null) {
+//                    viewHolder.progressBar.setVisibility(View.GONE);
+//                    viewHolder.stateTv.setVisibility(View.VISIBLE);
+//                    viewHolder.stateTv.setText(fileContent.getStateMessage());
+//                    if (!fileContent.getSuccess()) {
+//                        viewHolder.stateTv.setTextColor(Color.RED);
+//                    } else {
+//                        viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
+//                    }
+//                } else {
+//                    viewHolder.progressBar.setVisibility(View.VISIBLE);
+//                    viewHolder.stateTv.setVisibility(View.GONE);
+//                    viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
+//                }
+//            } else {
+//                chatAdabper.notifyItemChanged(dataPosition);
+//            }
+//        } else {
+//            chatAdabper.notifyItemChanged(dataPosition);
+//        }
+//    }
+
+    @SuppressWarnings("all")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void updateMessage(MessageContent messageContent, boolean save) {
+        if (save) {
+            messsageDButil.updateMessage(messageContent);
+        }
+        MessageFileContent fileContent = (MessageFileContent) messageContent;
+        // 获取数据在列表中的下标
+        int dataPosition = chatAdabper.getDataPosition(messageContent);
+        if (fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_RIGHT) {
+            // 获取视图并更新视图数据
+            FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
+            if (viewHolder != null) {
+                viewHolder.progressBar.setProgress(fileContent.getProgress());
+
+                if (fileContent.existStatus(MessageContent.IN)) {
+                    viewHolder.progressBar.setVisibility(View.VISIBLE);
+                    viewHolder.stateTv.setVisibility(View.GONE);
+                    viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
+                } else {
+                    viewHolder.progressBar.setVisibility(View.GONE);
+                    viewHolder.stateTv.setVisibility(View.VISIBLE);
+                    viewHolder.stateTv.setText(fileContent.getStateMessage());
+                    if (fileContent.existStatus(MessageContent.SUCCESS)) {
+                        viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
+                    } else if (fileContent.existStatus(MessageContent.ERROR)) {
+                        viewHolder.stateTv.setTextColor(Color.RED);
+                    }
+                }
+
+            } else {
+                chatAdabper.notifyItemChanged(dataPosition);
+            }
+        } else {
+            chatAdabper.notifyItemChanged(dataPosition);
+        }
+    }
+
+    public void addMessage(MessageContent messageContent, boolean save) {
+        // 保存消息内容
+        if (Config.SAVE_MESSAGE && save) {
+            messsageDButil.addMessage(messageContent);
+        }
         messageContentList.add(messageContent);
         chatAdabper.refresh();
         recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
     }
+
+    public void addListMessage(List<MessageContent> messageContent, boolean save) {
+        // 保存消息内容
+        if (Config.SAVE_MESSAGE && save) {
+            messsageDButil.addListMessage(messageContent);
+        }
+        messageContentList.addAll(messageContent);
+        chatAdabper.notifyDataSetChanged();
+        recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
+    }
+
+    public void delMessage(MessageContent messageContent, boolean save) {
+        if (save) {
+            messsageDButil.delMessage(messageContent);
+        }
+        if (messageContent instanceof MessageFileContent) {
+            MessageFileContent fileContent = (MessageFileContent) messageContent;
+            mSocket socket = fileContent.getSocket();
+            if (socket != null) {
+                if (fileContent.isLeft()) {
+                    LANService.service.sendCloseCmd(fileContent, socket.getOut());
+                } else {
+                    socket.mClose();
+                }
+            }
+        }
+        // 移除数据
+        messageContentList.remove(messageContent);
+//                chatAdabper.notifyItemRemoved(position);
+        // 更新列表
+        chatAdabper.refresh();
+    }
+
 
     @Override
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
@@ -361,12 +438,13 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     return;
                 }
                 MessageContent messageContent = new MessageContent();
+                messageContent.setId(StringUtils.getUUID());
                 messageContent.setLeft(false);
                 messageContent.setContent(message);
                 messageContent.setUserName(LANService.service.getDevName());
                 messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
                 LANService.service.broadcastMessage(selectedDevice, message, false);
-                addMessage(messageContent);
+                addMessage(messageContent, true);
                 editContent.setText("");
                 break;
             }
@@ -424,16 +502,113 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     return false;
                 }
                 MessageContent messageContent = new MessageContent();
+                messageContent.setId(StringUtils.getUUID());
                 messageContent.setLeft(false);
                 messageContent.setContent(message);
                 messageContent.setUserName(LANService.service.getDevName());
                 messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
                 LANService.service.broadcastMessage(selectedDevice, message, true);
-                addMessage(messageContent);
+                addMessage(messageContent, true);
                 editContent.setText("");
                 break;
             }
         }
         return true;
     }
+
+    /**
+     * 删除所有文件不存在的消息
+     */
+    private void deleteFileMessageByNotExist() {
+        Iterator<MessageContent> iterator = messageContentList.iterator();
+        while (iterator.hasNext()) {
+            MessageContent next = iterator.next();
+            if (next instanceof MessageFileContent) {
+                MessageFileContent messageFileContent = (MessageFileContent) next;
+                if (messageFileContent.existStatus(MessageContent.SUCCESS)) {
+                    File file = new File(messageFileContent.getPath());
+                    if (!file.exists()) {
+                        messsageDButil.delMessage(next);
+                        iterator.remove();
+                    }
+                } else if (messageFileContent.existStatus(MessageContent.FILE_NOT_EXIST)) {
+                    messsageDButil.delMessage(next);
+                    iterator.remove();
+                }
+            }
+        }
+
+        chatAdabper.refresh();
+    }
+
+    /**
+     * 删除所有文本消息
+     */
+    public void deleteAllTextMessage() {
+        Iterator<MessageContent> iterator = messageContentList.iterator();
+        while (iterator.hasNext()) {
+            MessageContent next = iterator.next();
+            if (!(next instanceof MessageFileContent)) {
+                messsageDButil.delMessage(next);
+                iterator.remove();
+            }
+        }
+        chatAdabper.refresh();
+    }
+
+    /**
+     * 删除所有文件消息
+     */
+    public void deleteFileMessage() {
+        Iterator<MessageContent> iterator = messageContentList.iterator();
+        while (iterator.hasNext()) {
+            MessageContent next = iterator.next();
+            if (next instanceof MessageFileContent) {
+                messsageDButil.delMessage(next);
+                iterator.remove();
+            }
+        }
+        chatAdabper.refresh();
+    }
+
+    /**
+     * 删除所有消息
+     */
+    public void deleteAllMessage() {
+        messageContentList.clear();
+        chatAdabper.refresh();
+    }
+
+
+    public void messageDelete() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("请选择操作");
+        String[] items = new String[]{"清空所有消息", "清空所有文本消息", "清空所有文件消息", "清空所有文件已被删除的消息"};
+
+        // 绑定选项和点击事件
+        builder.setItems(items, (arg0, arg1) -> {
+            switch (arg1) {
+                case 0: {
+                    deleteAllMessage();
+                    break;
+                }
+                case 1: {
+                    deleteAllTextMessage();
+                    break;
+                }
+                case 2: {
+                    deleteFileMessage();
+                    break;
+                }
+                case 3: {
+                    deleteFileMessageByNotExist();
+                    break;
+                }
+
+            }
+            arg0.dismiss();
+        });
+        builder.show();
+    }
+
 }

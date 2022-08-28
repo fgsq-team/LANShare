@@ -3,6 +3,7 @@ package com.fgsqw.lanshare.activity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Messenger;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -90,21 +91,21 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         PrefUtil prefUtil = new PrefUtil(this);
         String filePath = prefUtil.getString(PreConfig.FILE_PATH);
         if (filePath.isEmpty()) {
-            prefUtil.saveString(PreConfig.FILE_PATH, Config.FILE_SAVE_PATH);
-            filePath = Config.FILE_SAVE_PATH;
+            prefUtil.saveString(PreConfig.FILE_PATH, Config.DEFAULT_FILE_SAVE_PATH);
+            filePath = Config.DEFAULT_FILE_SAVE_PATH;
         }
-        if (filePath.charAt(filePath.length() - 1) != '/') {
-            filePath += "/";
-        }
+
         String userName = prefUtil.getString(PreConfig.USER_NAME);
         if (userName.isEmpty()) {
             prefUtil.saveString(PreConfig.USER_NAME, android.os.Build.MODEL);
         }
-        Config.FILE_SAVE_PATH = filePath;
+        Config.FILE_SAVE_PATH = new File(Environment.getExternalStorageDirectory(), filePath).getPath() + File.separator;
+
         File file = new File(Config.FILE_SAVE_PATH);
         if (!file.exists()) {
             file.mkdirs();
         }
+        Config.SAVE_MESSAGE = prefUtil.getBoolean(PreConfig.SAVE_MESSAGE, true);
     }
 
     public void initView() {
@@ -294,6 +295,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 break;
             case R.id.menu_http_share:
                 startActivity(new Intent(this, HttpShareActivity.class));
+                break;
+            case R.id.menu_delete_message:
+                if (fragChat != null) {
+                    fragChat.messageDelete();
+                }
                 break;
            /* case R.id.menu_camera_send:
                 startActivity(new Intent(this, MainActivity.class));

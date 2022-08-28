@@ -1,6 +1,8 @@
 package com.fgsqw.lanshare.pojo;
 
-public class MediaInfo extends FileInfo {
+import java.io.Serializable;
+
+public class MediaInfo extends FileInfo implements Serializable {
 
     boolean isGif;
     boolean isVideo;

@@ -23,6 +23,13 @@
     <string name="all_device">所有设备</string>
     <string name="copy_text">复制文本</string>
     <string name="http_share">通过Web分享LANShare</string>
+
+    <string name="delete_message">清理消息</string>
+    <string name="delete_all_message">清空所有消息</string>
+    <string name="delete_all_message_text">清空所有文本消息</string>
+    <string name="delete_all_message_file">清空所有文件</string>
+    <string name="delete_all_message_is_not_exist_file">清空所有不存在的文件</string>
+
     <string name="http_share_info">开启按钮启动Web分享服务\n开启后可点击此处复制链接</string>
     <string name="test_text">test text</string>
     <string name="time_zero">00:00</string>
@@ -38,4 +45,9 @@
     <string name="set_recv_file_path">设置文件储存路径</string>
     <string name="media_default_model_select">媒体默认为选择模式</string>
     <string name="after_opening_chick_media_only_select">开启后点击媒体将只会选中</string>
+
+    <string name="save_message">保存消息记录</string>
+    <string name="save_message_detail">开启后会保存所有消息内容</string>
+
+
 </resources>

@@ -12,6 +12,8 @@ public class PreConfig {
     public static String NOT_RECV_DIALOG = "not_recv_dialog";
     // 选择媒体模式
     public static String MEDIA_SELECT_MODEL = "media_select_model";
+    // 保存消息
+    public static String SAVE_MESSAGE = "save_message";
     // 隐私政策同意状态
     public static String PRIVACY_AGREE = "privacy_agree";
     // 隐私政策版本

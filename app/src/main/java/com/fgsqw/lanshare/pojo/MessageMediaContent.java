@@ -2,7 +2,9 @@ package com.fgsqw.lanshare.pojo;
 
 import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 
-public class MessageMediaContent extends MessageFileContent {
+import java.io.Serializable;
+
+public class MessageMediaContent extends MessageFileContent implements Serializable {
 
     private boolean isVideo;
     private String videoTime;

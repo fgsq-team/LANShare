@@ -2,12 +2,13 @@ package com.fgsqw.lanshare.pojo;
 
 import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 
-public class MessageFileContent extends MessageContent {
+import java.io.Serializable;
+
+public class MessageFileContent extends MessageContent implements Serializable {
     private int progress;
     private String path;
-    private Boolean success;
     private long length;
-    private mSocket socket;
+    private transient mSocket socket;
     private int index;
     private String stateMessage;
 
@@ -15,9 +16,6 @@ public class MessageFileContent extends MessageContent {
         return isLeft() ? ChatAdabper.TYPE_FILE_MSG_LEFT : ChatAdabper.TYPE_FILE_MSG_RIGHT;
     }
 
-    public Boolean getSuccess() {
-        return success;
-    }
 
     public String getStateMessage() {
         return stateMessage;
@@ -25,10 +23,6 @@ public class MessageFileContent extends MessageContent {
 
     public void setStateMessage(String stateMessage) {
         this.stateMessage = stateMessage;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
     }
 
     public mSocket getSocket() {

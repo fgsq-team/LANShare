@@ -235,6 +235,8 @@ public class LANService extends BaseService {
 
                 if (fileType == mCmd.FILE_IMAGE || fileType == mCmd.FILE_VIEDO) {
                     MessageMediaContent mediaContent = new MessageMediaContent();
+                    mediaContent.setId(StringUtils.getUUID());
+                    mediaContent.setStatus(MessageContent.IN);
                     mediaContent.setContent(fileName);
                     mediaContent.setLength(fileSize);
                     mediaContent.setSocket(new mSocket(input, out));
@@ -256,6 +258,8 @@ public class LANService extends BaseService {
                     int fileCount = dataDec.getInt();
 
                     MessageFolderContent folderContent = new MessageFolderContent();
+                    folderContent.setId(StringUtils.getUUID());
+                    folderContent.setStatus(MessageContent.IN);
                     folderContent.setContent(fileName);
                     folderContent.setLength(fileSize);
                     folderContent.setSocket(new mSocket(input, out));
@@ -273,6 +277,8 @@ public class LANService extends BaseService {
                     fileContentList.add(folderContent);
                 } else {
                     MessageFileContent fileContent = new MessageFileContent();
+                    fileContent.setId(StringUtils.getUUID());
+                    fileContent.setStatus(MessageContent.IN);
                     fileContent.setContent(fileName);
                     fileContent.setLength(fileSize);
                     fileContent.setSocket(new mSocket(input, out));
@@ -379,6 +385,7 @@ public class LANService extends BaseService {
                     if (progeress != p) {
                         // 更新视图进度条
                         fileContent.setProgress(progeress);
+
                         Message mMessage = Message.obtain();
                         mMessage.what = mCmd.SERVICE_PROGRESS;
                         mMessage.obj = fileContent;
@@ -524,11 +531,11 @@ public class LANService extends BaseService {
 
                     // 接收成功设置文件路径 失败则删除文件
                     if (totalRecv != fileContent.getLength()) {
-                        fileContent.setSuccess(false);
+                        fileContent.setStatus(MessageContent.ERROR);
                         fileContent.setStateMessage("接收失败");
                     } else {
                         fileContent.setPath(file.getPath());
-                        fileContent.setSuccess(true);
+                        fileContent.setStatus(MessageContent.SUCCESS);
                         fileContent.setStateMessage("接收成功");
                     }
 
@@ -689,6 +696,7 @@ public class LANService extends BaseService {
                         String videoTime = ((MediaInfo) fileInfo).getVideoTime();
                         dataEnc.putString(videoTime == null ? "" : videoTime);
 
+                        mediaContent.setId(StringUtils.getUUID());
                         mediaContent.setContent(fileInfo.getName());
                         mediaContent.setLength(fileInfo.getLength());
                         mediaContent.setPath(fileInfo.getPath());
@@ -723,6 +731,7 @@ public class LANService extends BaseService {
                         dataEnc.putInt(fileInfos.size());
                         // 创建Message实体类
                         MessageFolderContent folderContent = new MessageFolderContent();
+                        folderContent.setId(StringUtils.getUUID());
                         folderContent.setFileCount(fileInfos.size());
                         folderContent.setLength(totalSize);
                         folderContent.setFileInfoList(fileInfos);
@@ -748,6 +757,7 @@ public class LANService extends BaseService {
                         dataEnc.putString("");
 
                         MessageFileContent fileContent = new MessageFileContent();
+                        fileContent.setId(StringUtils.getUUID());
                         fileContent.setContent(fileInfo.getName());
                         fileContent.setLength(fileInfo.getLength());
                         fileContent.setPath(fileInfo.getPath());
@@ -814,7 +824,6 @@ public class LANService extends BaseService {
                             break;
                         }
 
-
                         // 文件接收
                         long thatSend = baseSend(
                                 fileContent,
@@ -855,10 +864,10 @@ public class LANService extends BaseService {
                 }
 
                 if (totalSend != fileContent.getLength()) {
-                    fileContent.setSuccess(false);
+                    fileContent.setStatus(MessageContent.ERROR);
                     fileContent.setStateMessage("发送失败");
                 } else {
-                    fileContent.setSuccess(true);
+                    fileContent.setStatus(MessageContent.SUCCESS);
                     fileContent.setStateMessage("发送成功");
                 }
 
@@ -890,6 +899,7 @@ public class LANService extends BaseService {
         long totalSend = mTotalSend;
         long thatSend = 0;
         try {
+            folderContent.setStatus(MessageContent.IN);
             // 读取时偏移掉头的位置
             while ((ten = fileIs.read(sendBuffer, DataEnc.getHeaderSize(), sendBuffer.length - DataEnc.getHeaderSize())) != -1) {
                 dataEnc.setDataIndex(ten);
@@ -1077,6 +1087,8 @@ public class LANService extends BaseService {
                         String message = dataDec.getString();
 
                         MessageContent content = new MessageContent();
+                        content.setId(StringUtils.getUUID());
+                        content.setStatus(MessageContent.SUCCESS);
                         content.setUserName(devName);
                         content.setContent(message);
                         content.setLeft(true);
@@ -1094,6 +1106,8 @@ public class LANService extends BaseService {
                         String message = dataDec.getString();
 
                         MessageContent content = new MessageContent();
+                        content.setId(StringUtils.getUUID());
+                        content.setStatus(MessageContent.SUCCESS);
                         content.setUserName(devName);
                         content.setContent(message);
                         content.setLeft(true);

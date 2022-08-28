@@ -1,8 +1,9 @@
 package com.fgsqw.lanshare.pojo;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MessageFolderContent extends MessageFileContent {
+public class MessageFolderContent extends MessageFileContent implements Serializable {
 
     // 文件数量
     private int fileCount;

@@ -17,12 +17,14 @@ import android.util.Log;
 
 import com.fgsqw.lanshare.toast.T;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
@@ -692,7 +694,7 @@ public class FileUtil {
         //在MIME和文件类型的匹配表中找到对应的MIME类型。
         for (int i = 0; i < MIME_MapTable.length; i++) { //MIME_MapTable??在这里你一定有疑问，这个MIME_MapTable是什么？
             if (name.equalsIgnoreCase(MIME_MapTable[i][0]))
-                return  MIME_MapTable[i][1];
+                return MIME_MapTable[i][1];
         }
         return DEFAULT_TYPE;
     }
@@ -713,5 +715,17 @@ public class FileUtil {
         if (end.equals("")) return DEFAULT_TYPE;
         return getMyMIMEType(end);
     }
+
+    public static <E> byte[] objectToBytes(E obj) throws IOException {
+        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(arrayOutputStream);
+        objectOutputStream.writeObject(obj);
+        objectOutputStream.flush();
+        byte[] data = arrayOutputStream.toByteArray();
+        objectOutputStream.close();
+        arrayOutputStream.close();
+        return data;
+    }
+
 
 }

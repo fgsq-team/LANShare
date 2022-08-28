@@ -3,9 +3,10 @@ package com.fgsqw.lanshare.pojo;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class FileInfo {
+public class FileInfo implements Serializable {
     private String name;
     private String path;
     private long length;

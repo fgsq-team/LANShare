@@ -11,7 +11,11 @@ public class Config {
     // 局域网设备扫描时间间隔
     public static final int SCANN_TIME = 5;
     // 文件保存路径
-    public static String FILE_SAVE_PATH = "/sdcard/LANShare/";
+    public static final String DEFAULT_FILE_SAVE_PATH = "/LANShare/";
+    public static String FILE_SAVE_PATH = "/LANShare/";
+    // 是否保存消息
+    public static boolean SAVE_MESSAGE = true;
+
     public static String FORDER = "文件夹";
     public static final String[][] fileType =
             {

@@ -108,20 +108,22 @@ public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 Glide.with(mContext).load(R.drawable.rc_file_blue_icon)
                         .apply(options)
                         .into(fileMsgHolder.fileTypeIcon);
-            }else {
+            } else {
                 Glide.with(mContext).load(R.drawable.rc_file_icon_file)
                         .apply(options)
                         .into(fileMsgHolder.fileTypeIcon);
             }
 
-            fileMsgHolder.progressBar.setVisibility(messageFileContent.getSuccess() != null ? View.GONE : View.VISIBLE);
-            fileMsgHolder.stateTv.setVisibility(messageFileContent.getSuccess() != null ? View.VISIBLE : View.GONE);
+            boolean status = !messageFileContent.existStatus(MessageContent.IN);
 
-            if (messageFileContent.getSuccess() != null) {
+            fileMsgHolder.progressBar.setVisibility(status ? View.GONE : View.VISIBLE);
+            fileMsgHolder.stateTv.setVisibility(status ? View.VISIBLE : View.GONE);
+
+            if (status) {
                 fileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
-                if (messageFileContent.getSuccess()) {
+                if (messageFileContent.existStatus(MessageContent.SUCCESS)) {
                     fileMsgHolder.stateTv.setTextColor(stateTvColor);
-                } else {
+                } else if (messageFileContent.existStatus(MessageContent.ERROR)) {
                     fileMsgHolder.stateTv.setTextColor(Color.RED);
                 }
             }
@@ -141,16 +143,18 @@ public class ChatAdabper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             // 判断文件传输是否已完成
-            if (mediaContent.getSuccess() != null) {
+            if (mediaContent.existStatus(MessageContent.SUCCESS, MessageContent.ERROR)) {
                 mediaMsgHloder.progressBar.setVisibility(View.GONE);
                 mediaMsgHloder.stateTv.setVisibility(View.VISIBLE);
 
-                mediaMsgHloder.mediaInfo.setVisibility(mediaContent.getSuccess() ? View.GONE : View.VISIBLE);
-                mediaMsgHloder.stateTv.setTextColor(mediaContent.getSuccess() ? stateTvColor : Color.RED);
+                boolean statusSuccess = mediaContent.existStatus(MessageContent.SUCCESS);
+
+                mediaMsgHloder.mediaInfo.setVisibility(statusSuccess ? View.GONE : View.VISIBLE);
+                mediaMsgHloder.stateTv.setTextColor(statusSuccess ? stateTvColor : Color.RED);
 
                 mediaMsgHloder.stateTv.setText(mediaContent.getStateMessage());
 
-                Glide.with(mContext).load(mediaContent.getSuccess() ? mediaContent.getPath() : ((Drawable) null))
+                Glide.with(mContext).load(statusSuccess ? mediaContent.getPath() : ((Drawable) null))
                         .apply(options)
                         .into(mediaMsgHloder.media);
 
