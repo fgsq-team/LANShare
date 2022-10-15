@@ -47,6 +47,7 @@ import com.fgsqw.lanshare.pojo.mSocket;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileUtil;
+import com.fgsqw.lanshare.utils.ImageUtils;
 import com.fgsqw.lanshare.utils.MesssageDButil;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
@@ -340,6 +341,8 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         if (save) {
             messsageDButil.updateMessage(messageContent);
         }
+        // 扫描文件夹下的图片
+        ImageUtils.scannerImage(getContext(), Config.FILE_SAVE_PATH);
         MessageFileContent fileContent = (MessageFileContent) messageContent;
         // 获取数据在列表中的下标
         int dataPosition = chatAdabper.getDataPosition(messageContent);
@@ -580,6 +583,10 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         chatAdabper.refresh();
     }
 
+
+    public void setEditContent(String editContent) {
+        this.editContent.setText(editContent);
+    }
 
     public void messageDelete() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

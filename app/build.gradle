@@ -8,7 +8,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 220828
-        versionName "1.0.1"
+        versionName "1.0.3"
     }
 
     buildTypes {
@@ -38,6 +38,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     // 图片预览
     implementation 'com.github.chrisbanes.photoview:library:1.2.4'
+    // 二维码扫描
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     // 视频预览
     implementation project(':mnvideoplayerlibrary')
 }

@@ -1,9 +1,19 @@
 package com.fgsqw.lanshare.utils;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class ImageUtils {
     /**
@@ -28,6 +38,18 @@ public class ImageUtils {
         // 把 drawable 内容画到画布中
         drawable.draw(canvas);
         return bitmap;
+    }
+
+
+    /**
+     * 扫描文件夹下的图片
+     * @param path 文件夹路径
+     */
+    public static void scannerImage(Context context, String path) {
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri uri = Uri.fromFile(new File(path));
+        intent.setData(uri);
+        context.sendBroadcast(intent);
     }
 
 }

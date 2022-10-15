@@ -22,7 +22,7 @@ public class ByteUtil {
         return b;
     }
 
-    public static byte[] intToBytes(int i, byte b[], int off) {
+    public static byte[] intToBytes(int i, byte[] b, int off) {
         b[off] = (byte) ((i >> 24) & 255);
         b[1 + off] = (byte) ((i >> 16) & 255);
         b[2 + off] = (byte) ((i >> 8) & 255);
@@ -43,8 +43,8 @@ public class ByteUtil {
         return b;
     }
 
-    public static byte[] longToBytes(long i, byte b[], int off) {
-        b[0 + off] = (byte) ((i >> 56) & 255);
+    public static void longToBytes(long i, byte[] b, int off) {
+        b[off] = (byte) ((i >> 56) & 255);
         b[1 + off] = (byte) ((i >> 48) & 255);
         b[2 + off] = (byte) ((i >> 40) & 255);
         b[3 + off] = (byte) ((i >> 32) & 255);
@@ -52,7 +52,6 @@ public class ByteUtil {
         b[5 + off] = (byte) ((i >> 16) & 255);
         b[6 + off] = (byte) ((i >> 8) & 255);
         b[7 + off] = (byte) (i & 255);
-        return b;
     }
 
     public static int bytesToInt(byte[] buf, int offset) {
@@ -66,7 +65,7 @@ public class ByteUtil {
 
 
     public static int[] bytesToInter(byte[] buf, int offset, int len) {
-        int s[] = new int[(len - offset) / 4];
+        int[] s = new int[(len - offset) / 4];
         for (int i = offset; i < len; i += 4) {
             int v = s[i / 4];
 
@@ -134,7 +133,7 @@ public class ByteUtil {
 
     }
 
-    public static byte[] floatsbytes(float f[]) {
+    public static byte[] floatsbytes(float[] f) {
 
         byte[] b = new byte[f.length * 4];
         for (int i = 0; i < f.length; i++) {

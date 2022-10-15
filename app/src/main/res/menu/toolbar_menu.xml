@@ -26,6 +26,12 @@
         android:title="@string/delete_message"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_scan"
+        android:orderInCategory="100"
+        android:title="@string/scan"
+        app:showAsAction="never" />
+
    <!-- <item
         android:id="@+id/menu_camera_send"
         android:orderInCategory="100"

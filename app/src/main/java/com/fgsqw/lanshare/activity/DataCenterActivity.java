@@ -29,12 +29,17 @@ import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.utils.PrefUtil;
+import com.fgsqw.lanshare.utils.StringUtils;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE;
 
 
 @SuppressWarnings("all")
@@ -275,6 +280,18 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
+            final String qrContent = scanResult.getContents();
+            if(!StringUtils.isEmpty(qrContent)){
+                fragChat.setEditContent(qrContent);
+            }
+        }
+    }
+
     public void hideBottom() {
         bottomLayout.setVisibility(View.GONE);
     }
@@ -301,6 +318,26 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                     fragChat.messageDelete();
                 }
                 break;
+            case R.id.menu_scan:
+//                new IntentIntegrator(this)
+//                        .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)// 扫码的类型,可选：一维码，二维码，一/二维码
+//                        .setPrompt("请对准二维码")// 设置提示语
+//                        .setCameraId(0)// 选择摄像头,可使用前置或者后置
+//                        .setBeepEnabled(false)// 是否开启声音,扫完码之后会"哔"的一声
+//                        .setBarcodeImageEnabled(true)// 扫完码之后生成二维码的图片
+//                        .initiateScan();// 初始化扫码
+
+//                startActivity(new Intent(this, ZxingActivity.class));
+
+                //打开扫描界面
+                IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+                intentIntegrator.setOrientationLocked(false);
+                intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+                intentIntegrator.setCaptureActivity(ZxingActivity.class); // 设置自定义的activity是QRActivity
+                intentIntegrator.setRequestCode(REQUEST_CODE);
+                intentIntegrator.initiateScan();
+                break;
+
            /* case R.id.menu_camera_send:
                 startActivity(new Intent(this, MainActivity.class));
                 break;
