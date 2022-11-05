@@ -20,6 +20,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
     RelativeLayout githubLayout;
     RelativeLayout aboutLayout;
     RelativeLayout privacyLayout;
+    RelativeLayout groupLayout;
     ImageView exitImg;
     TextView tvVersionName;
 
@@ -35,6 +36,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         githubLayout = findViewById(R.id.about_github);
         aboutLayout = findViewById(R.id.about_help);
         privacyLayout = findViewById(R.id.about_privacy);
+        groupLayout = findViewById(R.id.about_group);
         tvVersionName = findViewById(R.id.about_version_name);
 
         exitImg = findViewById(R.id.about_exit_img);
@@ -45,6 +47,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         privacyLayout.setOnClickListener(this);
         githubLayout.setOnClickListener(this);
         aboutLayout.setOnClickListener(this);
+        groupLayout.setOnClickListener(this);
         exitImg.setOnClickListener(this);
 
     }
@@ -56,8 +59,9 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
             case R.id.about_github: {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/fgsqme/LANShare/"));
                 startActivity(intent);
-                break;
+
             }
+            break;
             case R.id.about_help: {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                 dialog.setTitle("使用帮助");
@@ -66,8 +70,9 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
                 final AlertDialog alertdialog1 = dialog.create();
                 alertdialog1.show();
 
-                break;
+
             }
+            break;
             case R.id.about_privacy: {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                 dialog.setTitle("隐私声明");
@@ -78,13 +83,17 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
 
                 /*PrivacyDialog t = new PrivacyDialog(this);
                 t.show();*/
-
-                break;
             }
+            break;
             case R.id.about_exit_img: {
                 finish();
-                break;
             }
+            break;
+            case R.id.about_group: {
+                mUtil.joinQQGroup("xJNzrothp7Dj3U3GDRxEjJaH78y4TSrF", AboutActivity.this);
+            }
+            break;
+
         }
     }
 }

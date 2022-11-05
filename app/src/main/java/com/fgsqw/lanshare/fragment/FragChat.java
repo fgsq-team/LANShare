@@ -341,8 +341,10 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         if (save) {
             messsageDButil.updateMessage(messageContent);
         }
-        // 扫描文件夹下的图片
-        ImageUtils.scannerImage(getContext(), Config.FILE_SAVE_PATH);
+        if (Config.SAVE_TO_GALLERY) {
+            // 扫描文件夹下的图片
+            ImageUtils.scannerImage(getContext(), Config.FILE_SAVE_PATH);
+        }
         MessageFileContent fileContent = (MessageFileContent) messageContent;
         // 获取数据在列表中的下标
         int dataPosition = chatAdabper.getDataPosition(messageContent);

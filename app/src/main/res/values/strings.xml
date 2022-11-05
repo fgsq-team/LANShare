@@ -17,6 +17,7 @@
     <string name="copyright">版权所有©fgsq</string>
     <string name="version">V0.0.1_beta</string>
     <string name="privacy">隐私声明</string>
+    <string name="join_group">加入QQ群</string>
     <string name="lan_not_device">在局域网中没有搜索到设备</string>
     <string name="send_message_hint">长按发送至设备剪切板</string>
     <string name="cancelled">已取消</string>
@@ -25,7 +26,7 @@
     <string name="http_share">通过Web分享LANShare</string>
 
     <string name="delete_message">清理消息</string>
-    <string name="scan">扫码</string>
+    <string name="scan">扫码输入到消息框</string>
     <string name="delete_all_message">清空所有消息</string>
     <string name="delete_all_message_text">清空所有文本消息</string>
     <string name="delete_all_message_file">清空所有文件</string>
@@ -49,6 +50,8 @@
 
     <string name="save_message">保存消息记录</string>
     <string name="save_message_detail">开启后会保存所有消息内容</string>
+    <string name="save_to_gallery">保存媒体到相册</string>
+    <string name="save_to_gallery_detail">开启后接收到媒体文件会直接添加到下相册</string>
 
 
 </resources>

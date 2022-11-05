@@ -18,4 +18,6 @@ public class PreConfig {
     public static String PRIVACY_AGREE = "privacy_agree";
     // 隐私政策版本
     public static String PRIVACY_VERSION = "privacy_version";
+    // 保存媒体到相册
+    public static String SAVE_TO_GALLERY = "save_to_gallery";
 }

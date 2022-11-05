@@ -111,6 +111,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             file.mkdirs();
         }
         Config.SAVE_MESSAGE = prefUtil.getBoolean(PreConfig.SAVE_MESSAGE, true);
+        Config.SAVE_TO_GALLERY = prefUtil.getBoolean(PreConfig.SAVE_TO_GALLERY, true);
     }
 
     public void initView() {
@@ -286,7 +287,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         if (requestCode == REQUEST_CODE) {
             IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
             final String qrContent = scanResult.getContents();
-            if(!StringUtils.isEmpty(qrContent)){
+            if (!StringUtils.isEmpty(qrContent)) {
                 fragChat.setEditContent(qrContent);
             }
         }

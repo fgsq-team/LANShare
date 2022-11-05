@@ -6,7 +6,7 @@
     android:background="#FFFFFF">
 
     <com.journeyapps.barcodescanner.DecoratedBarcodeView
-        android:id="@+id/dbv"
+        android:id="@+id/decorated"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:zxing_framing_rect_height="200dp"
