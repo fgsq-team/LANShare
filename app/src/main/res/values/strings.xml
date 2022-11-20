@@ -27,6 +27,7 @@
 
     <string name="delete_message">清理消息</string>
     <string name="scan">扫码输入到消息框</string>
+    <string name="exit">退出软件</string>
     <string name="delete_all_message">清空所有消息</string>
     <string name="delete_all_message_text">清空所有文本消息</string>
     <string name="delete_all_message_file">清空所有文件</string>

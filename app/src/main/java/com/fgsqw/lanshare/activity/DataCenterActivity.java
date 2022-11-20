@@ -320,16 +320,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
             case R.id.menu_scan:
-//                new IntentIntegrator(this)
-//                        .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)// 扫码的类型,可选：一维码，二维码，一/二维码
-//                        .setPrompt("请对准二维码")// 设置提示语
-//                        .setCameraId(0)// 选择摄像头,可使用前置或者后置
-//                        .setBeepEnabled(false)// 是否开启声音,扫完码之后会"哔"的一声
-//                        .setBarcodeImageEnabled(true)// 扫完码之后生成二维码的图片
-//                        .initiateScan();// 初始化扫码
-
-//                startActivity(new Intent(this, ZxingActivity.class));
-
                 //打开扫描界面
                 IntentIntegrator intentIntegrator = new IntentIntegrator(this);
                 intentIntegrator.setOrientationLocked(false);
@@ -338,7 +328,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 intentIntegrator.setRequestCode(REQUEST_CODE);
                 intentIntegrator.initiateScan();
                 break;
-
+            case R.id.menu_exit:
+                stopService(new Intent(this, LANService.class));
+                finish();
+                break;
            /* case R.id.menu_camera_send:
                 startActivity(new Intent(this, MainActivity.class));
                 break;
