@@ -12,15 +12,15 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
 public class ZxingActivity extends BaseActivity {
 
-    private DecoratedBarcodeView mDBV;
+    private DecoratedBarcodeView decoratedBarcodeView;
     private CaptureManager captureManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr);
-        mDBV = findViewById(R.id.dbv);
-        captureManager = new CaptureManager(this, mDBV);
+        decoratedBarcodeView = findViewById(R.id.decorated);
+        captureManager = new CaptureManager(this, decoratedBarcodeView);
         captureManager.initializeFromIntent(getIntent(), savedInstanceState);
         captureManager.decode();
     }
@@ -35,7 +35,7 @@ public class ZxingActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return mDBV.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
+        return decoratedBarcodeView.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 
     @Override

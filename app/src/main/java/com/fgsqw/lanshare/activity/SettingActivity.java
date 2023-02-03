@@ -29,6 +29,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     Switch setting_open_media_switch;
     Switch setting_media_select_model_switch;
     Switch setting_save_message_switch;
+    Switch setting_save_to_gallery_switch;
 
     TextView tv_dev_name;
     TextView tv_recv_file_path;
@@ -56,6 +57,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setting_open_media_switch = findViewById(R.id.setting_open_media_switch);
         setting_media_select_model_switch = findViewById(R.id.setting_media_select_model_switch);
         setting_save_message_switch = findViewById(R.id.setting_save_message_switch);
+        setting_save_to_gallery_switch = findViewById(R.id.setting_save_to_gallery_switch);
 
         tv_dev_name = findViewById(R.id.tv_dev_name);
         tv_recv_file_path = findViewById(R.id.tv_recv_file_path);
@@ -70,6 +72,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setting_open_media_switch.setOnCheckedChangeListener(this);
         setting_media_select_model_switch.setOnCheckedChangeListener(this);
         setting_save_message_switch.setOnCheckedChangeListener(this);
+        setting_save_to_gallery_switch.setOnCheckedChangeListener(this);
 
     }
 
@@ -80,6 +83,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setting_open_media_switch.setChecked(prefUtil.getBoolean(PreConfig.POEN_MEDIA_PLAYER, true));
         setting_media_select_model_switch.setChecked(prefUtil.getBoolean(PreConfig.MEDIA_SELECT_MODEL, false));
         setting_save_message_switch.setChecked(prefUtil.getBoolean(PreConfig.SAVE_MESSAGE, true));
+        setting_save_to_gallery_switch.setChecked(prefUtil.getBoolean(PreConfig.SAVE_TO_GALLERY, true));
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -122,6 +126,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 setting_media_select_model_switch.setChecked(!setting_save_message_switch.isChecked());
                 break;
             }
+            case R.id.setting_save_to_gallery_switch: {
+                setting_save_to_gallery_switch.setChecked(!setting_save_to_gallery_switch.isChecked());
+                break;
+            }
         }
     }
 
@@ -144,6 +152,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             }
             case R.id.setting_save_message_switch: {
                 prefUtil.saveBoolean(PreConfig.SAVE_MESSAGE, isChecked);
+                break;
+            }
+            case R.id.setting_save_to_gallery_switch: {
+                prefUtil.saveBoolean(PreConfig.SAVE_TO_GALLERY, isChecked);
                 break;
             }
         }

@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.activity.DataCenterActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,17 +49,15 @@ public class mUtil {
         final int NOTIFICATION_ID = 0x1989;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         //准备intent
-        Intent intent = new Intent();
-        String action = context.getPackageName() + ".action";
-        intent.setAction(action);
-
-        //notification
+//        Intent intent = new Intent();
+//        String action = context.getPackageName() + ".action";
+//        intent.setAction(action);
+        Intent intent = new Intent(context, DataCenterActivity.class);
+        // notification
         Notification notification = null;
-
         // 构建 PendingIntent
         PendingIntent pi = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         //版本兼容
-
         if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O && Build.VERSION.SDK_INT >= LOLLIPOP_MR1) {
             notification = new Notification.Builder(context)
                     .setSmallIcon(R.mipmap.ic_launcher)
@@ -65,8 +65,8 @@ public class mUtil {
                     .setContentTitle(title)
                     .setContentText(content)
                     .setAutoCancel(false)
-                    .setContentIntent(pi).build();
-
+                    .setContentIntent(pi)
+                    .build();
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN &&
                 Build.VERSION.SDK_INT <= LOLLIPOP_MR1) {
             notification = new Notification.Builder(context)
@@ -75,10 +75,10 @@ public class mUtil {
                     .setTicker(content)
                     .setContentTitle(title)
                     .setContentText(content)
+                    .setContentIntent(pi)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setWhen(System.currentTimeMillis())
                     .build();
-
         } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             String CHANNEL_ID = "my_channel_01";
             int importance = NotificationManager.IMPORTANCE_HIGH;
@@ -89,7 +89,6 @@ public class mUtil {
             mChannel.enableVibration(true);
             mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             mChannel.setShowBadge(false);
-
             notificationManager.createNotificationChannel(mChannel);
             notification = new Notification.Builder(context, CHANNEL_ID)
                     .setAutoCancel(true)
@@ -97,6 +96,7 @@ public class mUtil {
                     .setTicker(content)
                     .setContentTitle(title)
                     .setContentText(content)
+                    .setContentIntent(pi)
                     .build();
         }
         ((Service) context).startForeground(NOTIFICATION_ID, notification);
@@ -166,6 +166,27 @@ public class mUtil {
             e.printStackTrace();
         }
         return appDir;
+    }
+
+    /****************
+     *
+     * 发起添加群流程。群号：LANShare交流/反馈群(538809905) 的 key 为： xJNzrothp7Dj3U3GDRxEjJaH78y4TSrF
+     * 调用 joinQQGroup(xJNzrothp7Dj3U3GDRxEjJaH78y4TSrF) 即可发起手Q客户端申请加群 LANShare交流/反馈群(538809905)
+     *
+     * @param key 由官网生成的key
+     * @return 返回true表示呼起手Q成功，返回false表示呼起失败
+     ******************/
+    public static boolean joinQQGroup(String key, Context context) {
+        Intent intent = new Intent();
+        intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3D" + key));
+        // 此Flag可根据具体产品需要自定义，如设置，则在加群界面按返回，返回手Q主界面，不设置，按返回会返回到呼起产品界面    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            // 未安装手Q或安装的版本不支持
+            return false;
+        }
     }
 
 }

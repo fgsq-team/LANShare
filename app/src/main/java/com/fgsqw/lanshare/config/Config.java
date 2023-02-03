@@ -15,6 +15,7 @@ public class Config {
     public static String FILE_SAVE_PATH = "/LANShare/";
     // 是否保存消息
     public static boolean SAVE_MESSAGE = true;
+    public static boolean SAVE_TO_GALLERY = true;
 
     public static String FORDER = "文件夹";
     public static final String[][] fileType =

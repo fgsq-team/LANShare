@@ -32,6 +32,12 @@
         android:title="@string/scan"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_exit"
+        android:orderInCategory="100"
+        android:title="@string/exit"
+        app:showAsAction="never" />
+
    <!-- <item
         android:id="@+id/menu_camera_send"
         android:orderInCategory="100"
