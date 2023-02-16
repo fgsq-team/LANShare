@@ -68,7 +68,7 @@ public class LANService extends BaseService {
     public Map<String, Device> devices = new ConcurrentHashMap<>();
     private Messenger mMessenger;
     // 本机IP列表
-    private List<Device> mDevice = new Vector<>();
+    public List<Device> mDevice = new Vector<>();
     private NetWorkReceiver netWorkReceiver;
     private PrefUtil prefUtil;
     private boolean running = true;
@@ -175,14 +175,30 @@ public class LANService extends BaseService {
         // 自定义数据包解包工具
         DataDec dataDec = new DataDec(buffer, DataEnc.getHeaderSize());
         int cmd = dataDec.getCmd();
-        // 接收文件
-        if (cmd == mCmd.FS_SHARE_FILE) {
+        if (cmd == mCmd.FS_ADD_DEVICE) { // 添加设备
+            String uuid = dataDec.getString();
+            String sgin = Config.sgin(uuid);
+            DataEnc dataEnc = new DataEnc(buffer);
+            dataEnc.setCmd(mCmd.FS_ADD_DEVICE);
+            dataEnc.putString(sgin);
+            try {
+                IOUtil.write(out, dataEnc.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+            }
+            IOUtil.closeIO(input, out, client);
+        } else if (cmd == mCmd.FS_SHARE_FILE) {  // 接收文件
             // 文件数量
             int count = dataDec.getCount();
             // 数据包大小
             int length = dataDec.getLength();
             try {
-                if (IOUtil.read(input, buffer, DataEnc.getHeaderSize(), length) != length) return;
+                if (IOUtil.read(input, buffer, DataEnc.getHeaderSize(), length) != length)
+                    return;
             } catch (IOException e) {
                 e.printStackTrace();
                 return;

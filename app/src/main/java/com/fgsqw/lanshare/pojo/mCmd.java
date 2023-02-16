@@ -14,6 +14,8 @@ public class mCmd {
     public static final int FS_AGREE = 1102;         // 同意
     public static final int FS_NOT_AGREE = 1103;     // 不同意
 
+    public static final int FS_ADD_DEVICE = 1102;    // 添加设备
+
     // 使用byte命令避免像int命令那样需要两边转换为byte
     public static final byte FS_DATA = 1;            // 数据
     public static final byte FS_END = 2;             // 接收结束

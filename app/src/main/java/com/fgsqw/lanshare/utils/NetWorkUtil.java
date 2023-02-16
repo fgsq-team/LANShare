@@ -128,20 +128,20 @@ public class NetWorkUtil {
                 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
                     if (interfaceAddress.getAddress() instanceof Inet4Address) {
                         String hostAddress = interfaceAddress.getAddress().getHostAddress();
-                        String maskMap = getMaskMap(interfaceAddress.getNetworkPrefixLength());
-                        String broadcastAddress = interfaceAddress.getBroadcast().getHostAddress();
                         if (hostAddress.equals(LOCALHOST)) {
                             continue;
+                        }
+                        String maskMap = getMaskMap(interfaceAddress.getNetworkPrefixLength());
+                        InetAddress broadcast = interfaceAddress.getBroadcast();
+                        String broadcastAddress = "";
+                        if (broadcast != null) {
+                            broadcastAddress = broadcast.getHostAddress();
                         }
                         NetInfo netInfo = new NetInfo();
                         netInfo.setIp(hostAddress);
                         netInfo.setMask(maskMap);
                         netInfo.setBrodIp(broadcastAddress);
                         netInfos.add(netInfo);
-//                        System.out.println("IP:" + interfaceAddress.getAddress().getHostAddress());
-//                        System.out.println("掩码:" + maskMap);
-//                        System.out.println("广播地址:" + broadcastAddress);
-//                        System.out.println();
                     }
                 }
             }

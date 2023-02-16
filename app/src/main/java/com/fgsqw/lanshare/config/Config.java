@@ -1,8 +1,12 @@
 package com.fgsqw.lanshare.config;
 
+import com.fgsqw.lanshare.utils.MD5Utils;
+
 @SuppressWarnings("all")
 public class Config {
 
+    public static final String APP_NAME = "LANShare";
+    public static final String KEY = "6c9b%8ErII@Rc&f";
     public static final int UDP_PORT = 4573;
     // 隐私协议版本
     public static final int PRIVACY_VERSION = 1;
@@ -44,5 +48,10 @@ public class Config {
                     {"xls", "表格"},
                     {"xlsx", "表格"},
             };
+
+    public static String sgin(String str) {
+        return MD5Utils.md5(str + ":" + APP_NAME + ":" + KEY);
+    }
+
 
 }

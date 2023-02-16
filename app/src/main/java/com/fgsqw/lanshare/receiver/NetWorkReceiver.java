@@ -35,7 +35,15 @@ public class NetWorkReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, intent.getAction());
-        if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+        ViewUpdate.runThread(() -> {
+            try {
+                Thread.sleep(1000);
+                lanService.initData();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+      /*  if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             ViewUpdate.runThread(() -> {
                 try {
                     Thread.sleep(1000);
@@ -58,11 +66,11 @@ public class NetWorkReceiver extends BroadcastReceiver {
                 });
             } else if (state == NetWorkUtil.WIFI_AP_STATE_DISABLED) { // 11 热点已关闭
                 lanService.initData();
-            }/* else if (state == WIFI_AP_STATE_DISABLING) { // 10  热点正在关闭...
+            }*//* else if (state == WIFI_AP_STATE_DISABLING) { // 10  热点正在关闭...
             } else if (state == WIFI_AP_STATE_ENABLING) { // 12 热点正在打开...
             } else if (state == WIFI_AP_STATE_FAILED) { // 14  热点操作失败... 硬件不支持或者其他问题
             }*/
-        }
+//        }
     }
 }
 

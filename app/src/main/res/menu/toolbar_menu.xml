@@ -33,6 +33,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_add_manually"
+        android:orderInCategory="100"
+        android:title="@string/add_manually"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_exit"
         android:orderInCategory="100"
         android:title="@string/exit"

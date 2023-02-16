@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
@@ -26,14 +28,29 @@ import com.fgsqw.lanshare.dialog.FileSendDialog;
 import com.fgsqw.lanshare.fragment.FragChat;
 import com.fgsqw.lanshare.fragment.FragFiles;
 import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.pojo.AddDevice;
+import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
+import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.service.LANService;
+import com.fgsqw.lanshare.toast.T;
+import com.fgsqw.lanshare.utils.DataDec;
+import com.fgsqw.lanshare.utils.DataEnc;
+import com.fgsqw.lanshare.utils.IOUtil;
+import com.fgsqw.lanshare.utils.MD5Utils;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
+import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -46,6 +63,10 @@ import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE
 public class DataCenterActivity extends BaseActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener {
 
 
+    /**
+     * 添加设备
+     */
+    public static final int ADD_DEVICE = 0x800;
     private LinearLayout bottomRecord;
     private ImageView imgRecord;
     private TextView tvRecord;
@@ -281,16 +302,62 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE) {
             IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
-            final String qrContent = scanResult.getContents();
+            String qrContent = scanResult.getContents();
             if (!StringUtils.isEmpty(qrContent)) {
                 fragChat.setEditContent(qrContent);
             }
         }
+
+        if (requestCode == ADD_DEVICE) {
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
+            String qrContent = scanResult.getContents();
+            try {
+                AddDevice addDevice = new Gson().fromJson(qrContent, AddDevice.class);
+                ViewUpdate.runThread(() -> {
+                    List<Device> devices = addDevice.getDevices();
+                    if (devices != null && !devices.isEmpty()) {
+                        for (Device device : devices) {
+                            Socket socket = new Socket();
+                            try {
+                                socket.connect(new InetSocketAddress(device.getDevIP(), device.getDevPort()), 2000);
+                                InputStream inputStream = socket.getInputStream();
+                                OutputStream outputStream = socket.getOutputStream();
+                                String uuid = StringUtils.getUUID();
+                                byte[] buffer = new byte[1024];
+                                DataEnc dataEnc = new DataEnc(buffer);
+                                dataEnc.setCmd(mCmd.FS_ADD_DEVICE);
+                                dataEnc.putString(uuid);
+                                IOUtil.write(outputStream, dataEnc.getData());
+                                DataDec dataDec = new DataDec(buffer);
+                                if (IOUtil.read(inputStream, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
+                                    continue;
+                                int length = dataDec.getLength();
+                                if (IOUtil.read(inputStream, buffer, DataEnc.getHeaderSize(), length) != length)
+                                    continue;
+                                String sgin = dataDec.getString();
+                                if (sgin.equals(Config.sgin(uuid))) {
+                                    String address = device.getDevIP() + ":" + device.getDevPort();
+                                    LANService.service.devices.put(address, device);
+                                }
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            T.s("二维码格式错误!");
+        }
+
     }
 
     public void hideBottom() {
@@ -319,7 +386,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                     fragChat.messageDelete();
                 }
                 break;
-            case R.id.menu_scan:
+            case R.id.menu_scan: {
                 //打开扫描界面
                 IntentIntegrator intentIntegrator = new IntentIntegrator(this);
                 intentIntegrator.setOrientationLocked(false);
@@ -327,10 +394,22 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 intentIntegrator.setCaptureActivity(ZxingActivity.class); // 设置自定义的activity是QRActivity
                 intentIntegrator.setRequestCode(REQUEST_CODE);
                 intentIntegrator.initiateScan();
-                break;
+            }
+            break;
+            case R.id.menu_add_manually: {
+                IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+                intentIntegrator.setOrientationLocked(false);
+                intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+                intentIntegrator.setCaptureActivity(ZxingActivity.class); // 设置自定义的activity是QRActivity
+                intentIntegrator.setRequestCode(ADD_DEVICE);
+                intentIntegrator.initiateScan();
+            }
+            break;
             case R.id.menu_exit:
-                stopService(new Intent(this, LANService.class));
-                finish();
+//                stopService(new Intent(this, LANService.class));
+//                finish();
+                startActivity(new Intent(this, TestActivity.class));
+
                 break;
            /* case R.id.menu_camera_send:
                 startActivity(new Intent(this, MainActivity.class));
