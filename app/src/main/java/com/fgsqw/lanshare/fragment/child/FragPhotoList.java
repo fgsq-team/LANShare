@@ -46,6 +46,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class FragPhotoList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
 
@@ -126,7 +127,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
                 sizImgTv.setText("加载中");
                 swipe.setRefreshing(true);
             });
-            mFolders = FIleSerachUtils.loadImageForSDCard(getContext());
+            mFolders = FIleSerachUtils.loadImageForSDCard(Objects.requireNonNull(getContext()));
             ViewUpdate.threadUi(() -> {
                 if (mFolders != null && !mFolders.isEmpty()) {
                     isOpenFolder = true;

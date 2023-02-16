@@ -37,19 +37,11 @@ public class NetWorkReceiver extends BroadcastReceiver {
         Log.d(TAG, intent.getAction());
         if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             ViewUpdate.runThread(() -> {
-                int i = 0;
-                while (i < 5) {
-                    NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(context);
-                    if (!oneNetWorkInfo.getName().equals(NetWorkUtil.UNKNOWN)) {
-                        lanService.initData();
-                        break;
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    i++;
+                try {
+                    Thread.sleep(1000);
+                    lanService.initData();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             });
             lanService.initData();
@@ -57,19 +49,11 @@ public class NetWorkReceiver extends BroadcastReceiver {
             int state = intent.getIntExtra(NetWorkUtil.EXTRA_WIFI_AP_STATE, 0);
             if (state == NetWorkUtil.WIFI_AP_STATE_ENABLED) { // 13 热点已开启 有时候开启后还是不能获取到热点ip 这里只能暂时用着笨办法循环5次获取，获取不到就真没办法了
                 ViewUpdate.runThread(() -> {
-                    int i = 0;
-                    while (i < 5) {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(context);
-                        if (!oneNetWorkInfo.getName().equals(NetWorkUtil.UNKNOWN)) {
-                            lanService.initData();
-                            break;
-                        }
-                        i++;
+                    try {
+                        Thread.sleep(1000);
+                        lanService.initData();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 });
             } else if (state == NetWorkUtil.WIFI_AP_STATE_DISABLED) { // 11 热点已关闭

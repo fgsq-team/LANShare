@@ -48,10 +48,6 @@ public class mUtil {
         }
         final int NOTIFICATION_ID = 0x1989;
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        //准备intent
-//        Intent intent = new Intent();
-//        String action = context.getPackageName() + ".action";
-//        intent.setAction(action);
         Intent intent = new Intent(context, DataCenterActivity.class);
         // notification
         Notification notification = null;

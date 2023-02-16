@@ -65,6 +65,14 @@ public class IOUtil {
         return null;
     }
 
+    /**
+     * 阻塞获取数据包直到达到len时跳出
+     * @param is 流
+     * @param buf 缓冲区
+     * @param offset 写入buff偏移
+     * @param len 读取大小
+     * @return 总读取大小
+     */
     public static int read(InputStream is, byte[] buf, int offset, int len) throws IOException {
         int totalRecv = 0;
         int off = offset;

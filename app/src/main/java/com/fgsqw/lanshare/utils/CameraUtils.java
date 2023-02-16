@@ -24,14 +24,6 @@ public class CameraUtils {
     JpegStream mMJpegStream = null;
 
 
-    private final Camera.PreviewCallback mPreviewCallback = (data, camera) -> {
-        Long timestamp = SystemClock.elapsedRealtime();
-        // 旋转90度
-//        byte[] bytes = rotateYUV420Degree(data, mPreviewWidth, mPreviewHeight, 270);
-        sendPreviewFrame(data, camera, timestamp);
-    };
-
-
     private void sendPreviewFrame(final byte[] data, final Camera camera, final long timestamp) {
         final YuvImage image = new YuvImage(data, mPreviewFormat, mPreviewWidth, mPreviewHeight, null);
         image.compressToJpeg(mPreviewRect, mJpegQuality, mJpegOutputStream);
@@ -65,6 +57,14 @@ public class CameraUtils {
         int mPreviewBufferSize = mPreviewWidth * mPreviewHeight * bytesPerPixel * 3 / 2 + 1;
         camera.addCallbackBuffer(new byte[mPreviewBufferSize]);
         mPreviewRect = new Rect(0, 0, mPreviewWidth, mPreviewHeight);
+        // 旋转90度
+        //        byte[] bytes = rotateYUV420Degree(data, mPreviewWidth, mPreviewHeight, 270);
+        Camera.PreviewCallback mPreviewCallback = (data, camera) -> {
+            long timestamp = SystemClock.elapsedRealtime();
+            // 旋转90度
+//        byte[] bytes = rotateYUV420Degree(data, mPreviewWidth, mPreviewHeight, 270);
+            sendPreviewFrame(data, camera, timestamp);
+        };
         camera.setPreviewCallbackWithBuffer(mPreviewCallback);
 
         mJpegOutputStream = new ByteArrayOutputStream(mPreviewBufferSize);

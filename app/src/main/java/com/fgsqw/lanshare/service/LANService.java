@@ -56,25 +56,22 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LANService extends BaseService {
-
     public static final String TAG = "LANService";
-
     public static LANService service;
-    ServerSocket fileRecive;
+    // TCP服务监听
+    private ServerSocket fileRecive;
+    // 在线设备列表
     public Map<String, Device> devices = new ConcurrentHashMap<>();
-    Messenger mMessenger;
-    Device mDevice;
-    //    String locAddrIndex = "255.255.255.255";
-    NetWorkReceiver netWorkReceiver;
-    PrefUtil prefUtil;
-    private boolean isRun = true;
+    private Messenger mMessenger;
+    // 本机IP列表
+    private List<Device> mDevice = new Vector<>();
+    private NetWorkReceiver netWorkReceiver;
+    private PrefUtil prefUtil;
+    private boolean running = true;
 
     @Nullable
     @Override
@@ -117,7 +114,11 @@ public class LANService extends BaseService {
         // 文件接收监听
         fileServer();
         // 通告局域网所有设备我已上线
-        ViewUpdate.runThread(() -> noticeDeviceOnLineByIp(mDevice.getDevBrotIP()));
+        ViewUpdate.runThread(() -> {
+            for (Device device : mDevice) {
+                noticeDeviceOnLineByIp(device.getDevBrotIP());
+            }
+        });
         // UDP 广播扫描设备
         scannDevice();
 
@@ -126,7 +127,8 @@ public class LANService extends BaseService {
 
     // 初始化数据
     public void initData() {
-        mDevice = getDevice();
+        mDevice.clear();
+        mDevice.addAll(getDevices());
     }
 
 
@@ -153,10 +155,8 @@ public class LANService extends BaseService {
 
     // 监听接收文件信息
     public void handelFile(Socket client) {
-
         InputStream input;
         OutputStream out;
-
         try {
             input = client.getInputStream();
             out = client.getOutputStream();
@@ -164,9 +164,7 @@ public class LANService extends BaseService {
             e.printStackTrace();
             return;
         }
-
         byte[] buffer = new byte[1024 * 1024];
-
         try {
             if (IOUtil.read(input, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
                 return;
@@ -174,38 +172,30 @@ public class LANService extends BaseService {
             e.printStackTrace();
             return;
         }
-
         // 自定义数据包解包工具
         DataDec dataDec = new DataDec(buffer, DataEnc.getHeaderSize());
-
         int cmd = dataDec.getCmd();
-
         // 接收文件
         if (cmd == mCmd.FS_SHARE_FILE) {
             // 文件数量
             int count = dataDec.getCount();
             // 数据包大小
             int length = dataDec.getLength();
-
             try {
                 if (IOUtil.read(input, buffer, DataEnc.getHeaderSize(), length) != length) return;
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
             }
-
             dataDec.setData(buffer, DataEnc.getHeaderSize() + length);
-
             // 获取设备信息
             int port = dataDec.getInt();
             String ip = dataDec.getString();
             String name = dataDec.getString();
-
             Device device = devices.get(ip + ":" + port);
             if (device == null) {
                 device = new Device(name, ip, port);
             }
-
             List<MessageFileContent> fileContentList = new ArrayList<>();
             Message mMessage;
             for (int i = 0; i < count; i++) {
@@ -219,7 +209,6 @@ public class LANService extends BaseService {
                 }
                 // 从头数据中获取数据包大小
                 length = dataDec.getLength();
-
                 try {
                     // 接收数据包
                     if (IOUtil.read(input, buffer, DataEnc.getHeaderSize(), length) != length)
@@ -228,7 +217,6 @@ public class LANService extends BaseService {
                     e.printStackTrace();
                     return;
                 }
-
                 dataDec.setData(buffer, buffer.length);
                 // 文件大小
                 long fileSize = dataDec.getLong();
@@ -236,9 +224,7 @@ public class LANService extends BaseService {
                 String fileName = dataDec.getString();
                 int fileType = dataDec.getInt();
                 String videoTime = dataDec.getString();
-
                 Log.d(TAG, "filename:" + fileName + " fileSize:" + fileSize);
-
                 if (fileType == mCmd.FILE_IMAGE || fileType == mCmd.FILE_VIEDO) {
                     MessageMediaContent mediaContent = new MessageMediaContent();
                     mediaContent.setId(StringUtils.getUUID());
@@ -251,13 +237,11 @@ public class LANService extends BaseService {
                     mediaContent.setUserName(name);
                     mediaContent.setVideo(fileType == mCmd.FILE_VIEDO);
                     mediaContent.setVideoTime(videoTime);
-
                     if (device.getDevMode() == Device.ANDROID) {
                         mediaContent.setHeader(R.drawable.ic_phone);
                     } else if (device.getDevMode() == Device.WIN) {
                         mediaContent.setHeader(R.drawable.ic_win);
                     }
-
                     fileContentList.add(mediaContent);
                 } else if (fileType == mCmd.FILE_FOLDER) {
                     // 获取文件数量
@@ -470,7 +454,6 @@ public class LANService extends BaseService {
                         MessageFolderContent folderContent = (MessageFolderContent) fileContent;
                         DataDec dataDec = new DataDec(recvBuffer);
                         file = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/" + folderContent.getContent() + "/");
-
                         for (int j = 0; j < folderContent.getFileCount(); j++) {
                             // 读取文件信息
                             try {
@@ -485,15 +468,10 @@ public class LANService extends BaseService {
                                 break;
                             }
                             // 从头数据中获取数据包大小
-
                             long fileLength = dataDec.getLong();
                             String fileName = dataDec.getString();
-
                             Log.d(TAG, "接收文件:" + fileName + " 大小:" + fileLength);
-
-
                             File outFile = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/", fileName);
-
                             long thatTotal = baseRecv(
                                     objects,
                                     dataDec,
@@ -503,7 +481,6 @@ public class LANService extends BaseService {
                                     outFile,
                                     folderContent
                             );
-
                             // 传输过程中有问题直接break
                             if (thatTotal <= 0) {
                                 break;
@@ -604,7 +581,7 @@ public class LANService extends BaseService {
         ViewUpdate.runThread(() -> {
             DataDec dataDec = new DataDec();
             try {
-                while (isRun) {
+                while (running) {
                     int read = IOUtil.read(input, dataDec.getData(), 0, dataDec.getByteLen());
                     if (read > 0) {
                         if (read == dataDec.getByteLen()) {
@@ -614,6 +591,7 @@ public class LANService extends BaseService {
                                 for (MessageFileContent messageFileContent : fileContentList) {
                                     if (messageFileContent.getIndex() == index) {
                                         messageFileContent.getSocket().mClose();
+                                        break;
                                     }
                                 }
                             }
@@ -669,117 +647,126 @@ public class LANService extends BaseService {
         List<MessageFileContent> messageFileContents = new ArrayList<>();
         synchronized (sendBuffer) {
             try {
-                DataEnc dataEnc = new DataEnc(sendBuffer);
-                dataEnc.setCmd(mCmd.FS_SHARE_FILE);
-                dataEnc.setCount(fileList.size());
-                dataEnc.putInt(mDevice.getDevPort());
-                dataEnc.putString(mDevice.getDevIP());
-                dataEnc.putString(prefUtil.getString(PreConfig.USER_NAME));
+                for (Device d : mDevice) {
+                    if (NetWorkUtil.subNet(d.getDevIP(), device.getDevIP(), d.getDevNetMask())) {
 
-                IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
 
-                String userName = prefUtil.getString(PreConfig.USER_NAME);
+                        DataEnc dataEnc = new DataEnc(sendBuffer);
+                        dataEnc.setCmd(mCmd.FS_SHARE_FILE);
+                        dataEnc.setCount(fileList.size());
+                        dataEnc.putInt(d.getDevPort());
+                        dataEnc.putString(d.getDevIP());
+                        dataEnc.putString(prefUtil.getString(PreConfig.USER_NAME));
 
-                for (int i = 0; i < fileList.size(); i++) {
-                    FileInfo fileInfo = fileList.get(i);
-                    dataEnc.reset();
-                    // 媒体
-                    if (fileInfo instanceof MediaInfo) {
-                        MediaInfo mediaInfo = (MediaInfo) fileInfo;
-                        MessageMediaContent mediaContent = new MessageMediaContent();
+                        IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
 
-                        dataEnc.putLong(fileInfo.getLength());
-                        dataEnc.putString(fileInfo.getName());
+                        String userName = prefUtil.getString(PreConfig.USER_NAME);
 
-                        if (mediaInfo.isVideo()) {
-                            dataEnc.putInt(mCmd.FILE_VIEDO);
-                            mediaContent.setVideo(true);
-                        } else {
-                            dataEnc.putInt(mCmd.FILE_IMAGE);
-                            mediaContent.setVideo(false);
+                        for (int i = 0; i < fileList.size(); i++) {
+                            FileInfo fileInfo = fileList.get(i);
+                            dataEnc.reset();
+                            // 媒体
+                            if (fileInfo instanceof MediaInfo) {
+                                MediaInfo mediaInfo = (MediaInfo) fileInfo;
+                                MessageMediaContent mediaContent = new MessageMediaContent();
+
+                                dataEnc.putLong(fileInfo.getLength());
+                                dataEnc.putString(fileInfo.getName());
+
+                                if (mediaInfo.isVideo()) {
+                                    dataEnc.putInt(mCmd.FILE_VIEDO);
+                                    mediaContent.setVideo(true);
+                                } else {
+                                    dataEnc.putInt(mCmd.FILE_IMAGE);
+                                    mediaContent.setVideo(false);
+                                }
+
+                                String videoTime = ((MediaInfo) fileInfo).getVideoTime();
+                                dataEnc.putString(videoTime == null ? "" : videoTime);
+
+                                mediaContent.setId(StringUtils.getUUID());
+                                mediaContent.setContent(fileInfo.getName());
+                                mediaContent.setLength(fileInfo.getLength());
+                                mediaContent.setPath(fileInfo.getPath());
+                                mediaContent.setSocket(new mSocket(input, out));
+                                mediaContent.setIndex(i);
+                                mediaContent.setLeft(false);
+                                mediaContent.setUserName(userName);
+                                mediaContent.setToUser(device.getDevName());
+                                mediaContent.setVideoTime(videoTime);
+                                messageFileContents.add(mediaContent);
+
+                                // 文件夹
+                            } else if (fileInfo instanceof FileSource && !((FileSource) fileInfo).isFile()) {
+                                FileSource fileSource = (FileSource) fileInfo;
+
+                                File file = new File(fileSource.getPath());
+                                if (!file.exists()) {
+                                    T.s("路径不存在");
+                                    continue;
+                                }
+                                List<FileInfo> fileInfos = new LinkedList<>();
+                                // 扫描文件并返回扫描到的文件总大小
+                                long totalSize = FIleSerachUtils.scanPathFiles(file, fileInfos);
+
+                                // 写入总文件大小
+                                dataEnc.putLong(totalSize);
+                                // 写入文件名称
+                                dataEnc.putString(file.getName());
+                                // 写入文件类型
+                                dataEnc.putInt(mCmd.FILE_FOLDER);
+                                dataEnc.putString("");
+                                dataEnc.putInt(fileInfos.size());
+                                // 创建Message实体类
+                                MessageFolderContent folderContent = new MessageFolderContent();
+                                folderContent.setId(StringUtils.getUUID());
+                                folderContent.setFileCount(fileInfos.size());
+                                folderContent.setLength(totalSize);
+                                folderContent.setFileInfoList(fileInfos);
+                                folderContent.setBasePath(file.getPath());
+                                folderContent.setLeft(false);
+                                folderContent.setContent(file.getName());
+                                folderContent.setSocket(new mSocket(input, out));
+                                folderContent.setIndex(i);
+                                folderContent.setUserName(userName);
+                                folderContent.setBasePath(fileSource.getPath());
+                                folderContent.setToUser(device.getDevName());
+
+                                messageFileContents.add(folderContent);
+
+                                // 其他文件
+                            } else {
+                                // 写入文件大小
+                                dataEnc.putLong(fileInfo.getLength());
+                                // 写入文件名称
+                                dataEnc.putString(fileInfo.getName());
+                                // 写入文件类型
+                                dataEnc.putInt(mCmd.FILE_FILE);
+                                dataEnc.putString("");
+
+                                MessageFileContent fileContent = new MessageFileContent();
+                                fileContent.setId(StringUtils.getUUID());
+                                fileContent.setContent(fileInfo.getName());
+                                fileContent.setLength(fileInfo.getLength());
+                                fileContent.setPath(fileInfo.getPath());
+                                fileContent.setSocket(new mSocket(input, out));
+                                fileContent.setIndex(i);
+                                fileContent.setLeft(false);
+                                fileContent.setUserName(userName);
+                                fileContent.setToUser(device.getDevName());
+                                messageFileContents.add(fileContent);
+                            }
+                            IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                         }
-
-                        String videoTime = ((MediaInfo) fileInfo).getVideoTime();
-                        dataEnc.putString(videoTime == null ? "" : videoTime);
-
-                        mediaContent.setId(StringUtils.getUUID());
-                        mediaContent.setContent(fileInfo.getName());
-                        mediaContent.setLength(fileInfo.getLength());
-                        mediaContent.setPath(fileInfo.getPath());
-                        mediaContent.setSocket(new mSocket(input, out));
-                        mediaContent.setIndex(i);
-                        mediaContent.setLeft(false);
-                        mediaContent.setUserName(userName);
-                        mediaContent.setToUser(device.getDevName());
-                        mediaContent.setVideoTime(videoTime);
-                        messageFileContents.add(mediaContent);
-
-                        // 文件夹
-                    } else if (fileInfo instanceof FileSource && !((FileSource) fileInfo).isFile()) {
-                        FileSource fileSource = (FileSource) fileInfo;
-
-                        File file = new File(fileSource.getPath());
-                        if (!file.exists()) {
-                            T.s("路径不存在");
-                            continue;
-                        }
-                        List<FileInfo> fileInfos = new LinkedList<>();
-                        // 扫描文件并返回扫描到的文件总大小
-                        long totalSize = FIleSerachUtils.scanPathFiles(file, fileInfos);
-
-                        // 写入总文件大小
-                        dataEnc.putLong(totalSize);
-                        // 写入文件名称
-                        dataEnc.putString(file.getName());
-                        // 写入文件类型
-                        dataEnc.putInt(mCmd.FILE_FOLDER);
-                        dataEnc.putString("");
-                        dataEnc.putInt(fileInfos.size());
-                        // 创建Message实体类
-                        MessageFolderContent folderContent = new MessageFolderContent();
-                        folderContent.setId(StringUtils.getUUID());
-                        folderContent.setFileCount(fileInfos.size());
-                        folderContent.setLength(totalSize);
-                        folderContent.setFileInfoList(fileInfos);
-                        folderContent.setBasePath(file.getPath());
-                        folderContent.setLeft(false);
-                        folderContent.setContent(file.getName());
-                        folderContent.setSocket(new mSocket(input, out));
-                        folderContent.setIndex(i);
-                        folderContent.setUserName(userName);
-                        folderContent.setBasePath(fileSource.getPath());
-                        folderContent.setToUser(device.getDevName());
-
-                        messageFileContents.add(folderContent);
-
-                        // 其他文件
-                    } else {
-                        // 写入文件大小
-                        dataEnc.putLong(fileInfo.getLength());
-                        // 写入文件名称
-                        dataEnc.putString(fileInfo.getName());
-                        // 写入文件类型
-                        dataEnc.putInt(mCmd.FILE_FILE);
-                        dataEnc.putString("");
-
-                        MessageFileContent fileContent = new MessageFileContent();
-                        fileContent.setId(StringUtils.getUUID());
-                        fileContent.setContent(fileInfo.getName());
-                        fileContent.setLength(fileInfo.getLength());
-                        fileContent.setPath(fileInfo.getPath());
-                        fileContent.setSocket(new mSocket(input, out));
-                        fileContent.setIndex(i);
-                        fileContent.setLeft(false);
-                        fileContent.setUserName(userName);
-                        fileContent.setToUser(device.getDevName());
-                        messageFileContents.add(fileContent);
+                        break;
                     }
-                    IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
             }
+
 
             // 读取对方是否同意接收文件
             try {
@@ -830,7 +817,7 @@ public class LANService extends BaseService {
                             break;
                         }
 
-                        // 文件接收
+                        // 文件发送
                         long thatSend = baseSend(
                                 fileContent,
                                 fileInfo.getPath(),
@@ -912,14 +899,14 @@ public class LANService extends BaseService {
                 IOUtil.write(mOut, dataEnc.getData(), dataEnc.getDataLen());
                 totalSend += ten;
                 thatSend += ten;
-                int prngeress = (int) (totalSend * 100.0F / totalLength);
-                if (prngeress != p) {
-                    folderContent.setProgress(prngeress);
+                int progress = (int) (totalSend * 100.0F / totalLength);
+                if (progress != p) {
+                    folderContent.setProgress(progress);
                     Message mMessage = Message.obtain();
                     mMessage.what = mCmd.SERVICE_PROGRESS;
                     mMessage.obj = folderContent;
                     messageSend(mMessage);
-                    p = prngeress;
+                    p = progress;
                 }
             }
         } catch (IOException e) {
@@ -954,7 +941,7 @@ public class LANService extends BaseService {
             e.printStackTrace();
         }
         ViewUpdate.runThread(() -> {
-            while (isRun) {
+            while (running) {
                 try {
                     // 等待客户端连接
                     Socket client = fileRecive.accept();
@@ -968,34 +955,27 @@ public class LANService extends BaseService {
 
 
     // 获取自己的设备信息
-    public Device getDevice() {
-        Device device = new Device();
-        device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
-
-        NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(service);
-
-        if (StringUtils.isEmpty(oneNetWorkInfo.getIp())
-                || StringUtils.isEmpty(oneNetWorkInfo.getMask())) {
-            device.setDevIP("127.0.0.1");
-            device.setDevNetMask(NetWorkUtil.getMaskMap(24));
-            device.setDevBrotIP(NetWorkUtil.getBroadcastAddress(24, "127.0.0.1"));
-        } else {
-            device.setDevIP(oneNetWorkInfo.getIp());
-            device.setDevNetMask(oneNetWorkInfo.getMask());
-            device.setDevBrotIP(oneNetWorkInfo.getBrodIp());
+    public List<Device> getDevices() {
+//        NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(service);
+        List<NetInfo> netInfoList = NetWorkUtil.getNetInfoList();
+        List<Device> mDeviceList = new ArrayList<>();
+        for (NetInfo netInfo : netInfoList) {
+            Device device = new Device();
+            device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
+            device.setDevIP(netInfo.getIp());
+            device.setDevNetMask(netInfo.getMask());
+            device.setDevBrotIP(netInfo.getBrodIp());
+            device.setDevPort(Config.FILE_SERVER_PORT);
+            device.setDevMode(Device.ANDROID);
+            mDeviceList.add(device);
         }
-
-        device.setDevPort(Config.FILE_SERVER_PORT);
-        device.setDevMode(Device.ANDROID);
-
-        Message mMessage = Message.obtain();
-        mMessage.what = mCmd.SERVICE_NETWORK_CHANGES;
-        mMessage.obj = oneNetWorkInfo;
-        messageSend(mMessage);
-
-        // 计算广播ip
-        //  T.s("IP:" + locAddress + " mask:" + locMask + " BrotIP:" + device.getDevBrotIP());
-        return device;
+        if (!netInfoList.isEmpty()) {
+            Message mMessage = Message.obtain();
+            mMessage.what = mCmd.SERVICE_NETWORK_CHANGES;
+            mMessage.obj = netInfoList.get(0);
+            messageSend(mMessage);
+        }
+        return mDeviceList;
     }
 
     public String getDevName() {
@@ -1006,16 +986,23 @@ public class LANService extends BaseService {
     public void noticeDeviceOnLineByIp(String ip) {
         byte[] bytes = new byte[2048];
         DataEnc dataEnc = new DataEnc(bytes);
-        dataEnc.setCmd(mCmd.UDP_SET_DEVICES);
-        dataEnc.putInt(mDevice.getDevPort());
-        dataEnc.putString(mDevice.getDevIP());
-        dataEnc.putString(getDevName());
-        dataEnc.putInt(mDevice.getDevMode());
-        try {
-            UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), ip, Config.UDP_PORT);
-        } catch (SocketException e) {
-            e.printStackTrace();
+        for (Device device : mDevice) {
+            if (NetWorkUtil.subNet(device.getDevIP(), ip, device.getDevNetMask())) {
+                dataEnc.setCmd(mCmd.UDP_SET_DEVICES);
+                dataEnc.putInt(device.getDevPort());
+                dataEnc.putString(device.getDevIP());
+                dataEnc.putString(getDevName());
+                dataEnc.putInt(device.getDevMode());
+                try {
+                    UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), ip, Config.UDP_PORT);
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+                dataEnc.reset();
+            }
         }
+
+
     }
 
     DatagramSocket ipGetSocket = null;
@@ -1057,9 +1044,10 @@ public class LANService extends BaseService {
                     int cmd = dataDec.getCmd();
                     if (cmd == mCmd.UDP_GET_DEVICES) {
                         String devIp = dataDec.getString();
-                        // 排除自己发送的数据
-                        if (devIp != null && devIp.equals(mDevice.getDevIP())) {
-                            return;
+                        for (Device device : mDevice) {
+                            if (devIp != null && devIp.equals(device.getDevIP())) {
+                                return;
+                            }
                         }
                         // 向设备发送自己的数据
                         ViewUpdate.runThread(() -> noticeDeviceOnLineByIp(devIp));
@@ -1070,8 +1058,10 @@ public class LANService extends BaseService {
                         int devMode = dataDec.getInt();
 
                         // 排除自己发送的数据
-                        if (devIp != null && devIp.equals(mDevice.getDevIP())) {
-                            return;
+                        for (Device device : mDevice) {
+                            if (devIp != null && devIp.equals(device.getDevIP())) {
+                                return;
+                            }
                         }
 
                         String address = devIp + ":" + devPort;
@@ -1089,8 +1079,10 @@ public class LANService extends BaseService {
                     } else if (cmd == mCmd.UDP_DEVICES_MESSAGE) {
                         String devIp = dataDec.getString();
                         // 排除自己发送的w数据
-                        if (devIp != null && devIp.equals(mDevice.getDevIP())) {
-                            return;
+                        for (Device device : mDevice) {
+                            if (devIp != null && devIp.equals(device.getDevIP())) {
+                                return;
+                            }
                         }
                         String devName = dataDec.getString();
                         String message = dataDec.getString();
@@ -1108,8 +1100,10 @@ public class LANService extends BaseService {
                     } else if (cmd == mCmd.UDP_DEVICES_MESSAGE_TO_CLIPBOARD) {
                         String devIp = dataDec.getString();
                         // 排除自己发送的数据
-                        if (devIp != null && devIp.equals(mDevice.getDevIP())) {
-                            return;
+                        for (Device device : mDevice) {
+                            if (devIp != null && devIp.equals(device.getDevIP())) {
+                                return;
+                            }
                         }
                         String devName = dataDec.getString();
                         String message = dataDec.getString();
@@ -1137,7 +1131,7 @@ public class LANService extends BaseService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        isRun = false;
+        running = false;
         IOUtil.closeIO(ipGetSocket, fileRecive);
         unregisterReceiver(netWorkReceiver);
     }
@@ -1145,60 +1139,74 @@ public class LANService extends BaseService {
     // 局域网扫描设备
     public void scannDevice() {
         ViewUpdate.runThread(() -> {
-            while (isRun) {
-                try {
-                    if (!StringUtils.isEmpty(mDevice.getDevBrotIP())) {
-                        DataEnc dataEnc = new DataEnc(1024);
-                        dataEnc.setCmd(mCmd.UDP_GET_DEVICES);
-                        dataEnc.putString(mDevice.getDevIP());
-                        UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), mDevice.getDevBrotIP(), Config.UDP_PORT);
-                    }
-                    Thread.sleep(5000);
-                    long currentTime = System.currentTimeMillis();
-                    // 移除没有心跳的设备
-                    for (String key : devices.keySet()) {
-                        Device device = devices.get(key);
-                        if (device != null) {
-                            long setTime = device.getSetTime();
-                            long timeOut = currentTime - setTime;
-                            // 超过20秒没有心跳的设备直接移除
-                            if (timeOut > (1000 * 20)) {
-                                devices.remove(key);
+            while (running) {
+                for (Device device : mDevice) {
+                    try {
+                        if (!StringUtils.isEmpty(device.getDevBrotIP())) {
+                            DataEnc dataEnc = new DataEnc(1024);
+                            dataEnc.setCmd(mCmd.UDP_GET_DEVICES);
+                            dataEnc.putString(device.getDevIP());
+                            UDPTools.sendData(
+                                    new DatagramSocket(),
+                                    dataEnc.getData(),
+                                    dataEnc.getDataLen(),
+                                    device.getDevBrotIP(),
+                                    Config.UDP_PORT
+                            );
+                        }
+                        Thread.sleep(5000);
+                        long currentTime = System.currentTimeMillis();
+                        // 移除没有心跳的设备
+                        for (String key : devices.keySet()) {
+                            Device d = devices.get(key);
+                            if (d != null) {
+                                long setTime = d.getSetTime();
+                                long timeOut = currentTime - setTime;
+                                // 超过20秒没有心跳的设备直接移除
+                                if (timeOut > (1000 * 20)) {
+                                    devices.remove(key);
+                                }
                             }
                         }
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
         });
     }
 
     // 广播发送信息
-    public void broadcastMessage(Device device, String message, boolean isClip) {
+    public void broadcastMessage(Device toDevice, String message, boolean isClip) {
         if (message.length() > 700) {
             return;
         }
-        DataEnc dataEnc = new DataEnc(1024 + message.getBytes().length);
-        dataEnc.setCmd(isClip ? mCmd.UDP_DEVICES_MESSAGE_TO_CLIPBOARD : mCmd.UDP_DEVICES_MESSAGE);
-        dataEnc.putString(mDevice.getDevIP());
-        dataEnc.putString(getDevName());
-        dataEnc.putString(message);
 
         ViewUpdate.runThread(() -> {
-            try {
-                if (device == null) {
-                    for (Device dev : devices.values()) {
-                        UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), dev.getDevIP(), Config.UDP_PORT);
+            for (Device fromDevice : mDevice) {
+                DataEnc dataEnc = new DataEnc(1024 + message.getBytes().length);
+                dataEnc.setCmd(isClip ? mCmd.UDP_DEVICES_MESSAGE_TO_CLIPBOARD : mCmd.UDP_DEVICES_MESSAGE);
+                dataEnc.putString(fromDevice.getDevIP());
+                dataEnc.putString(getDevName());
+                dataEnc.putString(message);
+                try {
+                    if (toDevice == null) {
+                        for (Device dev : devices.values()) {
+                            if (NetWorkUtil.subNet(dev.getDevIP(),
+                                    fromDevice.getDevIP(), fromDevice.getDevNetMask())) {
+                                UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), dev.getDevIP(), Config.UDP_PORT);
+                            }
+                        }
+                    } else {
+                        UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), fromDevice.getDevIP(), Config.UDP_PORT);
                     }
-                } else {
-                    UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), device.getDevIP(), Config.UDP_PORT);
+                } catch (SocketException e) {
+                    e.printStackTrace();
                 }
-            } catch (SocketException e) {
-                e.printStackTrace();
             }
+
         });
 
     }

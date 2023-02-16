@@ -17,7 +17,9 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 public class NetWorkUtil {
 
@@ -35,6 +37,8 @@ public class NetWorkUtil {
 
     public static final String UNKNOWN = "未知";
 
+    public static final String LOCALHOST = "127.0.0.1";
+
 
     // 监听热点状态
     public static final String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
@@ -51,6 +55,8 @@ public class NetWorkUtil {
 
     public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
 
+    public static final int ALL_BIT = 32 /* ip address have 32 bits */;
+
 
     public static boolean isWifiApEnabled(Context mContext) {
         WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -66,18 +72,22 @@ public class NetWorkUtil {
 
     public static NetInfo createDefaultNetinfo() {
         NetInfo netInfo = new NetInfo();
-        netInfo.setIp("127.0.0.1");
+        netInfo.setIp(LOCALHOST);
         netInfo.setMask(getMaskMap(24));
         netInfo.setName(UNKNOWN);
-        netInfo.setBrodIp(getBroadcastAddress(24, "127.0.0.1"));
+        netInfo.setBrodIp(getBroadcastAddress(24, LOCALHOST));
         return netInfo;
     }
 
     public static NetInfo getOneNetWorkInfo(Context context) {
         if (isWifiApEnabled(context)) {   //  如果有开启热点默认会使用热点的ip
             NetInfo netByName = getNetByName(WLAN_1);
-            if (netByName == null)
+            if (netByName == null) {
+                netByName = getNetByName(WLAN_0);
+            }
+            if (netByName == null) {
                 return createDefaultNetinfo();
+            }
             netByName.setName(WLAN_1_NAME);
             return netByName;
         } else {
@@ -100,6 +110,45 @@ public class NetWorkUtil {
             }
         }
         return createDefaultNetinfo();
+    }
+
+    public static List<NetInfo> getNetInfoList() {
+        List<NetInfo> netInfos = new ArrayList<>();
+        try {
+            // 获取本机所有的网络接口
+            Enumeration<NetworkInterface> enNetworkInterface = NetworkInterface.getNetworkInterfaces();
+            // 判断 Enumeration 对象中是否还有数据
+            while (enNetworkInterface.hasMoreElements()) {
+                // 获取 Enumeration 对象中的下一个数据
+                NetworkInterface networkInterface = enNetworkInterface.nextElement();
+                // 判断网口是否在使用
+                if (!networkInterface.isUp()) {
+                    continue;
+                }
+                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                    if (interfaceAddress.getAddress() instanceof Inet4Address) {
+                        String hostAddress = interfaceAddress.getAddress().getHostAddress();
+                        String maskMap = getMaskMap(interfaceAddress.getNetworkPrefixLength());
+                        String broadcastAddress = interfaceAddress.getBroadcast().getHostAddress();
+                        if (hostAddress.equals(LOCALHOST)) {
+                            continue;
+                        }
+                        NetInfo netInfo = new NetInfo();
+                        netInfo.setIp(hostAddress);
+                        netInfo.setMask(maskMap);
+                        netInfo.setBrodIp(broadcastAddress);
+                        netInfos.add(netInfo);
+//                        System.out.println("IP:" + interfaceAddress.getAddress().getHostAddress());
+//                        System.out.println("掩码:" + maskMap);
+//                        System.out.println("广播地址:" + broadcastAddress);
+//                        System.out.println();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return netInfos;
     }
 
     public static NetInfo getNetByName(String interfaceName) {
@@ -137,7 +186,6 @@ public class NetWorkUtil {
 
     //  通过子网长度获取子网掩码
     public static String getMaskMap(int length) {
-
         int mask = 0xffffffff << (32 - length);
         int partsNum = 4;
         int bitsOfPart = 8;
@@ -157,16 +205,45 @@ public class NetWorkUtil {
 
 
     /**
-     * 将得到的int类型的IP转换为String类型
-     *
-     * @param ip
-     * @return
+     * 将int类型的IP转换为String类型
      */
     public static String intIP2StringIP(int ip) {
         return (ip & 0xFF) + "." +
                 ((ip >> 8) & 0xFF) + "." +
                 ((ip >> 16) & 0xFF) + "." +
                 (ip >> 24 & 0xFF);
+    }
+
+    /**
+     * 将String类型的IP转换为int类型
+     */
+    public static int stringIP2intIP(String ip) {
+        String[] ips = ip.split("\\.");
+        return (Integer.parseInt(ips[0]) << 24)
+                | (Integer.parseInt(ips[1]) << 16)
+                | (Integer.parseInt(ips[2]) << 8)
+                | Integer.parseInt(ips[3]);
+    }
+
+    public static int getMaskMapLength(String netmask) {
+        String[] data = netmask.split("\\.");
+        int len = 0;
+        for (String n : data) {
+            len += (8 - Math.log(256 - Integer.parseInt(n)) / Math.log(2));
+        }
+        return len;
+    }
+
+    public static boolean subNet(String ip1, String ip2, String sub_mask) {
+        return subNet(ip1, ip2, getMaskMapLength(sub_mask));
+    }
+
+    public static boolean subNet(String ip1, String ip2, int sub_mask) {
+        int mask = 0xFFFFFFFF;
+        mask = mask << (ALL_BIT - sub_mask);
+        int ipA = stringIP2intIP(ip1) & mask;
+        int ipB = stringIP2intIP(ip2) & mask;
+        return ipA == ipB;
     }
 
     /**
@@ -234,42 +311,4 @@ public class NetWorkUtil {
         return total;
 
     }
-
-
-    /*// 通过子网长度获取子网掩码
-    public static String getMaskMap(int maskBit) {
-        if (maskBit == 1) return "128.0.0.0";
-        if (maskBit == 2) return "192.0.0.0";
-        if (maskBit == 3) return "224.0.0.0";
-        if (maskBit == 4) return "240.0.0.0";
-        if (maskBit == 5) return "248.0.0.0";
-        if (maskBit == 6) return "252.0.0.0";
-        if (maskBit == 7) return "254.0.0.0";
-        if (maskBit == 8) return "255.0.0.0";
-        if (maskBit == 9) return "255.128.0.0";
-        if (maskBit == 10) return "255.192.0.0";
-        if (maskBit == 11) return "255.224.0.0";
-        if (maskBit == 12) return "255.240.0.0";
-        if (maskBit == 13) return "255.248.0.0";
-        if (maskBit == 14) return "255.252.0.0";
-        if (maskBit == 15) return "255.254.0.0";
-        if (maskBit == 16) return "255.255.0.0";
-        if (maskBit == 17) return "255.255.128.0";
-        if (maskBit == 18) return "255.255.192.0";
-        if (maskBit == 19) return "255.255.224.0";
-        if (maskBit == 20) return "255.255.240.0";
-        if (maskBit == 21) return "255.255.248.0";
-        if (maskBit == 22) return "255.255.252.0";
-        if (maskBit == 23) return "255.255.254.0";
-        if (maskBit == 24) return "255.255.255.0";
-        if (maskBit == 25) return "255.255.255.128";
-        if (maskBit == 26) return "255.255.255.192";
-        if (maskBit == 27) return "255.255.255.224";
-        if (maskBit == 28) return "255.255.255.240";
-        if (maskBit == 29) return "255.255.255.248";
-        if (maskBit == 30) return "255.255.255.252";
-        if (maskBit == 31) return "255.255.255.254";
-        if (maskBit == 32) return "255.255.255.255";
-        return "-1";
-    }*/
 }
