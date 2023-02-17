@@ -48,7 +48,7 @@ public class FileSendDialog extends Dialog implements DeviceDialogAdapter.OnItem
     @SuppressLint("SetTextI18n")
     public void initList() {
         tvCount.setText("已选择" + count + "个文件");
-        Map<String, Device> deviceMap = LANService.service.devices;
+        Map<String, Device> deviceMap = LANService.getInstance().devices;
 
         List<Device> deviceList;
         if (deviceMap.size() > 0) {

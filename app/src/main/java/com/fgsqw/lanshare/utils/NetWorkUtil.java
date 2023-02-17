@@ -133,10 +133,10 @@ public class NetWorkUtil {
                         }
                         String maskMap = getMaskMap(interfaceAddress.getNetworkPrefixLength());
                         InetAddress broadcast = interfaceAddress.getBroadcast();
-                        String broadcastAddress = "";
-                        if (broadcast != null) {
-                            broadcastAddress = broadcast.getHostAddress();
+                        if (broadcast == null) {
+                            continue;
                         }
+                        String broadcastAddress = broadcast.getHostAddress();
                         NetInfo netInfo = new NetInfo();
                         netInfo.setIp(hostAddress);
                         netInfo.setMask(maskMap);

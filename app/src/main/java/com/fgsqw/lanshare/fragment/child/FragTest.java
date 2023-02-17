@@ -15,7 +15,7 @@ import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 public class FragTest extends BaseFragment implements  ChildBaseMethod {
 
 
-    public static final String TAG = "ddddddddd";
+    public static final String TAG = "FragTest";
     View view;
 
     @Override

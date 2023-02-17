@@ -4,7 +4,7 @@ public class mCmd {
 
     // 局域网通讯命令
     public static final int UDP_GET_DEVICES = 1001;        // 获取设备
-    public static final int UDP_SET_DEVICES = 1002;        // 设置设备
+    public static final int UDP_SET_DEVICES = 1002;        // 设置设备(心跳设置)
     public static final int UDP_DEVICES_OFF_LINE = 1003;   // 设备下线
     public static final int UDP_DEVICES_MESSAGE = 1004;    // 广播消息
     public static final int UDP_DEVICES_MESSAGE_TO_CLIPBOARD = 1005;    // 广播消息到剪切板

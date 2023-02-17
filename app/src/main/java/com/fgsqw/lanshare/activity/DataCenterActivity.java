@@ -17,8 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
@@ -33,11 +31,9 @@ import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.service.LANService;
-import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
 import com.fgsqw.lanshare.utils.IOUtil;
-import com.fgsqw.lanshare.utils.MD5Utils;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.ViewUpdate;
@@ -60,14 +56,10 @@ import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE
 
 
 @SuppressWarnings("all")
-public class DataCenterActivity extends BaseActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener {
+public class DataCenterActivity extends BaseActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnLongClickListener {
 
-
-    /**
-     * 添加设备
-     */
-    public static final int ADD_DEVICE = 0x800;
     private LinearLayout bottomRecord;
+    private LinearLayout mainScan;
     private ImageView imgRecord;
     private TextView tvRecord;
 
@@ -92,11 +84,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
         initView();
         initFragment();
-
-
         Intent lanService = new Intent();
         lanService.setClass(this, LANService.class);
         lanService.putExtra("messenger", new Messenger(fragChat.getHandler()));
@@ -137,6 +126,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     public void initView() {
         bottomRecord = bind(R.id.bottom_record);
+        mainScan = bind(R.id.main_scan);
         imgRecord = bind(R.id.img_record);
         tvRecord = bind(R.id.bottom_record_tv);
 
@@ -156,6 +146,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         bottomRecord.setOnClickListener(this);
         bottomSend.setOnClickListener(this);
         bottomFiles.setOnClickListener(this);
+        mainScan.setOnClickListener(this);
+        mainScan.setOnLongClickListener(this);
     }
 
 
@@ -207,6 +199,20 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         }
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        switch (v.getId()) {
+            case R.id.main_scan: {
+                startActivity(new Intent(this, DeviceQrCodeActivity.class));
+                break;
+            }
+            default:
+                break;
+        }
+
+        return true;
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -227,6 +233,17 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 switchFragment(1);
                 break;
             }
+            case R.id.main_scan: {
+                //打开扫描界面
+                IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+                intentIntegrator.setOrientationLocked(false);
+                intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+                intentIntegrator.setCaptureActivity(ZxingActivity.class); // 设置自定义的activity是QRActivity
+                intentIntegrator.setRequestCode(REQUEST_CODE);
+                intentIntegrator.initiateScan();
+                break;
+            }
+
             default:
                 break;
         }
@@ -236,7 +253,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     public void sendOneFile(FileInfo fileInfo) {
         FileSendDialog dialog = new FileSendDialog(this, 1);
         dialog.setOnDeviceSelect(device -> {
-            LANService.service.fileSend(device, Arrays.asList(fileInfo));
+            LANService.getInstance().fileSend(device, Arrays.asList(fileInfo));
         });
         dialog.show();
     }
@@ -245,7 +262,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     public void sendFiles(List<FileInfo> fileSelects) {
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
         dialog.setOnDeviceSelect(device -> {
-            LANService.service.fileSend(device, new LinkedList<>(fileSelects));
+            LANService.getInstance().fileSend(device, new LinkedList<>(fileSelects));
             ((ChildBaseMethod) fragFiles).clearSelect();
             fileSelects.clear();
             setSelectCount(fileSelects.size());
@@ -310,54 +327,49 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
             String qrContent = scanResult.getContents();
             if (!StringUtils.isEmpty(qrContent)) {
-                fragChat.setEditContent(qrContent);
-            }
-        }
-
-        if (requestCode == ADD_DEVICE) {
-            IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
-            String qrContent = scanResult.getContents();
-            try {
-                AddDevice addDevice = new Gson().fromJson(qrContent, AddDevice.class);
-                ViewUpdate.runThread(() -> {
-                    List<Device> devices = addDevice.getDevices();
-                    if (devices != null && !devices.isEmpty()) {
-                        for (Device device : devices) {
-                            Socket socket = new Socket();
-                            try {
-                                socket.connect(new InetSocketAddress(device.getDevIP(), device.getDevPort()), 2000);
-                                InputStream inputStream = socket.getInputStream();
-                                OutputStream outputStream = socket.getOutputStream();
-                                String uuid = StringUtils.getUUID();
-                                byte[] buffer = new byte[1024];
-                                DataEnc dataEnc = new DataEnc(buffer);
-                                dataEnc.setCmd(mCmd.FS_ADD_DEVICE);
-                                dataEnc.putString(uuid);
-                                IOUtil.write(outputStream, dataEnc.getData());
-                                DataDec dataDec = new DataDec(buffer);
-                                if (IOUtil.read(inputStream, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
-                                    continue;
-                                int length = dataDec.getLength();
-                                if (IOUtil.read(inputStream, buffer, DataEnc.getHeaderSize(), length) != length)
-                                    continue;
-                                String sgin = dataDec.getString();
-                                if (sgin.equals(Config.sgin(uuid))) {
-                                    String address = device.getDevIP() + ":" + device.getDevPort();
-                                    LANService.service.devices.put(address, device);
+                try {
+                    // 先判断二维码是否是添加设备
+                    AddDevice addDevice = new Gson().fromJson(qrContent, AddDevice.class);
+                    if (!Config.KEY.equals(addDevice.getKey())) {
+                        throw new RuntimeException();
+                    }
+                    ViewUpdate.runThread(() -> {
+                        List<Device> devices = addDevice.getDevices();
+                        if (devices != null && !devices.isEmpty()) {
+                            for (Device device : devices) {
+                                Socket socket = new Socket();
+                                try {
+                                    socket.connect(new InetSocketAddress(device.getDevIP(), device.getDevPort()), 2000);
+                                    InputStream inputStream = socket.getInputStream();
+                                    OutputStream outputStream = socket.getOutputStream();
+                                    String uuid = StringUtils.getUUID();
+                                    byte[] buffer = new byte[1024];
+                                    DataEnc dataEnc = new DataEnc(buffer);
+                                    dataEnc.setCmd(mCmd.FS_ADD_DEVICE);
+                                    dataEnc.putString(uuid);
+                                    IOUtil.write(outputStream, dataEnc.getData());
+                                    DataDec dataDec = new DataDec(buffer);
+                                    if (IOUtil.read(inputStream, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
+                                        continue;
+                                    int length = dataDec.getLength();
+                                    if (IOUtil.read(inputStream, buffer, DataEnc.getHeaderSize(), length) != length)
+                                        continue;
+                                    String sgin = dataDec.getString();
+                                    if (sgin.equals(Config.sgin(uuid))) {
+                                        String address = device.getDevIP() + ":" + device.getDevPort();
+                                        LANService.getInstance().devices.put(address, device);
+                                    }
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
                                 }
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
                             }
                         }
-                    }
-                });
-
-            } catch (Exception e) {
-                e.printStackTrace();
+                    });
+                } catch (Exception e) {
+                    fragChat.setEditContent(qrContent);
+                }
             }
-            T.s("二维码格式错误!");
         }
-
     }
 
     public void hideBottom() {
@@ -386,30 +398,9 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                     fragChat.messageDelete();
                 }
                 break;
-            case R.id.menu_scan: {
-                //打开扫描界面
-                IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-                intentIntegrator.setOrientationLocked(false);
-                intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
-                intentIntegrator.setCaptureActivity(ZxingActivity.class); // 设置自定义的activity是QRActivity
-                intentIntegrator.setRequestCode(REQUEST_CODE);
-                intentIntegrator.initiateScan();
-            }
-            break;
-            case R.id.menu_add_manually: {
-                IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-                intentIntegrator.setOrientationLocked(false);
-                intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
-                intentIntegrator.setCaptureActivity(ZxingActivity.class); // 设置自定义的activity是QRActivity
-                intentIntegrator.setRequestCode(ADD_DEVICE);
-                intentIntegrator.initiateScan();
-            }
-            break;
             case R.id.menu_exit:
-//                stopService(new Intent(this, LANService.class));
-//                finish();
-                startActivity(new Intent(this, TestActivity.class));
-
+                stopService(new Intent(this, LANService.class));
+                finish();
                 break;
            /* case R.id.menu_camera_send:
                 startActivity(new Intent(this, MainActivity.class));
@@ -421,6 +412,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         }
         return true;
     }
+
+
 }
 
 

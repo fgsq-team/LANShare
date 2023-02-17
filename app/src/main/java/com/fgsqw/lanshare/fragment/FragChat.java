@@ -159,10 +159,10 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 .setMessage("是否接收来自" + device.getDevName() + "的" + msg.arg1 + "个文件")
                 .setPositiveButton("确定", (dialogInterface, i) -> {
                     dialogInterface.dismiss();
-                    LANService.service.startRecvFile(dataObject, true);
+                    LANService.getInstance().startRecvFile(dataObject, true);
                 }).setNegativeButton("取消", (dialogInterface, i) -> {
                     dialogInterface.dismiss();
-                    LANService.service.startRecvFile(dataObject, false);
+                    LANService.getInstance().startRecvFile(dataObject, false);
                 });
         builder.create().show();
     }
@@ -406,7 +406,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
             mSocket socket = fileContent.getSocket();
             if (socket != null) {
                 if (fileContent.isLeft()) {
-                    LANService.service.sendCloseCmd(fileContent, socket.getOut());
+                    LANService.getInstance().sendCloseCmd(fileContent, socket.getOut());
                 } else {
                     socket.mClose();
                 }
@@ -446,9 +446,9 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 messageContent.setId(StringUtils.getUUID());
                 messageContent.setLeft(false);
                 messageContent.setContent(message);
-                messageContent.setUserName(LANService.service.getDevName());
+                messageContent.setUserName(LANService.getInstance().getDevName());
                 messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
-                LANService.service.broadcastMessage(selectedDevice, message, false);
+                LANService.getInstance().broadcastMessage(selectedDevice, message, false);
                 addMessage(messageContent, true);
                 editContent.setText("");
                 break;
@@ -510,9 +510,9 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 messageContent.setId(StringUtils.getUUID());
                 messageContent.setLeft(false);
                 messageContent.setContent(message);
-                messageContent.setUserName(LANService.service.getDevName());
+                messageContent.setUserName(LANService.getInstance().getDevName());
                 messageContent.setToUser(selectedDevice == null ? "所有设备" : selectedDevice.getDevName());
-                LANService.service.broadcastMessage(selectedDevice, message, true);
+                LANService.getInstance().broadcastMessage(selectedDevice, message, true);
                 addMessage(messageContent, true);
                 editContent.setText("");
                 break;

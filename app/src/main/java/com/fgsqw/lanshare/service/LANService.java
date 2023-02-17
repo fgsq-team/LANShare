@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class LANService extends BaseService {
     public static final String TAG = "LANService";
-    public static LANService service;
+    public static LANService instance;
     // TCP服务监听
     private ServerSocket fileRecive;
     // 在线设备列表
@@ -91,6 +91,10 @@ public class LANService extends BaseService {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    public static LANService getInstance() {
+        return instance;
+    }
+
     WifiManager.MulticastLock multicastLock;
 
     @Override
@@ -99,8 +103,7 @@ public class LANService extends BaseService {
         multicastLock = mWifiManager.createMulticastLock("multicastLock");
 //        multicastLock.setReferenceCounted(false);
         super.onCreate();
-
-        service = this;
+        instance = this;
         // 自定义配置文件工具类
         prefUtil = new PrefUtil(this);
         // Service保活
@@ -154,7 +157,7 @@ public class LANService extends BaseService {
     }
 
     // 监听接收文件信息
-    public void handelFile(Socket client) {
+    public void handleTcp(Socket client) {
         InputStream input;
         OutputStream out;
         try {
@@ -190,6 +193,9 @@ public class LANService extends BaseService {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
             }
+
+
+
             IOUtil.closeIO(input, out, client);
         } else if (cmd == mCmd.FS_SHARE_FILE) {  // 接收文件
             // 文件数量
@@ -961,7 +967,7 @@ public class LANService extends BaseService {
                 try {
                     // 等待客户端连接
                     Socket client = fileRecive.accept();
-                    ViewUpdate.runThread(() -> handelFile(client));
+                    ViewUpdate.runThread(() -> handleTcp(client));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -1025,7 +1031,7 @@ public class LANService extends BaseService {
 
     // 监听并处理获取客户和设置客户端命令
     public void runRecive() {
-        new Thread(() -> {
+        ViewUpdate.runThread(() -> {
             byte[] buf = new byte[4096];
             byte[] newBuf = new byte[4096];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -1141,7 +1147,7 @@ public class LANService extends BaseService {
                 });
             }
 
-        }).start();
+        });
     }
 
     @Override
@@ -1156,27 +1162,26 @@ public class LANService extends BaseService {
     public void scannDevice() {
         ViewUpdate.runThread(() -> {
             while (running) {
-                for (Device device : mDevice) {
+                for (Device selfDevice : mDevice) {
                     try {
-                        if (!StringUtils.isEmpty(device.getDevBrotIP())) {
+                        if (!StringUtils.isEmpty(selfDevice.getDevBrotIP())) {
                             DataEnc dataEnc = new DataEnc(1024);
                             dataEnc.setCmd(mCmd.UDP_GET_DEVICES);
-                            dataEnc.putString(device.getDevIP());
+                            dataEnc.putString(selfDevice.getDevIP());
                             UDPTools.sendData(
                                     new DatagramSocket(),
                                     dataEnc.getData(),
                                     dataEnc.getDataLen(),
-                                    device.getDevBrotIP(),
+                                    selfDevice.getDevBrotIP(),
                                     Config.UDP_PORT
                             );
                         }
-                        Thread.sleep(5000);
                         long currentTime = System.currentTimeMillis();
                         // 移除没有心跳的设备
                         for (String key : devices.keySet()) {
-                            Device d = devices.get(key);
-                            if (d != null) {
-                                long setTime = d.getSetTime();
+                            Device device = devices.get(key);
+                            if (device != null) {
+                                long setTime = device.getSetTime();
                                 long timeOut = currentTime - setTime;
                                 // 超过20秒没有心跳的设备直接移除
                                 if (timeOut > (1000 * 20)) {
@@ -1186,9 +1191,12 @@ public class LANService extends BaseService {
                         }
                     } catch (SocketException e) {
                         e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
+                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

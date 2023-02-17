@@ -54,6 +54,7 @@
     <string name="save_message_detail">开启后会保存所有消息内容</string>
     <string name="save_to_gallery">保存媒体到相册</string>
     <string name="save_to_gallery_detail">开启后接收到媒体文件会直接添加到下相册</string>
+    <string name="device_qr_code_info">需要设备在同一局域网扫码才能生效</string>
 
 
 </resources>

@@ -45,7 +45,7 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
 
     @SuppressLint("SetTextI18n")
     public void initList() {
-        Map<String, Device> deviceMap = LANService.service.devices;
+        Map<String, Device> deviceMap = LANService.getInstance().devices;
 
         List<Device> deviceList = new ArrayList<>();
         Device device = new Device();
