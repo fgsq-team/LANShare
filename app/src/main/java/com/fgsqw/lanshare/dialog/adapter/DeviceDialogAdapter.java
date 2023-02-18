@@ -15,11 +15,13 @@ import com.bumptech.glide.Glide;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.pojo.Device;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapter.ViewHolder> {
-    private List<Device> deviceList;
+
+    private List<Device> deviceList = new ArrayList<>();
 
     OnItemClickListener onItemClickListener;
 
@@ -28,6 +30,10 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
 
     Context context;
 
+
+    public DeviceDialogAdapter(Context context) {
+        this.context = context;
+    }
 
     public DeviceDialogAdapter(Context context, List<Device> deviceList) {
         this.deviceList = deviceList;

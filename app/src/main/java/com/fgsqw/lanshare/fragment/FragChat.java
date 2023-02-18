@@ -41,6 +41,7 @@ import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
 import com.fgsqw.lanshare.pojo.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.MessageUriContent;
 import com.fgsqw.lanshare.pojo.NetInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mSocket;
@@ -256,7 +257,9 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     }
                 } else {
 
-                    if (messageContent instanceof MessageFolderContent) {
+                    if (messageContent instanceof MessageUriContent) {
+                        T.s("暂不支持分享文件查看");
+                    } else if (messageContent instanceof MessageFolderContent) {
                         T.s("暂不支持打开文件夹,清在件管理器中查看");
                     } else {
                         if (fileContent.getStatus() == MessageContent.SUCCESS) {

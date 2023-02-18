@@ -1,6 +1,7 @@
 package com.fgsqw.lanshare.utils;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -13,8 +14,10 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.toast.T;
 
 import java.io.ByteArrayOutputStream;
@@ -716,16 +719,14 @@ public class FileUtil {
         return getMyMIMEType(end);
     }
 
-    public static <E> byte[] objectToBytes(E obj) throws IOException {
-        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(arrayOutputStream);
-        objectOutputStream.writeObject(obj);
-        objectOutputStream.flush();
-        byte[] data = arrayOutputStream.toByteArray();
-        objectOutputStream.close();
-        arrayOutputStream.close();
-        return data;
+
+    public static DocumentFile getFileRealNameFromUri(Uri fileUri) {
+        if (fileUri == null) return null;
+        return DocumentFile.fromSingleUri(App.getInstance(), fileUri);
     }
 
-
+    public static InputStream getInputStreamFromUri(Uri uri) throws FileNotFoundException {
+        ContentResolver resolver = App.getInstance().getContentResolver();
+        return resolver.openInputStream(uri);
+    }
 }

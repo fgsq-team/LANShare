@@ -1,7 +1,9 @@
 package com.fgsqw.lanshare.activity;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Messenger;
@@ -9,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,12 +32,14 @@ import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.AddDevice;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
+import com.fgsqw.lanshare.pojo.UriFileInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.ByteUtil;
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
+import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
@@ -44,6 +49,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -83,6 +89,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     private PrefUtil prefUtil;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +101,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         lanService.setClass(this, LANService.class);
         lanService.putExtra("messenger", new Messenger(fragChat.getHandler()));
         startService(lanService);
+        processExtraData();
     }
 
     public void updateIP(String ip) {
@@ -104,6 +112,21 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     protected void onStart() {
         super.onStart();
         getConfig();
+    }
+
+    private void processExtraData() {
+        Intent intent = getIntent();
+        List<FileInfo> externalShareFiles = getExternalShareFiles(intent);
+        if (!externalShareFiles.isEmpty()) {
+            sendFiles(externalShareFiles);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        processExtraData();
     }
 
     public void getConfig() {
@@ -323,6 +346,31 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     }
 
+
+    /**
+     * 获取外部分享的文件
+     *
+     * @return
+     */
+    public List<FileInfo> getExternalShareFiles(Intent intent) {
+        List<FileInfo> uris = new ArrayList<>();
+        if (intent == null) {
+            return uris;
+        }
+
+        Uri uri = intent.getParcelableExtra(intent.EXTRA_STREAM);
+        if (uri != null) {
+            uris.add(new UriFileInfo(uri));
+        } else {
+            List<Uri> files = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            if (files != null && !files.isEmpty()) {
+                for (Uri file : files) {
+                    uris.add(new UriFileInfo(file));
+                }
+            }
+        }
+        return uris;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

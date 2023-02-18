@@ -27,7 +27,9 @@ import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
 import com.fgsqw.lanshare.pojo.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.MessageUriContent;
 import com.fgsqw.lanshare.pojo.NetInfo;
+import com.fgsqw.lanshare.pojo.UriFileInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.pojo.mOutputStream;
 import com.fgsqw.lanshare.pojo.mSocket;
@@ -37,6 +39,7 @@ import com.fgsqw.lanshare.utils.ByteUtil;
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
+import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
 import com.fgsqw.lanshare.utils.PrefUtil;
@@ -123,7 +126,7 @@ public class LANService extends BaseService {
         runRecive();
         // 文件接收监听
         fileServer();
-        // 通告局域网所有设备我已上线
+        // 广播局域网所有设备我已上线
         ViewUpdate.runThread(() -> {
             for (Device device : mDevice) {
                 noticeDeviceOnLineByIp(device.getDevBrotIP());
@@ -551,10 +554,7 @@ public class LANService extends BaseService {
                                 file,
                                 fileContent
                         );
-
-
                     }
-
 
                     // 接收成功设置文件路径 失败则删除文件
                     if (totalRecv != fileContent.getLength()) {
@@ -694,7 +694,6 @@ public class LANService extends BaseService {
                 for (Device d : mDevice) {
                     if (NetWorkUtil.subNet(d.getDevIP(), device.getDevIP(), d.getDevNetMask())) {
 
-
                         DataEnc dataEnc = new DataEnc(sendBuffer);
                         dataEnc.setCmd(mCmd.FS_SHARE_FILE);
                         dataEnc.setCount(fileList.size());
@@ -777,6 +776,29 @@ public class LANService extends BaseService {
                                 folderContent.setToUser(device.getDevName());
 
                                 messageFileContents.add(folderContent);
+
+
+                                // Uri分享文件
+                            } else if (fileInfo instanceof UriFileInfo) {
+                                // 写入文件大小
+                                dataEnc.putLong(fileInfo.getLength());
+                                // 写入文件名称
+                                dataEnc.putString(fileInfo.getName());
+                                // 写入文件类型
+                                dataEnc.putInt(mCmd.FILE_FILE);
+                                dataEnc.putString("");
+                                MessageUriContent fileContent =
+                                        new MessageUriContent(((UriFileInfo) fileInfo).getUri());
+                                fileContent.setId(StringUtils.getUUID());
+                                fileContent.setContent(fileInfo.getName());
+                                fileContent.setLength(fileInfo.getLength());
+                                fileContent.setPath(fileInfo.getPath());
+                                fileContent.setSocket(new mSocket(input, out));
+                                fileContent.setIndex(i);
+                                fileContent.setLeft(false);
+                                fileContent.setUserName(userName);
+                                fileContent.setToUser(device.getDevName());
+                                messageFileContents.add(fileContent);
 
                                 // 其他文件
                             } else {
@@ -919,11 +941,15 @@ public class LANService extends BaseService {
     }
 
 
-    public long baseSend(MessageFileContent folderContent, String filePath, DataEnc dataEnc, long mTotalSend, long totalLength, long fileLength) {
-        mOutputStream mOut = folderContent.getSocket().getOutputStream();
+    public long baseSend(MessageFileContent content, String filePath, DataEnc dataEnc, long mTotalSend, long totalLength, long fileLength) {
+        mOutputStream mOut = content.getSocket().getOutputStream();
         InputStream fileIs;
         try {
-            fileIs = new FileInputStream(filePath);
+            if (content instanceof MessageUriContent) {
+                fileIs = FileUtil.getInputStreamFromUri(((MessageUriContent) content).getUri());
+            } else {
+                fileIs = new FileInputStream(filePath);
+            }
         } catch (FileNotFoundException e) {
             return -1;
         }
@@ -936,7 +962,7 @@ public class LANService extends BaseService {
         long totalSend = mTotalSend;
         long thatSend = 0;
         try {
-            folderContent.setStatus(MessageContent.IN);
+            content.setStatus(MessageContent.IN);
             // 读取时偏移掉头的位置
             while ((ten = fileIs.read(sendBuffer, DataEnc.getHeaderSize(), sendBuffer.length - DataEnc.getHeaderSize())) != -1) {
                 dataEnc.setDataIndex(ten);
@@ -945,10 +971,10 @@ public class LANService extends BaseService {
                 thatSend += ten;
                 int progress = (int) (totalSend * 100.0F / totalLength);
                 if (progress != p) {
-                    folderContent.setProgress(progress);
+                    content.setProgress(progress);
                     Message mMessage = Message.obtain();
                     mMessage.what = mCmd.SERVICE_PROGRESS;
-                    mMessage.obj = folderContent;
+                    mMessage.obj = content;
                     messageSend(mMessage);
                     p = progress;
                 }
@@ -967,7 +993,7 @@ public class LANService extends BaseService {
         }
 
         try {
-            IOUtil.write(folderContent.getSocket().getOut(), dataEnc.getData(), dataEnc.getDataLen());
+            IOUtil.write(content.getSocket().getOut(), dataEnc.getData(), dataEnc.getDataLen());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1045,8 +1071,24 @@ public class LANService extends BaseService {
                 dataEnc.reset();
             }
         }
+    }
 
-
+    public void noticeDeviceOffLineByIp(String ip) {
+        byte[] bytes = new byte[2048];
+        DataEnc dataEnc = new DataEnc(bytes);
+        for (Device device : mDevice) {
+            if (NetWorkUtil.subNet(device.getDevIP(), ip, device.getDevNetMask())) {
+                dataEnc.setCmd(mCmd.UDP_DEVICES_OFF_LINE);
+                dataEnc.putInt(device.getDevPort());
+                dataEnc.putString(device.getDevIP());
+                try {
+                    UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), ip, Config.UDP_PORT);
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+                dataEnc.reset();
+            }
+        }
     }
 
     DatagramSocket ipGetSocket = null;
@@ -1094,7 +1136,7 @@ public class LANService extends BaseService {
                             }
                         }
                         // 向设备发送自己的数据
-                        ViewUpdate.runThread(() -> noticeDeviceOnLineByIp(devIp));
+                       /* ViewUpdate.runThread(() ->*/ noticeDeviceOnLineByIp(devIp);
                     } else if (cmd == mCmd.UDP_SET_DEVICES) {
                         int devPort = dataDec.getInt();
                         String devIp = dataDec.getString();
@@ -1108,6 +1150,7 @@ public class LANService extends BaseService {
                             }
                         }
 
+
                         String address = devIp + ":" + devPort;
                         Device device = devices.get(address);
                         if (device == null) {
@@ -1120,6 +1163,17 @@ public class LANService extends BaseService {
                         device.setSetTime(System.currentTimeMillis());
                         devices.put(address, device);
 
+                    } else if (cmd == mCmd.UDP_DEVICES_OFF_LINE) {
+                        int devPort = dataDec.getInt();
+                        String devIp = dataDec.getString();
+                        // 排除自己发送的数据
+                        for (Device device : mDevice) {
+                            if (devIp != null && devIp.equals(device.getDevIP())) {
+                                return;
+                            }
+                        }
+                        String address = devIp + ":" + devPort;
+                        devices.remove(address);
                     } else if (cmd == mCmd.UDP_DEVICES_MESSAGE) {
                         String devIp = dataDec.getString();
                         // 排除自己发送的w数据
@@ -1176,6 +1230,11 @@ public class LANService extends BaseService {
     public void onDestroy() {
         super.onDestroy();
         running = false;
+        ViewUpdate.runThread(() -> {
+            for (Device device : mDevice) {
+                noticeDeviceOffLineByIp(device.getDevBrotIP());
+            }
+        });
         IOUtil.closeIO(ipGetSocket, fileRecive);
         unregisterReceiver(netWorkReceiver);
     }

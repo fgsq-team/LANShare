@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
+import com.fgsqw.lanshare.pojo.MessageUriContent;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -28,7 +29,7 @@ public class MesssageDButil {
 
     public void addMessage(MessageContent messageContent) {
         try {
-            byte[] data = FileUtil.objectToBytes(messageContent);
+            byte[] data = ByteUtil.objectToByte(messageContent);
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             String sql = "insert into " + DBHelper.TABLE_NAME + " values (?,?,1)";
             db.execSQL(sql, new Object[]{messageContent.getId(), data});
@@ -40,10 +41,10 @@ public class MesssageDButil {
     public void updateMessage(MessageContent messageContent) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         try {
-            byte[] data = FileUtil.objectToBytes(messageContent);
+            byte[] data = ByteUtil.objectToByte(messageContent);
             String sql = "update " + DBHelper.TABLE_NAME + " set message = ?2 where id = ?1 ";
             db.execSQL(sql, new Object[]{messageContent.getId(), data});
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -80,14 +81,17 @@ public class MesssageDButil {
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 byte[] data = cursor.getBlob(cursor.getColumnIndex("message"));
-
-                ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(data);
                 try {
-                    ObjectInputStream inputStream = new ObjectInputStream(arrayInputStream);
-                    MessageContent messageContent = (MessageContent) inputStream.readObject();
-                    inputStream.close();
-                    arrayInputStream.close();
-                    if (messageContent instanceof MessageFileContent) {
+                    MessageContent messageContent = ByteUtil.byteToObject(data);
+                    if (messageContent instanceof MessageUriContent) {
+                        MessageUriContent messageUriContent = (MessageUriContent) messageContent;
+                        if (messageUriContent.existStatus(MessageContent.IN)) {
+                            messageUriContent.setStatus(MessageContent.ERROR);
+                            messageUriContent.setStateMessage("未完成");
+                        } else if (messageUriContent.existStatus(MessageContent.SUCCESS)) {
+                            messageUriContent.setStateMessage("已完成");
+                        }
+                    } else if (messageContent instanceof MessageFileContent) {
                         MessageFileContent messageFileContent = (MessageFileContent) messageContent;
                         if (messageFileContent.existStatus(MessageContent.IN)) {
                             messageFileContent.setStatus(MessageContent.ERROR);
