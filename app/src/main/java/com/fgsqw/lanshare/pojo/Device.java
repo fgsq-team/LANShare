@@ -1,6 +1,8 @@
 package com.fgsqw.lanshare.pojo;
 
-public class Device {
+import java.io.Serializable;
+
+public class Device implements Serializable {
     public static final int UNKNOW = -1;
     public static final int ANDROID = 1;
     public static final int WIN = 2;

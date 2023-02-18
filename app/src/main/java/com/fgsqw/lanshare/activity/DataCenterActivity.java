@@ -31,6 +31,8 @@ import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.service.LANService;
+import com.fgsqw.lanshare.toast.T;
+import com.fgsqw.lanshare.utils.ByteUtil;
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
 import com.fgsqw.lanshare.utils.IOUtil;
@@ -79,11 +81,13 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private FragFiles fragFiles;
     private FragChat fragChat;
 
+    private PrefUtil prefUtil;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        prefUtil = new PrefUtil(this);
         initView();
         initFragment();
         Intent lanService = new Intent();
@@ -103,7 +107,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     public void getConfig() {
-        PrefUtil prefUtil = new PrefUtil(this);
+
         String filePath = prefUtil.getString(PreConfig.FILE_PATH);
         if (filePath.isEmpty()) {
             prefUtil.saveString(PreConfig.FILE_PATH, Config.DEFAULT_FILE_SAVE_PATH);
@@ -344,10 +348,19 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                                     OutputStream outputStream = socket.getOutputStream();
                                     String uuid = StringUtils.getUUID();
                                     byte[] buffer = new byte[1024];
+                                    String userName = prefUtil.getString(PreConfig.USER_NAME);
                                     DataEnc dataEnc = new DataEnc(buffer);
                                     dataEnc.setCmd(mCmd.FS_ADD_DEVICE);
                                     dataEnc.putString(uuid);
-                                    IOUtil.write(outputStream, dataEnc.getData());
+
+                                    Device mDevice = new Device();
+                                    mDevice.setDevName(prefUtil.getString(PreConfig.USER_NAME));
+                                    mDevice.setDevPort(Config.FILE_SERVER_PORT);
+                                    mDevice.setDevMode(Device.ANDROID);
+
+                                    byte[] objectBytes = ByteUtil.objectToByte(mDevice);
+                                    dataEnc.putBytes(objectBytes);
+                                    IOUtil.write(outputStream, dataEnc);
                                     DataDec dataDec = new DataDec(buffer);
                                     if (IOUtil.read(inputStream, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
                                         continue;
@@ -357,10 +370,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                                     String sgin = dataDec.getString();
                                     if (sgin.equals(Config.sgin(uuid))) {
                                         String address = device.getDevIP() + ":" + device.getDevPort();
-                                        LANService.getInstance().devices.put(address, device);
+                                        LANService.getInstance().addDevice(device);
+                                        T.s("添加设备 " + device.getDevName() + " 成功!");
                                     }
                                 } catch (IOException e) {
-                                    throw new RuntimeException(e);
+                                    e.printStackTrace();
                                 }
                             }
                         }

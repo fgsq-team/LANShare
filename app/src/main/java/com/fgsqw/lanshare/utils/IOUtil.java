@@ -67,10 +67,11 @@ public class IOUtil {
 
     /**
      * 阻塞获取数据包直到达到len时跳出
-     * @param is 流
-     * @param buf 缓冲区
+     *
+     * @param is     流
+     * @param buf    缓冲区
      * @param offset 写入buff偏移
-     * @param len 读取大小
+     * @param len    读取大小
      * @return 总读取大小
      */
     public static int read(InputStream is, byte[] buf, int offset, int len) throws IOException {
@@ -89,6 +90,20 @@ public class IOUtil {
         }
 
         return totalRecv;
+    }
+
+    public static boolean read(InputStream is, DataDec dataDec) throws IOException {
+        if (read(is, dataDec.getData(), 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
+            return false;
+        int length = dataDec.getLength();
+        if (read(is, dataDec.getData(), DataEnc.getHeaderSize(), length) != length)
+            return false;
+        return true;
+    }
+
+
+    public static void write(OutputStream out, DataEnc dataEnc) throws IOException {
+        write(out, dataEnc.getData(), dataEnc.getDataLen());
     }
 
     public static void write(OutputStream out, byte[] buf) throws IOException {

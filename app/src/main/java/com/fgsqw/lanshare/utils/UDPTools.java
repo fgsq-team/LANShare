@@ -7,6 +7,10 @@ import java.net.InetAddress;
 
 public class UDPTools {
 
+    public static synchronized void sendData(DatagramSocket ds, DataEnc dataEnc, String IP, int port) {
+        sendData(ds, dataEnc.getData(), dataEnc.getDataLen(), IP, port);
+    }
+
     public static synchronized void sendData(DatagramSocket ds, byte[] buf, int length, String IP, int port) {
         try {
             ds.send(new DatagramPacket(buf, length, InetAddress.getByName(IP), port));
@@ -20,4 +24,5 @@ public class UDPTools {
             e.printStackTrace();
         }
     }
+
 }

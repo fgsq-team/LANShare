@@ -1,5 +1,10 @@
 package com.fgsqw.lanshare.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 public class ByteUtil {
 
     public static byte[] interToBytes(int[] nums) {
@@ -200,6 +205,37 @@ public class ByteUtil {
         l &= 0xffffff;
         l |= ((long) b[index + 3] << 24);
         return Float.intBitsToFloat(l);
+    }
+
+    public static <T> T byteToObject(byte[] bytes) {
+        T obj = null;
+        try {
+            //bytearray to object
+            ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+            ObjectInputStream oi = new ObjectInputStream(bi);
+            obj = (T) oi.readObject();
+            bi.close();
+            oi.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return obj;
+    }
+
+
+    public static byte[] objectToByte(Object obj) {
+        byte[] bytes = null;
+        try {
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            ObjectOutputStream oo = new ObjectOutputStream(bo);
+            oo.writeObject(obj);
+            bytes = bo.toByteArray();
+            bo.close();
+            oo.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
 }

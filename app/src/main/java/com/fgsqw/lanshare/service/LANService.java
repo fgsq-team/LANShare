@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.activity.DeviceQrCodeActivity;
 import com.fgsqw.lanshare.base.BaseService;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
@@ -32,6 +33,7 @@ import com.fgsqw.lanshare.pojo.mOutputStream;
 import com.fgsqw.lanshare.pojo.mSocket;
 import com.fgsqw.lanshare.receiver.NetWorkReceiver;
 import com.fgsqw.lanshare.toast.T;
+import com.fgsqw.lanshare.utils.ByteUtil;
 import com.fgsqw.lanshare.utils.DataDec;
 import com.fgsqw.lanshare.utils.DataEnc;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
@@ -72,6 +74,11 @@ public class LANService extends BaseService {
     private NetWorkReceiver netWorkReceiver;
     private PrefUtil prefUtil;
     private boolean running = true;
+
+    public void addDevice(Device device) {
+        String address = device.getDevIP() + ":" + device.getDevPort();
+        devices.put(address, device);
+    }
 
     @Nullable
     @Override
@@ -124,18 +131,17 @@ public class LANService extends BaseService {
         });
         // UDP 广播扫描设备
         scannDevice();
-
     }
 
 
-    // 初始化数据
+    // 初始化设备IP地址列表
     public void initData() {
         mDevice.clear();
         mDevice.addAll(getDevices());
     }
 
 
-    // 网络状态监听
+    // 网络状态监听，用来刷新设备IP
     public void receiver() {
         netWorkReceiver = new NetWorkReceiver(this);
         IntentFilter filter = new IntentFilter();
@@ -179,13 +185,30 @@ public class LANService extends BaseService {
         DataDec dataDec = new DataDec(buffer, DataEnc.getHeaderSize());
         int cmd = dataDec.getCmd();
         if (cmd == mCmd.FS_ADD_DEVICE) { // 添加设备
+            // 数据包大小
+            int length = dataDec.getLength();
+            try {
+                if (IOUtil.read(input, buffer, DataEnc.getHeaderSize(), length) != length)
+                    return;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+            dataDec.setData(buffer, DataEnc.getHeaderSize() + length);
             String uuid = dataDec.getString();
+            byte[] objectBytes = dataDec.getBytes();
+            Device device = ByteUtil.byteToObject(objectBytes);
+            String hostAddress = client.getInetAddress().getHostAddress();
+            device.setDevIP(hostAddress);
+            addDevice(device);
             String sgin = Config.sgin(uuid);
+            Log.i("FS_ADD_DEVICE uuid", uuid);
+            Log.i("FS_ADD_DEVICE sgin", sgin);
             DataEnc dataEnc = new DataEnc(buffer);
             dataEnc.setCmd(mCmd.FS_ADD_DEVICE);
             dataEnc.putString(sgin);
             try {
-                IOUtil.write(out, dataEnc.getData());
+                IOUtil.write(out, dataEnc);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -193,10 +216,9 @@ public class LANService extends BaseService {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
             }
-
-
-
+            T.s("添加设备 " + device.getDevName() + " 成功!");
             IOUtil.closeIO(input, out, client);
+            DeviceQrCodeActivity.exitFlag = true;
         } else if (cmd == mCmd.FS_SHARE_FILE) {  // 接收文件
             // 文件数量
             int count = dataDec.getCount();
@@ -1207,7 +1229,6 @@ public class LANService extends BaseService {
         if (message.length() > 700) {
             return;
         }
-
         ViewUpdate.runThread(() -> {
             for (Device fromDevice : mDevice) {
                 DataEnc dataEnc = new DataEnc(1024 + message.getBytes().length);
@@ -1217,14 +1238,20 @@ public class LANService extends BaseService {
                 dataEnc.putString(message);
                 try {
                     if (toDevice == null) {
+                        // 没有指定设备向所有设备发送
                         for (Device dev : devices.values()) {
                             if (NetWorkUtil.subNet(dev.getDevIP(),
                                     fromDevice.getDevIP(), fromDevice.getDevNetMask())) {
-                                UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), dev.getDevIP(), Config.UDP_PORT);
+                                UDPTools.sendData(new DatagramSocket(), dataEnc, dev.getDevIP(), Config.UDP_PORT);
                             }
                         }
                     } else {
-                        UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), fromDevice.getDevIP(), Config.UDP_PORT);
+                        // 指定了设备单独发送
+                        if (NetWorkUtil.subNet(toDevice.getDevIP(),
+                                fromDevice.getDevIP(), fromDevice.getDevNetMask())) {
+                            UDPTools.sendData(new DatagramSocket(), dataEnc, toDevice.getDevIP(), Config.UDP_PORT);
+                            break;
+                        }
                     }
                 } catch (SocketException e) {
                     e.printStackTrace();
