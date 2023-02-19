@@ -15,12 +15,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.fgsqw.lanshare.R;
-import com.fgsqw.lanshare.fragment.child.FragPhotoList;
+import com.fgsqw.lanshare.fragment.child.FragMediaList;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 
 import java.util.List;
 
-public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> {
+public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> {
     private final Context mContext;//上下文对象
     //    private List<MediaInfo> mFileUtils;   //图片列表
     private final LayoutInflater mInflater;//
@@ -28,16 +28,16 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     private OnImageSelectListener mSelectListener;
     private OnItemClickListener mItemClickListener;
     private boolean isViewImage;   // 是否预览媒体
-    private final FragPhotoList fragPhotoList;
+    private final FragMediaList fragMediaList;
 
     /**
      * @param isViewImage 是否点击放大图片查看
      */
     //构造方法
-    public PhotoAdapter(FragPhotoList fragPhotoList, boolean isViewImage) {
-        this.fragPhotoList = fragPhotoList;
+    public MediaAdapter(FragMediaList fragMediaList, boolean isViewImage) {
+        this.fragMediaList = fragMediaList;
         this.isViewImage = isViewImage;
-        mContext = fragPhotoList.getContext();
+        mContext = fragMediaList.getContext();
         this.mInflater = LayoutInflater.from(mContext);
     }
 
@@ -55,7 +55,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
 
-        final MediaInfo mediaInfo = fragPhotoList.getCruuentPhotoList().get(position);
+        final MediaInfo mediaInfo = fragMediaList.getCruuentPhotoList().get(position);
 
         Glide
                 .with(mContext)
@@ -98,7 +98,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     private boolean isSelect(MediaInfo fs) {
-        List<MediaInfo> selectList = fragPhotoList.getSelectList();
+        List<MediaInfo> selectList = fragMediaList.getSelectList();
         if (selectList.size() != 0) {
             for (int i = 0; i < selectList.size(); i++) {
                 if (fs.getPath().equals(selectList.get(i).getPath())) {
@@ -113,12 +113,12 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     private void checkedImage(ViewHolder holder, MediaInfo mediaInfo, int position) {
 
         if (isSelect(mediaInfo)) {//如果图片已经选中，就取消选中
-            fragPhotoList.dataCenterActivity.removeSendFile(mediaInfo);
+            fragMediaList.dataCenterActivity.removeSendFile(mediaInfo);
             unSelectImage(mediaInfo, position);//取消选中图片
             setItemSelect(holder, false);//设置图片选中效果
 
         } else {//如果未选中就选中
-            if (fragPhotoList.dataCenterActivity.addASendFile(mediaInfo)) {
+            if (fragMediaList.dataCenterActivity.addASendFile(mediaInfo)) {
                 selectImage(mediaInfo, position);//选中图片
                 setItemSelect(holder, true);//设置图片选中效果
             }
@@ -131,7 +131,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
      * @param mediaInfo
      */
     private void selectImage(MediaInfo mediaInfo, int position) {
-        fragPhotoList.getSelectList().add(mediaInfo);
+        fragMediaList.getSelectList().add(mediaInfo);
         if (mSelectListener != null) {
             mSelectListener.OnImageSelect(mediaInfo, true, position);
         }
@@ -143,7 +143,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
      * @param mediaInfo
      */
     private void unSelectImage(MediaInfo mediaInfo, int position) {
-        List<MediaInfo> selectList = fragPhotoList.getSelectList();
+        List<MediaInfo> selectList = fragMediaList.getSelectList();
         if (selectList.size() != 0) {
             for (int i = 0; i < selectList.size(); i++) {
                 if (mediaInfo.getPath().equals(selectList.get(i).getPath())) {
@@ -164,7 +164,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     private int getImageCount() {
-        List<MediaInfo> cruuentPhotoList = fragPhotoList.getCruuentPhotoList();
+        List<MediaInfo> cruuentPhotoList = fragMediaList.getCruuentPhotoList();
         return cruuentPhotoList == null ? 0 : cruuentPhotoList.size();
     }
 
@@ -173,7 +173,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     public MediaInfo getFirstVisibleImage(int firstVisibleItem) {
-        List<MediaInfo> cruuentPhotoList = fragPhotoList.getCruuentPhotoList();
+        List<MediaInfo> cruuentPhotoList = fragMediaList.getCruuentPhotoList();
         if (cruuentPhotoList != null && !cruuentPhotoList.isEmpty()) {
             return cruuentPhotoList.get(firstVisibleItem);
         }
@@ -194,21 +194,21 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     public void clearThisFolderAllSelect() {
-        List<MediaInfo> cruuentPhotoList = fragPhotoList.getCruuentPhotoList();
+        List<MediaInfo> cruuentPhotoList = fragMediaList.getCruuentPhotoList();
 
-        if (cruuentPhotoList != null && !fragPhotoList.getSelectList().isEmpty()) {
-            fragPhotoList.mSelectList.removeAll(cruuentPhotoList);
-            fragPhotoList.dataCenterActivity.removeSendALL(cruuentPhotoList);
+        if (cruuentPhotoList != null && !fragMediaList.getSelectList().isEmpty()) {
+            fragMediaList.mSelectList.removeAll(cruuentPhotoList);
+            fragMediaList.dataCenterActivity.removeSendALL(cruuentPhotoList);
             notifyItemRangeChanged(0, cruuentPhotoList.size());
         }
 
     }
 
     public void clearAllSelect() {
-        List<MediaInfo> cruuentPhotoList = fragPhotoList.getCruuentPhotoList();
-        if (cruuentPhotoList != null && fragPhotoList.mSelectList.size() != 0) {
-            fragPhotoList.dataCenterActivity.removeSendALL(fragPhotoList.mSelectList);
-            fragPhotoList.mSelectList.clear();
+        List<MediaInfo> cruuentPhotoList = fragMediaList.getCruuentPhotoList();
+        if (cruuentPhotoList != null && fragMediaList.mSelectList.size() != 0) {
+            fragMediaList.dataCenterActivity.removeSendALL(fragMediaList.mSelectList);
+            fragMediaList.mSelectList.clear();
             notifyItemRangeChanged(0, cruuentPhotoList.size());
         }
     }
@@ -219,11 +219,11 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     public void setSelecteAll(List<MediaInfo> selected) {
         if (selected != null) {
             for (MediaInfo select : selected) {
-                for (MediaInfo mediaInfo : fragPhotoList.getCruuentPhotoList()) {
+                for (MediaInfo mediaInfo : fragMediaList.getCruuentPhotoList()) {
                     if (select.equals(mediaInfo)) {
-                        if (!fragPhotoList.mSelectList.contains(mediaInfo)) {
-                            if (fragPhotoList.dataCenterActivity.addASendFile(mediaInfo)) {
-                                fragPhotoList.mSelectList.add(mediaInfo);
+                        if (!fragMediaList.mSelectList.contains(mediaInfo)) {
+                            if (fragMediaList.dataCenterActivity.addASendFile(mediaInfo)) {
+                                fragMediaList.mSelectList.add(mediaInfo);
                             }
                         }
                         break;
@@ -235,12 +235,12 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     public boolean isSelectAll() {
-        return fragPhotoList.mSelectList.containsAll(fragPhotoList.getCruuentPhotoList());
+        return fragMediaList.mSelectList.containsAll(fragMediaList.getCruuentPhotoList());
     }
 
 
     public List<MediaInfo> getSelectImages() {
-        return fragPhotoList.mSelectList;
+        return fragMediaList.mSelectList;
     }
 
     public void setOnImageSelectListener(OnImageSelectListener listener) {
@@ -252,8 +252,8 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
     }
 
     public void remove(MediaInfo img, int position) {
-        fragPhotoList.mSelectList.remove(img);
-        fragPhotoList.getCruuentPhotoList().remove(img);
+        fragMediaList.mSelectList.remove(img);
+        fragMediaList.getCruuentPhotoList().remove(img);
         notifyItemRemoved(position); // 提醒item删除指定数据，这里有RecyclerView的动画效果
     }
 

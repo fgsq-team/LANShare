@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,8 +30,9 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     private final List<Fragment> fragments = new ArrayList<>();
     FragAppList fragAppList;
     FragFileList fragFileList;
-    FragPhotoList fragPhotoList;
+    FragMediaList fragMediaList;
     FragTest fragTest;
+    FragSearch fragSearch;
 
     String[] tabTitles = {"应用", "媒体", "文件", "待添加"};
 
@@ -46,12 +46,17 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     public FragFiles() {
         fragAppList = new FragAppList();
         fragments.add(fragAppList);
-        fragPhotoList = new FragPhotoList();
-        fragments.add(fragPhotoList);
+        fragMediaList = new FragMediaList();
+        fragments.add(fragMediaList);
         fragFileList = new FragFileList();
         fragments.add(fragFileList);
-        fragTest = new FragTest();
-        fragments.add(fragTest);
+
+//        fragTest = new FragTest();
+//        fragments.add(fragTest);
+
+        fragSearch = new FragSearch();
+        fragments.add(fragSearch);
+
     }
 
 

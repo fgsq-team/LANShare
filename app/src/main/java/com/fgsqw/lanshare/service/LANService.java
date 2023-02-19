@@ -41,6 +41,7 @@ import com.fgsqw.lanshare.utils.DataEnc;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
+import com.fgsqw.lanshare.utils.LLog;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
@@ -63,6 +64,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class LANService extends BaseService {
     public static final String TAG = "LANService";
@@ -93,7 +95,7 @@ public class LANService extends BaseService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            Object messenger = intent.getExtras().get("messenger");
+            Object messenger = Objects.requireNonNull(intent.getExtras()).get("messenger");
             if (messenger != null) {
                 mMessenger = (Messenger) messenger;
             }
@@ -216,8 +218,8 @@ public class LANService extends BaseService {
                 e.printStackTrace();
             }
             try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
+                TimeUnit.MILLISECONDS.sleep(200);
+            } catch (InterruptedException ignored) {
             }
             T.s("添加设备 " + device.getDevName() + " 成功!");
             IOUtil.closeIO(input, out, client);
@@ -486,7 +488,7 @@ public class LANService extends BaseService {
             messageSend(mMessage);
 
             try {
-                Thread.sleep(500);
+                TimeUnit.MILLISECONDS.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -568,7 +570,7 @@ public class LANService extends BaseService {
 
 
                     try {
-                        Thread.sleep(100);
+                        TimeUnit.MILLISECONDS.sleep(200);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -916,7 +918,7 @@ public class LANService extends BaseService {
                             fileContent.getLength()
                     );
                     try {
-                        Thread.sleep(100);
+                        TimeUnit.MILLISECONDS.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -1073,6 +1075,7 @@ public class LANService extends BaseService {
         }
     }
 
+    // 告知设备我已下线
     public void noticeDeviceOffLineByIp(String ip) {
         byte[] bytes = new byte[2048];
         DataEnc dataEnc = new DataEnc(bytes);
@@ -1109,13 +1112,24 @@ public class LANService extends BaseService {
                 e.printStackTrace();
             }
 
-            while (true) {
+            while (running) {
                 try {
                     multicastLock.acquire();
+                } catch (Exception e) {
+                    LLog.info("multicastLock错误:" + e.getClass().getName() + " " + e.getMessage());
+                }
+                try {
                     ipGetSocket.receive(packet);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    break;
+                    LLog.info("runRecive3错误:" + e.getClass().getName() + " " + e.getMessage());
+                    if(!e.getMessage().contains("ECONNABORTED")){
+                        LLog.info("runRecive3 跳出循环");
+                        break;
+                    }else {
+                        LLog.info("runRecive3 继续监听");
+                    }
+//
                 } finally {
                     multicastLock.release();
                 }
@@ -1136,7 +1150,8 @@ public class LANService extends BaseService {
                             }
                         }
                         // 向设备发送自己的数据
-                       /* ViewUpdate.runThread(() ->*/ noticeDeviceOnLineByIp(devIp);
+                        /* ViewUpdate.runThread(() ->*/
+                        noticeDeviceOnLineByIp(devIp);
                     } else if (cmd == mCmd.UDP_SET_DEVICES) {
                         int devPort = dataDec.getInt();
                         String devIp = dataDec.getString();
@@ -1229,6 +1244,8 @@ public class LANService extends BaseService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        LLog.info("onDestroy 退出");
+
         running = false;
         ViewUpdate.runThread(() -> {
             for (Device device : mDevice) {
@@ -1275,9 +1292,8 @@ public class LANService extends BaseService {
                     }
                 }
                 try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    TimeUnit.MILLISECONDS.sleep(5);
+                } catch (InterruptedException ignored) {
                 }
             }
         });

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 
 public class UDPTools {
 
@@ -19,7 +20,7 @@ public class UDPTools {
         }
         ds.close();
         try {
-            Thread.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

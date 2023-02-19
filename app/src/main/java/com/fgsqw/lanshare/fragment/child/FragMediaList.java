@@ -32,7 +32,7 @@ import com.fgsqw.lanshare.activity.preview.ReviewImages;
 import com.fgsqw.lanshare.activity.video.VideoPlayer;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.config.PreConfig;
-import com.fgsqw.lanshare.fragment.adapter.PhotoAdapter;
+import com.fgsqw.lanshare.fragment.adapter.MediaAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
 import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.MediaInfo;
@@ -48,7 +48,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class FragPhotoList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
+public class FragMediaList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
 
     private View view;
     private ImageView backImg;
@@ -64,9 +64,9 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
     private boolean isShowTime;
 
     private int posiition;
-    private PhotoAdapter mPhotoAdapter;
+    private MediaAdapter mMediaAdapter;
     private GridLayoutManager mLayoutManager;
-    private List<PhotoFolder> mFolders;
+    public static List<PhotoFolder> mFolders;
     public final List<MediaInfo> mSelectList = new LinkedList<>();
 
 
@@ -147,14 +147,14 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
             mLayoutManager = new GridLayoutManager(getActivity(), 4);
         }
 
-        if (mPhotoAdapter == null) {
-            mPhotoAdapter = new PhotoAdapter(this, !selectMode.isChecked());
+        if (mMediaAdapter == null) {
+            mMediaAdapter = new MediaAdapter(this, !selectMode.isChecked());
         }
         isPhotoView = true;
 
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setAdapter(mPhotoAdapter);
-        mPhotoAdapter.refresh();
+        recyclerView.setAdapter(mMediaAdapter);
+        mMediaAdapter.refresh();
 
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -174,11 +174,11 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
             }
         });
 
-        mPhotoAdapter.setOnImageSelectListener((photoInfo, isSelect, view) -> {
-            selectAll.setChecked(mPhotoAdapter.isSelectAll());
+        mMediaAdapter.setOnImageSelectListener((photoInfo, isSelect, view) -> {
+            selectAll.setChecked(mMediaAdapter.isSelectAll());
         });
 
-        mPhotoAdapter.setOnItemClickListener(new PhotoAdapter.OnItemClickListener() {
+        mMediaAdapter.setOnItemClickListener(new MediaAdapter.OnItemClickListener() {
             @Override
             public void OnItemClick(MediaInfo mediaInfo, int position) {
                 if (mediaInfo.isVideo()) {
@@ -275,7 +275,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
     private void imageview(PhotoFolder folder) {
         if (!isOpenFolder) {
             initPhotoList(folder);
-            selectAll.setChecked(mPhotoAdapter.isSelectAll());
+            selectAll.setChecked(mMediaAdapter.isSelectAll());
             sizImgTv.setText(folder.getName() + "(" + folder.getImages().size() + ")");
             isOpenFolder = true;
             backImg.setVisibility(View.VISIBLE);
@@ -308,7 +308,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
      */
     private void changeTime() {
         int firstVisibleItem = getFirstVisibleItem();    //获取屏幕第一个item 位置
-        MediaInfo mediaInfo = mPhotoAdapter.getFirstVisibleImage(firstVisibleItem); //获取图片列表工具类
+        MediaInfo mediaInfo = mMediaAdapter.getFirstVisibleImage(firstVisibleItem); //获取图片列表工具类
         if (mediaInfo != null) {
             String time = DateUtils.getImageTime(mediaInfo.getTime() * 1000);
             timeTv.setText(time);
@@ -326,7 +326,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
     private void toPreviewActivity(List<MediaInfo> mediaInfos, int position) {
         if (mediaInfos != null && !mediaInfos.isEmpty()) {
             ReviewImages.openActivity(getActivity(), mediaInfos,
-                    mPhotoAdapter.getSelectImages(), false, 0, position);
+                    mMediaAdapter.getSelectImages(), false, 0, position);
         }
     }
 
@@ -352,11 +352,11 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
             case R.id.photo_check_select_all: {
                 CheckBox checkBox = (CheckBox) v;
                 if (checkBox.isChecked()) {
-                    mPhotoAdapter.setSelecteAll(cruuentPhotoList);
+                    mMediaAdapter.setSelecteAll(cruuentPhotoList);
                     mSelectList.clear();
                     mSelectList.addAll(cruuentPhotoList);
                 } else {
-                    mPhotoAdapter.clearThisFolderAllSelect();
+                    mMediaAdapter.clearThisFolderAllSelect();
                 }
                 break;
             }
@@ -377,8 +377,8 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
 
         if (mSelectList.size() > 0 && isVisible()) {
             mSelectList.clear();
-            mPhotoAdapter.refresh();
-            selectAll.setChecked(mPhotoAdapter.isSelectAll());
+            mMediaAdapter.refresh();
+            selectAll.setChecked(mMediaAdapter.isSelectAll());
         }
     }
 
@@ -388,7 +388,7 @@ public class FragPhotoList extends BaseFragment implements View.OnClickListener,
         switch (buttonView.getId()) {
             case R.id.photo_check_select_mode: {
                 if (isPhotoView) {
-                    mPhotoAdapter.setViewImage(!isChecked);
+                    mMediaAdapter.setViewImage(!isChecked);
                 }
                 break;
             }

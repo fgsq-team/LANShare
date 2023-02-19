@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 
 public class BaseFragment extends Fragment {
-    Context context;
+    private Context context;
 
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
         return false;

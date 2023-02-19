@@ -16,6 +16,7 @@ import com.fgsqw.lanshare.utils.ViewUpdate;
 import com.google.gson.Gson;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DeviceQrCodeActivity extends AppCompatActivity {
 
@@ -38,7 +39,7 @@ public class DeviceQrCodeActivity extends AppCompatActivity {
         ViewUpdate.runThread(() -> {
             while (!exitFlag) {
                 try {
-                    Thread.sleep(1000);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

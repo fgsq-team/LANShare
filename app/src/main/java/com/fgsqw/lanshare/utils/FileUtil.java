@@ -729,4 +729,22 @@ public class FileUtil {
         ContentResolver resolver = App.getInstance().getContentResolver();
         return resolver.openInputStream(uri);
     }
+
+    public static boolean writeString(String str, String path) {
+        return writeString(str, path, true);
+    }
+
+    public static boolean writeString(String str, String path, boolean append) {
+        try {
+            OutputStream out = new FileOutputStream(path, append);
+            out.write(str.getBytes("UTF-8"));
+            out.close();
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

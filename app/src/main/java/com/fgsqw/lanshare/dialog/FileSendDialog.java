@@ -20,6 +20,7 @@ import com.fgsqw.lanshare.utils.ViewUpdate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class FileSendDialog extends Dialog implements DeviceDialogAdapter.OnItemClickListener, Runnable {
 
@@ -105,7 +106,7 @@ public class FileSendDialog extends Dialog implements DeviceDialogAdapter.OnItem
                     }
             );
             try {
-                Thread.sleep(1000);
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

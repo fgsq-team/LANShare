@@ -20,6 +20,7 @@ import com.fgsqw.lanshare.utils.ViewUpdate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.OnItemClickListener, Runnable {
     RecyclerView recyclerView;
@@ -122,7 +123,7 @@ public class DeviceSelectDialog extends Dialog implements DeviceDialogAdapter.On
                     }
             );
             try {
-                Thread.sleep(1000);
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

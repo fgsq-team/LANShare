@@ -49,7 +49,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
     private SwipeRefreshLayout appSwipe;
     private RecyclerView appRecy;
 
-    public List<ApkInfo> apkFileList;//所有扫描到的Apk文件
+    public static List<ApkInfo> apkFileList;//所有扫描到的Apk文件
     public final List<ApkInfo> mSelectlist = new LinkedList<>();
 
     private AppAdapter appAdapter;
