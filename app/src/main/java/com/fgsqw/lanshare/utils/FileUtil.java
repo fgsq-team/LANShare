@@ -737,7 +737,7 @@ public class FileUtil {
     public static boolean writeString(String str, String path, boolean append) {
         try {
             OutputStream out = new FileOutputStream(path, append);
-            out.write(str.getBytes("UTF-8"));
+            out.write(str.getBytes(FileUtil.UTF_8));
             out.close();
             return true;
         } catch (FileNotFoundException e) {

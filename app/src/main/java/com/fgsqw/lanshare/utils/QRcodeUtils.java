@@ -19,7 +19,7 @@ public class QRcodeUtils {
         //   设置容错率 L>M>Q>H  等级越高扫描时间越长,准确率越高
         map.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
         //设置字符集
-        map.put(EncodeHintType.CHARACTER_SET, "utf-8");
+        map.put(EncodeHintType.CHARACTER_SET, FileUtil.UTF_8);
         //设置外边距
         map.put(EncodeHintType.MARGIN, 1);
         //利用编码器，生成二维码

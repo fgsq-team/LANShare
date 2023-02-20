@@ -2,6 +2,7 @@ package com.fgsqw.lanshare.utils;
 
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 //数据包装类
 public class DataEnc {
@@ -133,16 +134,12 @@ public class DataEnc {
     }
 
     public DataEnc putString(String val) {
-        return putString(val, "UTF-8");
+        return putString(val, FileUtil.UTF_8);
     }
 
 
-    public DataEnc putString(String val, String en) {
-        try {
-            putBytes(val.getBytes(en));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    public DataEnc putString(String val, Charset en) {
+        putBytes(val.getBytes(en));
         return this;
     }
 

@@ -2,6 +2,7 @@ package com.fgsqw.lanshare.utils;
 
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 //数据解析类
 public class DataDec {
@@ -159,18 +160,13 @@ public class DataDec {
      * @param en
      * @return
      */
-    public String getString(String en) {
+    public String getString(Charset en) {
         byte[] bytes = getBytes();
-        try {
-            return new String(bytes, en);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new String(bytes, en);
     }
 
     public String getString() {
-        return getString("UTF-8");
+        return getString(FileUtil.UTF_8);
     }
 
     public long getLastLong() {
