@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.activity.preview.ReviewImages;
@@ -173,7 +174,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (view == null) {
-            prefUtil = new PrefUtil(getContext());
+            prefUtil = App.getPrefUtil();
             view = inflater.inflate(R.layout.fragment_chat, container, false);
             initView();
             initList();

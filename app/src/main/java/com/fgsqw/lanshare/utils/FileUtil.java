@@ -706,7 +706,6 @@ public class FileUtil {
      * 根据文件后缀名获得对应的MIME类型。
      **/
     public static String getMyMIMEType(File file) {
-
         String name = file.getName();
         //获取后缀名前的分隔符"."在fName中的位置。
         int dotIndex = name.lastIndexOf(".");
@@ -746,5 +745,29 @@ public class FileUtil {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * 防止重名文件被覆盖
+     */
+    public static File avoidDuplication(File outFile) {
+        String name = outFile.getName();
+        if (outFile.exists()) {
+            for (int s = 1; s < 65535; s++) {
+                String str;
+                if (name.contains(".")) {
+                    String prefix = name.substring(0, name.lastIndexOf(".")) + "(" + s + ")";
+                    String suffix = name.substring(name.lastIndexOf("."));
+                    str = prefix + suffix;
+                } else {
+                    str = name + "(" + s + ")";
+                }
+                outFile = new File(outFile.getParentFile(), str);
+                if (!outFile.exists()) {
+                    return outFile;
+                }
+            }
+        }
+        return outFile;
     }
 }

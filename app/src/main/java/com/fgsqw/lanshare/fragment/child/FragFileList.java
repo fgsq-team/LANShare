@@ -16,21 +16,26 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
+import com.fgsqw.lanshare.config.Config;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
 import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.FileSource;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileUtil;
+import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
 import java.io.File;
@@ -59,8 +64,20 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
 
     private File currentDirectory;    // 当前文件夹路径
 
-
     public DataCenterActivity dataCenterActivity;
+
+    private boolean showHiddenFiles = false;
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        boolean aBoolean = App.getPrefUtil().getBoolean(PreConfig.SHOW_HIDDEN_FILES, false);
+        if (aBoolean != showHiddenFiles) {
+            showHiddenFiles = aBoolean;
+            initFileList(currentDirectory);
+        }
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -71,7 +88,7 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+        showHiddenFiles = App.getPrefUtil().getBoolean(PreConfig.SHOW_HIDDEN_FILES, false);
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_child_file, container, false);
             initView();
@@ -185,10 +202,16 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
                 for (File file : files) {
                     // 如果是文件夹
                     if (file.isDirectory()) {
+                        String name = file.getName();
+                        if (!showHiddenFiles) {
+                            if (name.startsWith(".")) {
+                                continue;
+                            }
+                        }
                         Resources res = getResources();
                         Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
                         fileSource = new FileSource();
-                        fileSource.setName(mUtil.StringSize(file.getName(), 20));
+                        fileSource.setName(mUtil.StringSize(name, 20));
                         fileSource.setPath(file.getPath());
                         fileSource.setPreView(bmp);
                         fileSource.setIsPreView(false);
@@ -198,24 +221,28 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
                         fileList.add(fileSource);
                         // 如果是文件
                     } else if (file.isFile()) {
-
+                        String name = file.getName();
+                        if (!showHiddenFiles) {
+                            if (name.startsWith(".")) {
+                                continue;
+                            }
+                        }
                         Resources res = getResources();
                         Bitmap bmp = null;
-                        String filest = file.getName();
-                        String userIdJiequ = filest.substring(filest.lastIndexOf(".") + 1);
+                        String suffixName = name.substring(name.lastIndexOf(".") + 1);
                         boolean isPreView = false;
-                        if (userIdJiequ.equalsIgnoreCase("txt")) {
+                        if (suffixName.equalsIgnoreCase("txt")) {
                             bmp = decodeResource(res, R.drawable.ic_txts_file);
-                        } else if (userIdJiequ.equalsIgnoreCase("jpg")//图片及视频文件
-                                || userIdJiequ.equalsIgnoreCase("png")
-                                || userIdJiequ.equalsIgnoreCase("jpeg")
-                                || userIdJiequ.equalsIgnoreCase("gif")
-                                || userIdJiequ.equalsIgnoreCase("mp4")
+                        } else if (suffixName.equalsIgnoreCase("jpg")//图片及视频文件
+                                || suffixName.equalsIgnoreCase("png")
+                                || suffixName.equalsIgnoreCase("jpeg")
+                                || suffixName.equalsIgnoreCase("gif")
+                                || suffixName.equalsIgnoreCase("mp4")
                         ) {
                             isPreView = true;
-                        } else if (userIdJiequ.equalsIgnoreCase("zip")) {//压缩包文件
+                        } else if (suffixName.equalsIgnoreCase("zip")) {//压缩包文件
                             bmp = decodeResource(res, R.drawable.ic_zip_file);
-                        } else if (userIdJiequ.equalsIgnoreCase("apk")) {//apk文件
+                        } else if (suffixName.equalsIgnoreCase("apk")) {//apk文件
                            /* Drawable drawable = FileUtil.getApkIcon(getContext(), file.getPath());
                             if (drawable != null) {
                                 bmp = ImageUtils.drawableToBitmap(drawable);
@@ -223,14 +250,14 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
                                 bmp = decodeResource(res, R.drawable.ic_null_android_file);
                             }*/
                             bmp = decodeResource(res, R.drawable.ic_null_android_file);
-                        } else if (userIdJiequ.equalsIgnoreCase("java")) {//java文件
+                        } else if (suffixName.equalsIgnoreCase("java")) {//java文件
                             bmp = decodeResource(res, R.drawable.ic_coder_file);
                         } else {
                             bmp = decodeResource(res, R.drawable.ic_file_file);
                         }
 
                         fileSource = new FileSource();
-                        fileSource.setName(file.getName());
+                        fileSource.setName(name);
                         fileSource.setPath(file.getPath());
                         fileSource.setPreView(bmp);
                         fileSource.setIsPreView(isPreView);

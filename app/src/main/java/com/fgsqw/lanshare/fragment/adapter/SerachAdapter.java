@@ -57,7 +57,7 @@ public class SerachAdapter extends RecyclerView.Adapter<SerachAdapter.ViewHolder
     public void onBindViewHolder(final SerachAdapter.ViewHolder holder, int position) {
         final FileInfo fileInfo = fragSearch.getSearchs().get(position);
         holder.mName.setText(mUtil.StringSize(fileInfo.getName(), 30));
-        holder.selectLayout.setVisibility(View.GONE);
+//        holder.selectLayout.setVisibility(View.GONE);
 
         if (fileInfo instanceof ApkInfo) {
             ApkInfo apkInfo = (ApkInfo) fileInfo;
@@ -74,13 +74,14 @@ public class SerachAdapter extends RecyclerView.Adapter<SerachAdapter.ViewHolder
                     .into(holder.mImg);
         }
 
-
+        holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
         setItemSelect(holder, isSelect(fileInfo));
 
         holder.layout.setOnClickListener(v -> {
-            if (mListener != null) {
-                mListener.OnClick(position);
-            }
+//            if (mListener != null) {
+//                mListener.OnClick(position);
+//            }
+            checkedImage(holder, fileInfo, position);
         });
         holder.layout.setOnLongClickListener(v -> {
             if (mListener != null) {
@@ -109,14 +110,18 @@ public class SerachAdapter extends RecyclerView.Adapter<SerachAdapter.ViewHolder
         }
     }
 
+
     /*选中图片效果*/
     private void checkedImage(SerachAdapter.ViewHolder holder, FileInfo fileInfo, int position) {
         if (isSelect(fileInfo)) {//如果图片已经选中，就取消选中
+            fragSearch.dataCenterActivity.removeSendFile(fileInfo);
             unSelectImage(fileInfo, position);//取消选中图片
             setItemSelect(holder, false);//设置图片选中效果
         } else {//如果未选中就选中
-            selectImage(fileInfo, position);//选中图片
-            setItemSelect(holder, true);//设置图片选中效果
+            if (fragSearch.dataCenterActivity.addASendFile(fileInfo)) {
+                selectImage(fileInfo, position);//选中图片
+                setItemSelect(holder, true);//设置图片选中效果
+            }
         }
     }
 

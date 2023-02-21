@@ -34,7 +34,7 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     FragTest fragTest;
     FragSearch fragSearch;
 
-    String[] tabTitles = {"应用", "媒体", "文件", "待添加"};
+    String[] tabTitles = {"应用", "媒体", "文件", "搜索"};
 
     TabLayout tabFiles;
     ViewPager viewPager;
