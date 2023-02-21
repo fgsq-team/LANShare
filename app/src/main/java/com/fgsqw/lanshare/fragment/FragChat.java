@@ -260,14 +260,13 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     if (messageContent instanceof MessageUriContent) {
                         T.s("暂不支持分享文件查看");
                     } else if (messageContent instanceof MessageFolderContent) {
-                        T.s("暂不支持打开文件夹,清在件管理器中查看");
+                        T.s("暂不支持打开文件夹,请在文件管理器中查看");
                     } else {
                         if (fileContent.getStatus() == MessageContent.SUCCESS) {
                             FileUtil.openFile(dataCenterActivity, new File(fileContent.getPath()));
                         }
                     }
                 }
-
 
             } else {
                 T.s("文件传输未完成");
