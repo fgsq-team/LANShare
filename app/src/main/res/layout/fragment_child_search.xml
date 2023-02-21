@@ -6,45 +6,65 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="#f3f3f3"
         android:gravity="center"
+        android:padding="10dp"
         android:orientation="horizontal">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="18">
 
             <EditText
                 android:id="@+id/search_edit"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="8dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:background="@drawable/message_shap_chat_bg"
+                android:drawablePadding="5dp"
                 android:hint="@string/enter_search_content"
-                android:maxLength="10"
-                android:paddingLeft="15dp"
-                android:singleLine="true"
-                android:textSize="12sp" />
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingStart="5dp"
+                android:paddingLeft="5dp"
+                android:textSize="16sp" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/search_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+        <LinearLayout
             android:gravity="center"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/search"
-            android:textColor="#ffffff"
-            android:textSize="20sp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            >
+
+            <Button
+                android:id="@+id/search_button"
+                android:layout_width="60dp"
+                android:layout_height="40dp"
+                android:background="@drawable/button_background"
+                android:padding="1dp"
+                android:text="@string/search"
+
+                android:textColor="@color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_recy"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/search_recy"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
 
 </LinearLayout>

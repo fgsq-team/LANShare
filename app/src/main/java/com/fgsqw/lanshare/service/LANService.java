@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.DeviceQrCodeActivity;
 import com.fgsqw.lanshare.base.BaseService;
@@ -77,7 +78,7 @@ public class LANService extends BaseService {
     // 本机IP列表
     public List<Device> mDevice = new Vector<>();
     private NetWorkReceiver netWorkReceiver;
-    private PrefUtil prefUtil;
+
     private boolean running = true;
 
     public void addDevice(Device device) {
@@ -116,8 +117,6 @@ public class LANService extends BaseService {
 //        multicastLock.setReferenceCounted(false);
         super.onCreate();
         instance = this;
-        // 自定义配置文件工具类
-        prefUtil = new PrefUtil(this);
         // Service保活
         mUtil.showNotification(this, getString(R.string.app_name), "服务正在运行...");
         // 初始化数据
@@ -336,7 +335,7 @@ public class LANService extends BaseService {
             }
             Object[] objects = {device, fileContentList, client, input, out};
             // 是否弹出确认接收dialog
-            boolean isNotRecvDialog = prefUtil.getBoolean("not_recv_dialog");
+            boolean isNotRecvDialog = App.getPrefUtil().getBoolean("not_recv_dialog");
             if (isNotRecvDialog) {
                 startRecvFile(objects, true);
             } else {
@@ -370,25 +369,7 @@ public class LANService extends BaseService {
             IOUtil.closeIO(input, out, client);
             return -1;
         }
-        String name = outFile.getName();
 
-        // 防止重名文件覆盖
-        if (outFile.exists()) {
-            for (int s = 1; s < 65535; s++) {
-                String str;
-                if (name.contains(".")) {
-                    String prefix = name.substring(0, name.lastIndexOf(".")) + "(" + s + ")";
-                    String suffix = name.substring(name.lastIndexOf("."));
-                    str = prefix + suffix;
-                } else {
-                    str = name + "(" + s + ")";
-                }
-                outFile = new File(parentFile, str);
-                if (!outFile.exists()) {
-                    break;
-                }
-            }
-        }
         // 文件输出流
         OutputStream outFileStream;
         try {
@@ -420,11 +401,9 @@ public class LANService extends BaseService {
                     totalRecv += thatLength;
                     thatTotal += thatLength;
                     int progeress = (int) (totalRecv * 100.0F / totalLength);
-
                     if (progeress != p) {
                         // 更新视图进度条
                         fileContent.setProgress(progeress);
-
                         Message mMessage = Message.obtain();
                         mMessage.what = mCmd.SERVICE_PROGRESS;
                         mMessage.obj = fileContent;
@@ -497,8 +476,10 @@ public class LANService extends BaseService {
                 // 接收文件列表遍历
                 for (int i = 0; i < messageFileContents.size(); i++) {
                     MessageFileContent fileContent = messageFileContents.get(i);
+                    // 接收文件总大小
                     long totalRecv = 0;
                     File file;
+                    // 接收文件夹
                     if (fileContent instanceof MessageFolderContent) {
                         MessageFolderContent folderContent = (MessageFolderContent) fileContent;
                         DataDec dataDec = new DataDec(recvBuffer);
@@ -506,12 +487,7 @@ public class LANService extends BaseService {
                         for (int j = 0; j < folderContent.getFileCount(); j++) {
                             // 读取文件信息
                             try {
-                                // 读取头数据
-                                if (IOUtil.read(input, recvBuffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
-                                    break;
-                                int dataLength = dataDec.getLength();
-                                if (IOUtil.read(input, recvBuffer, DataEnc.getHeaderSize(), dataLength) != dataLength)
-                                    break;
+                                if (!IOUtil.read(input, dataDec)) break;
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 break;
@@ -521,6 +497,8 @@ public class LANService extends BaseService {
                             String fileName = dataDec.getString();
                             Log.d(TAG, "接收文件:" + fileName + " 大小:" + fileLength);
                             File outFile = new File(Config.FILE_SAVE_PATH + Config.FORDER + "/", fileName);
+                            // 防止重名文件覆盖
+                            outFile = FileUtil.avoidDuplication(outFile);
                             long thatTotal = baseRecv(
                                     objects,
                                     dataDec,
@@ -540,13 +518,13 @@ public class LANService extends BaseService {
                                 mMessage.obj = folderContent;
                                 messageSend(mMessage);
                             }
-
                             totalRecv += thatTotal;
                         }
-
                     } else {
+                        // 接收单个文件
                         DataDec dataDec = new DataDec(recvBuffer);
                         file = new File(Config.FILE_SAVE_PATH + getNameType(fileContent.getContent()) + "/", fileContent.getContent());
+                        file = FileUtil.avoidDuplication(file);
                         totalRecv = baseRecv(
                                 objects,
                                 dataDec,
@@ -557,7 +535,6 @@ public class LANService extends BaseService {
                                 fileContent
                         );
                     }
-
                     // 接收成功设置文件路径 失败则删除文件
                     if (totalRecv != fileContent.getLength()) {
                         fileContent.setStatus(MessageContent.ERROR);
@@ -568,19 +545,16 @@ public class LANService extends BaseService {
                         fileContent.setStateMessage("接收成功");
                     }
 
-
                     try {
                         TimeUnit.MILLISECONDS.sleep(200);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
                     // 更新视图
                     mMessage = Message.obtain();
                     mMessage.what = mCmd.SERVICE_CLOSE_PROGRESS;
                     mMessage.obj = fileContent;
                     messageSend(mMessage);
-
                 }
                 IOUtil.closeIO(input, out, client);
             }
@@ -701,11 +675,11 @@ public class LANService extends BaseService {
                         dataEnc.setCount(fileList.size());
                         dataEnc.putInt(d.getDevPort());
                         dataEnc.putString(d.getDevIP());
-                        dataEnc.putString(prefUtil.getString(PreConfig.USER_NAME));
+                        dataEnc.putString(App.getPrefUtil().getString(PreConfig.USER_NAME));
 
                         IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
 
-                        String userName = prefUtil.getString(PreConfig.USER_NAME);
+                        String userName = App.getPrefUtil().getString(PreConfig.USER_NAME);
 
                         for (int i = 0; i < fileList.size(); i++) {
                             FileInfo fileInfo = fileList.get(i);
@@ -1033,7 +1007,7 @@ public class LANService extends BaseService {
         List<Device> mDeviceList = new ArrayList<>();
         for (NetInfo netInfo : netInfoList) {
             Device device = new Device();
-            device.setDevName(prefUtil.getString(PreConfig.USER_NAME));
+            device.setDevName(App.getPrefUtil().getString(PreConfig.USER_NAME));
             device.setDevIP(netInfo.getIp());
             device.setDevNetMask(netInfo.getMask());
             device.setDevBrotIP(netInfo.getBrodIp());
@@ -1051,7 +1025,7 @@ public class LANService extends BaseService {
     }
 
     public String getDevName() {
-        return prefUtil.getString(PreConfig.USER_NAME);
+        return App.getPrefUtil().getString(PreConfig.USER_NAME);
     }
 
     // 通告设备我已上线
@@ -1110,12 +1084,15 @@ public class LANService extends BaseService {
                 ipGetSocket.bind(new InetSocketAddress(Config.UDP_PORT));
             } catch (SocketException e) {
                 e.printStackTrace();
+                T.ss("启动UDP服务失败");
+                return;
             }
 
             while (running) {
                 try {
                     multicastLock.acquire();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     LLog.info("multicastLock错误:" + e.getClass().getName() + " " + e.getMessage());
                 }
                 try {
@@ -1123,20 +1100,18 @@ public class LANService extends BaseService {
                 } catch (Exception e) {
                     e.printStackTrace();
                     LLog.info("runRecive3错误:" + e.getClass().getName() + " " + e.getMessage());
-                    if(!e.getMessage().contains("ECONNABORTED")){
+                    if (e.getMessage().contains("ECONNABORTED")) {
+                        LLog.info("runRecive3 继续监听");
+                    } else {
                         LLog.info("runRecive3 跳出循环");
                         break;
-                    }else {
-                        LLog.info("runRecive3 继续监听");
                     }
-//
                 } finally {
                     multicastLock.release();
                 }
 
                 byte[] data = packet.getData();
                 int len = packet.getLength();
-
                 System.arraycopy(data, 0, newBuf, 0, len);
 
                 ViewUpdate.runThread(() -> {
@@ -1164,7 +1139,6 @@ public class LANService extends BaseService {
                                 return;
                             }
                         }
-
 
                         String address = devIp + ":" + devPort;
                         Device device = devices.get(address);
@@ -1292,7 +1266,7 @@ public class LANService extends BaseService {
                     }
                 }
                 try {
-                    TimeUnit.MILLISECONDS.sleep(5);
+                    TimeUnit.SECONDS.sleep(5);
                 } catch (InterruptedException ignored) {
                 }
             }

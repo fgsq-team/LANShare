@@ -12,6 +12,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
@@ -24,14 +25,13 @@ public class HelloActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-    PrefUtil prefUtil;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        prefUtil = new PrefUtil(this);
+        PrefUtil prefUtil = App.getPrefUtil();
         // 隐私政策
         boolean privacyAgree = prefUtil.getBoolean(PreConfig.PRIVACY_AGREE);
         int privacyVersion = prefUtil.getInt(PreConfig.PRIVACY_VERSION);
@@ -46,6 +46,7 @@ public class HelloActivity extends AppCompatActivity {
     public void privacy() {
         PrivacyDialog privacyDialog = new PrivacyDialog(this);
         privacyDialog.setOnClickListener(agree -> {
+            PrefUtil prefUtil = App.getPrefUtil();
             if (agree) {
                 prefUtil.saveBoolean(PreConfig.PRIVACY_AGREE, true);
                 prefUtil.saveInt(PreConfig.PRIVACY_VERSION, Config.PRIVACY_VERSION);

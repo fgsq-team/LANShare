@@ -57,6 +57,8 @@
     <string name="device_qr_code_info">需要设备在同一局域网扫码才能生效</string>
     <string name="search">搜索</string>
     <string name="enter_search_content">请输入搜索内容</string>
+    <string name="show_hidden_files">显示隐藏文件</string>
+    <string name="show_hidden_files_detail">文件管理中是否显示隐藏的文件</string>
 
 
 </resources>

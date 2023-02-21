@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.pojo.FileInfo;
+import com.fgsqw.lanshare.pojo.MediaResult;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 
@@ -28,13 +29,11 @@ public class FIleSerachUtils {
      *
      * @param context
      */
-    public static List<PhotoFolder> loadImageForSDCard(final Context context) {
+    public static MediaResult loadImageForSDCard(final Context context) {
         //由于扫描图片是耗时的操作，所以要在子线程处理。
-
         //扫描图片
         Uri mImageUri;
         mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
         ContentResolver mContentResolver = context.getContentResolver();
         Cursor mCursor = mContentResolver.query(mImageUri, new String[]{
                         MediaStore.Images.Media.DATA,
@@ -46,9 +45,7 @@ public class FIleSerachUtils {
                 null,
                 null,
                 MediaStore.Images.Media.DATE_ADDED);
-
         List<MediaInfo> mediaInfos = new ArrayList<>();
-
         //读取扫描到的图片
         if (mCursor != null) {
             while (mCursor.moveToNext()) {
@@ -61,11 +58,9 @@ public class FIleSerachUtils {
                 //获取图片时间
                 long time = mCursor.getLong(
                         mCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
-
                 //获取图片类型
                 String mimeType = mCursor.getString(
                         mCursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
-
                 //过滤未下载完成或者不存在的文件
                 if (!"downloading".equals(getExtensionName(path)) && checkImgExists(path)) {
                     long length = new File(path).length();
@@ -82,7 +77,6 @@ public class FIleSerachUtils {
             mCursor.close();
         }
         Collections.reverse(mediaInfos);
-
         return splitFolder(mediaInfos, loadVideoForSDCard(context));
     }
 
@@ -96,9 +90,7 @@ public class FIleSerachUtils {
         //由于扫描图片是耗时的操作，所以要在子线程处理。
         //扫描图片
         Uri mImageUri;
-
         mImageUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-
         ContentResolver mContentResolver = context.getContentResolver();
         Cursor mCursor = mContentResolver.query(mImageUri, new String[]{
                         MediaStore.Video.Media.DATA,
@@ -242,7 +234,8 @@ public class FIleSerachUtils {
      * @return
      */
 
-    private static List<PhotoFolder> splitFolder(List<MediaInfo> photoList, List<MediaInfo> videoList) {
+    private static MediaResult splitFolder(List<MediaInfo> photoList, List<MediaInfo> videoList) {
+        MediaResult mediaResult = new MediaResult();
         List<PhotoFolder> folders = new ArrayList<>();
         List<MediaInfo> allMedia = new ArrayList<>();
 
@@ -263,7 +256,9 @@ public class FIleSerachUtils {
                 }
             }
         }
-        return folders;
+        mediaResult.setAllMedia(allMedia);
+        mediaResult.setmFolders(folders);
+        return mediaResult;
     }
 
     /**

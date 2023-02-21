@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
@@ -87,14 +88,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private FragFiles fragFiles;
     private FragChat fragChat;
 
-    private PrefUtil prefUtil;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        prefUtil = new PrefUtil(this);
         initView();
         initFragment();
         Intent lanService = new Intent();
@@ -130,7 +128,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     public void getConfig() {
-
+        PrefUtil prefUtil = App.getPrefUtil();
         String filePath = prefUtil.getString(PreConfig.FILE_PATH);
         if (filePath.isEmpty()) {
             prefUtil.saveString(PreConfig.FILE_PATH, Config.DEFAULT_FILE_SAVE_PATH);
@@ -391,6 +389,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                             for (Device device : devices) {
                                 Socket socket = new Socket();
                                 try {
+                                    PrefUtil prefUtil = App.getPrefUtil();
                                     socket.connect(new InetSocketAddress(device.getDevIP(), device.getDevPort()), 2000);
                                     InputStream inputStream = socket.getInputStream();
                                     OutputStream outputStream = socket.getOutputStream();

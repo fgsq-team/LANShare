@@ -18,7 +18,7 @@ public class MessageContent implements Serializable {
     private String id;
     // 消息内容
     private String content;
-    // 消息是否再左边
+    // 消息是否在左边
     private boolean isLeft;
     private int header = 0;
     // 用户名

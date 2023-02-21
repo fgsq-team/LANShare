@@ -92,6 +92,11 @@ public class IOUtil {
         return totalRecv;
     }
 
+    public static boolean readHeader(InputStream is, DataDec dataDec) throws IOException {
+        return read(is, dataDec.getData(), 0, DataEnc.getHeaderSize()) == DataEnc.getHeaderSize();
+    }
+
+
     public static boolean read(InputStream is, DataDec dataDec) throws IOException {
         if (read(is, dataDec.getData(), 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
             return false;

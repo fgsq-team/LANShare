@@ -21,7 +21,11 @@ public class Config {
     public static boolean SAVE_MESSAGE = true;
     public static boolean SAVE_TO_GALLERY = true;
 
+    public final static boolean SAVE_LOG = false;
+
     public static String FORDER = "文件夹";
+
+
     public static final String[][] fileType =
             {
                     {"zip", "压缩包"},

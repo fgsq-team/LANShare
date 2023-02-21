@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 public class mInputStream extends InputStream {
     private boolean isClose;
-    InputStream is;
+    private final InputStream is;
 
     public mInputStream(InputStream is) {
         this.is = is;

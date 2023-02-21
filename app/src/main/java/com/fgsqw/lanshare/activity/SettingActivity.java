@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
@@ -24,12 +25,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     LinearLayout setting_not_recv_dialog;
     LinearLayout setting_open_media_internal_player;
     LinearLayout setting_media_select_model;
+    LinearLayout setting_check_show_hidden_files;
 
     Switch setting_not_recv_dialog_switch;
     Switch setting_open_media_switch;
     Switch setting_media_select_model_switch;
     Switch setting_save_message_switch;
     Switch setting_save_to_gallery_switch;
+    Switch setting_show_hidden_files_switch;
 
     TextView tv_dev_name;
     TextView tv_recv_file_path;
@@ -40,7 +43,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        prefUtil = new PrefUtil(this);
+        prefUtil = App.getPrefUtil();
         initView();
         initData();
     }
@@ -52,12 +55,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setting_open_media_internal_player = findViewById(R.id.setting_open_media_internal_player);
         setting_media_select_model = findViewById(R.id.setting_media_select_model);
         setting_media_select_model = findViewById(R.id.setting_media_select_model);
+        setting_check_show_hidden_files = findViewById(R.id.setting_check_show_hidden_files);
 
         setting_not_recv_dialog_switch = findViewById(R.id.setting_not_recv_dialog_switch);
         setting_open_media_switch = findViewById(R.id.setting_open_media_switch);
         setting_media_select_model_switch = findViewById(R.id.setting_media_select_model_switch);
         setting_save_message_switch = findViewById(R.id.setting_save_message_switch);
         setting_save_to_gallery_switch = findViewById(R.id.setting_save_to_gallery_switch);
+        setting_show_hidden_files_switch = findViewById(R.id.setting_show_hidden_files_switch);
 
         tv_dev_name = findViewById(R.id.tv_dev_name);
         tv_recv_file_path = findViewById(R.id.tv_recv_file_path);
@@ -67,12 +72,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setting_not_recv_dialog.setOnClickListener(this);
         setting_open_media_internal_player.setOnClickListener(this);
         setting_media_select_model.setOnClickListener(this);
+        setting_check_show_hidden_files.setOnClickListener(this);
 
         setting_not_recv_dialog_switch.setOnCheckedChangeListener(this);
         setting_open_media_switch.setOnCheckedChangeListener(this);
         setting_media_select_model_switch.setOnCheckedChangeListener(this);
         setting_save_message_switch.setOnCheckedChangeListener(this);
         setting_save_to_gallery_switch.setOnCheckedChangeListener(this);
+        setting_show_hidden_files_switch.setOnCheckedChangeListener(this);
 
     }
 
@@ -84,6 +91,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setting_media_select_model_switch.setChecked(prefUtil.getBoolean(PreConfig.MEDIA_SELECT_MODEL, false));
         setting_save_message_switch.setChecked(prefUtil.getBoolean(PreConfig.SAVE_MESSAGE, true));
         setting_save_to_gallery_switch.setChecked(prefUtil.getBoolean(PreConfig.SAVE_TO_GALLERY, true));
+        setting_show_hidden_files_switch.setChecked(prefUtil.getBoolean(PreConfig.SHOW_HIDDEN_FILES, false));
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -130,6 +138,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 setting_save_to_gallery_switch.setChecked(!setting_save_to_gallery_switch.isChecked());
                 break;
             }
+            case R.id.setting_check_show_hidden_files: {
+                setting_show_hidden_files_switch.setChecked(!setting_show_hidden_files_switch.isChecked());
+                break;
+            }
         }
     }
 
@@ -156,6 +168,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             }
             case R.id.setting_save_to_gallery_switch: {
                 prefUtil.saveBoolean(PreConfig.SAVE_TO_GALLERY, isChecked);
+                break;
+            }
+            case R.id.setting_show_hidden_files_switch: {
+                prefUtil.saveBoolean(PreConfig.SHOW_HIDDEN_FILES, isChecked);
                 break;
             }
         }

@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.activity.preview.ReviewImages;
@@ -36,6 +37,7 @@ import com.fgsqw.lanshare.fragment.adapter.MediaAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
 import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
 import com.fgsqw.lanshare.pojo.MediaInfo;
+import com.fgsqw.lanshare.pojo.MediaResult;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.utils.DateUtils;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
@@ -66,7 +68,8 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
     private int posiition;
     private MediaAdapter mMediaAdapter;
     private GridLayoutManager mLayoutManager;
-    public static List<PhotoFolder> mFolders;
+    public List<PhotoFolder> mFolders;
+    public static MediaResult mediaResult;
     public final List<MediaInfo> mSelectList = new LinkedList<>();
 
 
@@ -93,7 +96,7 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_child_photo, container, false);
-            prefUtil = new PrefUtil(getContext());
+            prefUtil = App.getPrefUtil();
             initView();
             loadImageForSDCard();
         }
@@ -127,7 +130,8 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
                 sizImgTv.setText("加载中");
                 swipe.setRefreshing(true);
             });
-            mFolders = FIleSerachUtils.loadImageForSDCard(Objects.requireNonNull(getContext()));
+            mediaResult = FIleSerachUtils.loadImageForSDCard(Objects.requireNonNull(getContext()));
+            mFolders = mediaResult.getmFolders();
             ViewUpdate.threadUi(() -> {
                 if (mFolders != null && !mFolders.isEmpty()) {
                     isOpenFolder = true;
@@ -231,13 +235,10 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
     private void initfolderlist() {
         isPhotoView = false;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
         SortPhotoAdapter adapter = new SortPhotoAdapter(getContext(), mFolders);
         adapter.setOnFolderSelectListener(new SortPhotoAdapter.OnFolderSelectListener() {
             @Override
             public void OnImageFoderSelect(PhotoFolder folder) {
-
-
             }
 
             @Override
@@ -245,10 +246,8 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
                 posiition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
                 //获取当前列表显示的第一个item
                 imageview(folder);
-
             }
         });
-
         recyclerView.setAdapter(adapter);
         recyclerView.scrollToPosition(posiition);
     }
@@ -374,7 +373,6 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
 
     @Override
     public void clearSelect() {
-
         if (mSelectList.size() > 0 && isVisible()) {
             mSelectList.clear();
             mMediaAdapter.refresh();
