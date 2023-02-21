@@ -7,8 +7,8 @@ android {
         applicationId "com.fgsqw.lanshare"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 2300216
-        versionName "1.0.4"
+        versionCode 2300221
+        versionName "1.0.5"
     }
 
     buildTypes {
