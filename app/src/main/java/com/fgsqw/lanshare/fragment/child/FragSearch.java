@@ -15,20 +15,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
-import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SerachAdapter;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.pojo.FileInfo;
-import com.fgsqw.lanshare.pojo.FileSource;
 import com.fgsqw.lanshare.pojo.MediaInfo;
-import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
@@ -37,9 +33,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-public class FragSearch extends BaseFragment implements ChildBaseMethod, View.OnClickListener {
+public class FragSearch extends BaseFragment implements IChildBaseMethod, View.OnClickListener {
 
 
     public static final String TAG = "FragSearch";

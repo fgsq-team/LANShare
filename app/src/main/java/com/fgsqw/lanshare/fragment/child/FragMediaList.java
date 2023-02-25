@@ -35,7 +35,7 @@ import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.MediaAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.pojo.MediaResult;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
@@ -50,7 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class FragMediaList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
+public class FragMediaList extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, IChildBaseMethod {
 
     private View view;
     private ImageView backImg;

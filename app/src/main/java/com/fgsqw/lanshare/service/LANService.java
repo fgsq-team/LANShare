@@ -1028,7 +1028,7 @@ public class LANService extends BaseService {
         return App.getPrefUtil().getString(PreConfig.USER_NAME);
     }
 
-    // 通告设备我已上线
+    // 广播通告局域网的设备我已上线
     public void noticeDeviceOnLineByIp(String ip) {
         byte[] bytes = new byte[2048];
         DataEnc dataEnc = new DataEnc(bytes);
@@ -1049,7 +1049,7 @@ public class LANService extends BaseService {
         }
     }
 
-    // 告知设备我已下线
+    // 广播通告局域网的设备我已下线
     public void noticeDeviceOffLineByIp(String ip) {
         byte[] bytes = new byte[2048];
         DataEnc dataEnc = new DataEnc(bytes);
@@ -1068,13 +1068,16 @@ public class LANService extends BaseService {
         }
     }
 
+
+
     DatagramSocket ipGetSocket = null;
 
     // 监听并处理获取客户和设置客户端命令
     public void runRecive() {
+
         ViewUpdate.runThread(() -> {
             byte[] buf = new byte[4096];
-            byte[] newBuf = new byte[4096];
+//            byte[] newBuf = new byte[4096];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
             try {
@@ -1112,10 +1115,10 @@ public class LANService extends BaseService {
 
                 byte[] data = packet.getData();
                 int len = packet.getLength();
-                System.arraycopy(data, 0, newBuf, 0, len);
+//                System.arraycopy(data, 0, newBuf, 0, len);
 
                 ViewUpdate.runThread(() -> {
-                    DataDec dataDec = new DataDec(newBuf, len);
+                    DataDec dataDec = new DataDec(data.clone(), len);
                     int cmd = dataDec.getCmd();
                     if (cmd == mCmd.UDP_GET_DEVICES) {
                         String devIp = dataDec.getString();

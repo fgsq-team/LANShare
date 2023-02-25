@@ -2,14 +2,12 @@ package com.fgsqw.lanshare.activity.web;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.View;
 import android.webkit.WebView;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
-import com.fgsqw.lanshare.utils.mUtil;
 
 public class PrivacyWebActivity extends BaseActivity {
 

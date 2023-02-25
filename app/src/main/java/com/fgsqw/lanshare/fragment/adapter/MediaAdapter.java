@@ -76,9 +76,9 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
         }
 
         //点击选中/取消选中图片
-        holder.ivSelectIcon.setOnClickListener(v -> {
-            checkedImage(holder, mediaInfo, position);
-        });
+        holder.ivSelectIcon.setOnClickListener(v ->
+                checkedImage(holder, mediaInfo, position)
+        );
 
         holder.itemView.setOnClickListener(v -> {
             if (isViewImage) {//单击图片是否查看，true查看，false选中
@@ -127,8 +127,6 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
 
     /**
      * 选中图片
-     *
-     * @param mediaInfo
      */
     private void selectImage(MediaInfo mediaInfo, int position) {
         fragMediaList.getSelectList().add(mediaInfo);
@@ -139,8 +137,6 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
 
     /**
      * 取消选中图片
-     *
-     * @param mediaInfo
      */
     private void unSelectImage(MediaInfo mediaInfo, int position) {
         List<MediaInfo> selectList = fragMediaList.getSelectList();
@@ -168,6 +164,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
         return cruuentPhotoList == null ? 0 : cruuentPhotoList.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void refresh() {
         notifyDataSetChanged();
     }
