@@ -10,9 +10,9 @@ import android.view.ViewGroup;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 
-public class FragTest extends BaseFragment implements  ChildBaseMethod {
+public class FragTest extends BaseFragment implements IChildBaseMethod {
 
 
     public static final String TAG = "FragTest";

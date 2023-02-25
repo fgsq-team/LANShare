@@ -26,19 +26,16 @@ import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLayoutManager;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.fragment.adapter.AppAdapter;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.utils.CopFileTask;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.ViewUpdate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, ChildBaseMethod {
+public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener, IChildBaseMethod {
 
     private ViewPager vp;
     private View view;
@@ -146,7 +143,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
                 tvCount.setText("加载中");
                 appSwipe.setRefreshing(true);
             });
-            apkFileList = FIleSerachUtils.loadApkForSDCard(getContext());
+            apkFileList = FIleSerachUtils.loadApk(getContext());
             ViewUpdate.threadUi(() -> {
                 if (apkFileList != null && !apkFileList.isEmpty()) {
                     if (appAdapter != null) {

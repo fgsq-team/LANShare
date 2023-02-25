@@ -141,7 +141,7 @@ public class FIleSerachUtils {
         return mediaInfos;
     }
 
-    public static List<ApkInfo> loadApkForSDCard(Context context) {
+    public static List<ApkInfo> loadApk(Context context) {
         //由于扫描应用是耗时的操作，所以要在子线程处理。
         PackageManager pm = context.getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN); // 动作匹配
@@ -164,7 +164,6 @@ public class FIleSerachUtils {
             }
             long length = new File(apkPath).length();
             if (length <= 0) continue;
-//            Log.d("hhhhhhhhhh", apkName + ".apk");
             ApkInfo apkInfo = new ApkInfo();
             apkInfo.setName(apkName + ".apk");
             apkInfo.setIcon(app.loadIcon(pm));
@@ -175,6 +174,18 @@ public class FIleSerachUtils {
         }
         return apkInfoList;
 
+    }
+
+    public static List<String> getPackageNames(Context context) {
+        PackageManager pm = context.getPackageManager();
+        List<String> packageNameList = new ArrayList<>();
+        Intent intent = new Intent(Intent.ACTION_MAIN); // 动作匹配
+        intent.addCategory(Intent.CATEGORY_LAUNCHER); // 类别匹配
+        List<ResolveInfo> mApps = pm.queryIntentActivities(intent, 0);
+        for (ResolveInfo resolveInfo : mApps) {
+            packageNameList.add(resolveInfo.activityInfo.packageName);
+        }
+        return packageNameList;
     }
 
     /**

@@ -8,44 +8,52 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
-import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.FileSource;
 import com.fgsqw.lanshare.toast.T;
+import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.FileUtil;
-import com.fgsqw.lanshare.utils.PrefUtil;
+import com.fgsqw.lanshare.utils.PermissionsUtils;
+import com.fgsqw.lanshare.utils.StringUtils;
+import com.fgsqw.lanshare.utils.VersionUtils;
 import com.fgsqw.lanshare.utils.mUtil;
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
+
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
-public class FragFileList extends BaseFragment implements ChildBaseMethod {
+public class FragFileList extends BaseFragment implements IChildBaseMethod {
 
     private ViewPager vp;
     private View view;
@@ -133,11 +141,14 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
                         int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();//获取当前屏幕第一个显示的item
                         mSign.add(i);
                         initFileList(mFile);
-
                     } else if (mFile.isFile()) {                      //点击的文件如果是文件的话
                         if (!mFile.isDirectory()) {
                             dialog(position);
                         }
+                    } else if (mFile.isAbsolute()) {
+                        int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();//获取当前屏幕第一个显示的item
+                        mSign.add(i);
+                        initFileList(mFile);
                     }
                 }
             }
@@ -170,15 +181,132 @@ public class FragFileList extends BaseFragment implements ChildBaseMethod {
 
     @SuppressLint("SetTextI18n")
     void initFileList(File f) {
-
         // 如果File为null则默认为跟目录
         if (f == null) {
             f = new File("/");
         }
-        // 如果是文件夹
-        if (f.isDirectory()) {
-            // 如果能读取
-            if (f.canRead()) {
+        if (VersionUtils.isAndroid11() && PermissionsUtils.isAndroidData(f.getPath())) {
+            boolean isGet = XXPermissions.isGranted(requireContext(), Permission.MANAGE_EXTERNAL_STORAGE);
+            //已有权限则返回
+            if (!isGet) {
+                XXPermissions.with(requireContext())
+                        // 申请单个权限
+                        .permission(Permission.MANAGE_EXTERNAL_STORAGE)
+                        // 设置不触发错误检测机制（局部设置）
+                        .unchecked()
+                        .request(new OnPermissionCallback() {
+                            @Override
+                            public void onGranted(List<String> permissions, boolean all) {
+                                T.s("成功");
+                            }
+
+                            @Override
+                            public void onDenied(List<String> permissions, boolean never) {
+                                if (never) {
+                                    //如果是被永久拒绝就跳转到应用权限系统设置页面
+                                    XXPermissions.startPermissionActivity(requireActivity(), permissions);
+                                } else {
+                                }
+
+                            }
+                        });
+                return;
+            }
+
+            // 保存当前路径
+            currentDirectory = f;
+            // 显示当前路径到界面
+            mPathTv.setText("    " + f.getPath());
+            fileList.clear();
+            Resources res = getResources();
+            FileSource fileSource = new FileSource();
+            fileSource.setName("...");
+            fileSource.setPreView(decodeResource(res, R.drawable.ic_folder_upload));
+            fileSource.setIsPreView(false);
+            fileList.add(fileSource);
+            List<String> packageNames = FIleSerachUtils.getPackageNames(getContext());
+            for (String packageName : packageNames) {
+                File file = new File(PermissionsUtils.ANDROID_DATA + "/" + packageName);
+                if (file.exists()) {
+                    String name = file.getName();
+                    Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
+                    fileSource = new FileSource();
+                    fileSource.setName(mUtil.StringSize(name, 20));
+                    fileSource.setPath(file.getPath());
+                    fileSource.setPreView(bmp);
+                    fileSource.setIsPreView(false);
+                    fileSource.setTime(file.lastModified());
+                    fileSource.setFile(false);
+                    fileList.add(fileSource);
+                }
+            }
+            mFileAdapter.refresh();
+        } else if (PermissionsUtils.isSubAndroidData(f.getPath())) {
+            Uri uri = PermissionsUtils.path2Uri(f.getPath());
+            //获取权限,没有权限返回null有权限返回授权uri字符串
+            String existsPermission = PermissionsUtils.existsGrantedUriPermission(uri, getContext());
+            if (existsPermission == null) {
+                PermissionsUtils.goApplyUriPermissionPage(uri, dataCenterActivity);
+                return;
+            }
+            Uri targetUri = Uri.parse(existsPermission + uri.toString()
+                    .replaceFirst(PermissionsUtils.URI_PERMISSION_REQUEST_COMPLETE_PREFIX, ""));
+            //Mtools.log(targetUri);
+            DocumentFile rootDocumentFile = DocumentFile.fromSingleUri(getContext(), targetUri);
+            Objects.requireNonNull(rootDocumentFile, "rootDocumentFile is null");
+            //创建一个 DocumentFile表示以给定的 Uri根的文档树。其实就是获取子目录的权限
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(getContext(), targetUri);
+            Objects.requireNonNull(pickedDir, "pickedDir is null");
+            DocumentFile[] documentFiles = pickedDir.listFiles();
+            currentDirectory = f;
+            // 显示当前路径到界面
+            mPathTv.setText("    " + f.getPath());
+            fileList.clear();
+            paths.clear();
+            Resources res = getResources();
+            FileSource fileSource = new FileSource();
+            fileSource.setName("...");
+            fileSource.setPreView(decodeResource(res, R.drawable.ic_folder_upload));
+            fileSource.setIsPreView(false);
+            fileList.add(fileSource);
+            for (DocumentFile documentFile : documentFiles) {
+                String name = documentFile.getName();
+                if (StringUtils.isEmpty(name)) {
+                    continue;
+                }
+                if (documentFile.isDirectory()) {
+                    if (!showHiddenFiles) {
+                        if (name.startsWith(".")) {
+                            continue;
+                        }
+                    }
+                    Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
+                    fileSource = new FileSource();
+                    fileSource.setName(mUtil.StringSize(name, 20));
+                    fileSource.setPath(f.getPath() + "/" + name);
+                    fileSource.setPreView(bmp);
+                    fileSource.setIsPreView(false);
+                    fileSource.setTime(documentFile.lastModified());
+                    fileSource.setFile(false);
+
+                    fileList.add(fileSource);
+                } else if (documentFile.isFile()) {
+                    fileSource = new FileSource();
+                    fileSource.setName(name);
+                    fileSource.setPath(f.getPath() + "/" + name);
+                    fileSource.setPreView(decodeResource(res, R.drawable.ic_file_file));
+                    fileSource.setIsPreView(false);
+                    fileSource.setTime(documentFile.lastModified());
+                    fileSource.setLength(documentFile.length());
+                    fileSource.setFile(true);
+                    paths.add(fileSource);
+                }
+            }
+            fileList.addAll(paths);
+            mFileAdapter.refresh();
+        } else if (f.isDirectory()) {  // 如果是文件夹
+
+            if (f.canRead()) {  // 如果能读取
                 // 保存当前路径
                 currentDirectory = f;
                 // 显示当前路径到界面

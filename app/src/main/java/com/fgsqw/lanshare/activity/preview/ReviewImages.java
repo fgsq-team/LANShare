@@ -3,6 +3,7 @@ package com.fgsqw.lanshare.activity.preview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -50,7 +51,7 @@ public class ReviewImages extends AppCompatActivity {
     private List<MediaInfo> mFileUtils;
     private List<MediaInfo> mSelectFileUtils;
     private boolean isShowBar = true;
-    private boolean isConfirm = false;
+//    private boolean isConfirm = false;
     // private boolean isSingle;
     private int mMaxCount;
 
@@ -134,6 +135,7 @@ public class ReviewImages extends AppCompatActivity {
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onPageSelected(int position) {
                 tvIndicator.setText(position + 1 + "/" + mFileUtils.size());
@@ -159,10 +161,8 @@ public class ReviewImages extends AppCompatActivity {
 
     /**
      * 获取状态栏高度
-     *
-     * @param context
-     * @return
      */
+    @SuppressLint("InternalInsetResource")
     public static int getStatusBarHeight(Context context) {
         int result = 0;
         int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -174,8 +174,6 @@ public class ReviewImages extends AppCompatActivity {
 
     /**
      * 显示和隐藏状态栏
-     *
-     * @param show
      */
     private void setStatusBarVisible(boolean show) {
         if (show) {
@@ -230,12 +228,7 @@ public class ReviewImages extends AppCompatActivity {
                 if (rlTopBar != null) {
                     rlTopBar.setVisibility(View.GONE);
                     //添加延时，保证rlTopBar完全隐藏后再隐藏StatusBar。
-                    rlTopBar.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            setStatusBarVisible(false);
-                        }
-                    }, 5);
+                    rlTopBar.postDelayed(() -> setStatusBarVisible(false), 5);
                 }
             }
         });

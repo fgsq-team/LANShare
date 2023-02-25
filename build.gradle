@@ -4,7 +4,12 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url "https://jitpack.io" }
+        maven {
+//            allowInsecureProtocol = true
+            url "http://a.fgsqw.com:8082/repository/maven-public/"
+        }
+        // JitPack 远程仓库：https://jitpack.io
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.4'
@@ -25,7 +30,12 @@ allprojects {
     repositories {
         google()
         jcenter()
-
+        maven {
+//            allowInsecureProtocol = true
+            url "http://a.fgsqw.com:8082/repository/maven-public/"
+        }
+        // JitPack 远程仓库：https://jitpack.io
+        maven { url 'https://jitpack.io' }
     }
 }
 

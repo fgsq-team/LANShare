@@ -1,17 +1,19 @@
 package com.fgsqw.lanshare.activity;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Messenger;
+import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +31,7 @@ import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.FileSendDialog;
 import com.fgsqw.lanshare.fragment.FragChat;
 import com.fgsqw.lanshare.fragment.FragFiles;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.AddDevice;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
@@ -50,7 +52,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,11 +62,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.fgsqw.lanshare.utils.PermissionsUtils.REQUEST_VISIT;
 import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE;
 
 
 @SuppressWarnings("all")
 public class DataCenterActivity extends BaseActivity implements View.OnClickListener, Toolbar.OnMenuItemClickListener, View.OnLongClickListener {
+
 
     private LinearLayout bottomRecord;
     private LinearLayout mainScan;
@@ -87,6 +90,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private BaseFragment currentFragment;
     private FragFiles fragFiles;
     private FragChat fragChat;
+
+    public List<FileInfo> fileSelects = new LinkedList<>();
 
 
     @Override
@@ -247,11 +252,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 break;
             }
             case R.id.bottom_send: {
-                if (fragFiles.getFileSelects().size() <= 0) {
+                if (fileSelects.size() <= 0) {
                     Toast.makeText(this, "请选择文件", Toast.LENGTH_LONG).show();
                     return;
                 }
-                sendFiles(fragFiles.getFileSelects());
+                sendFiles(fileSelects);
                 break;
             }
             case R.id.bottom_files: {
@@ -288,7 +293,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
         dialog.setOnDeviceSelect(device -> {
             LANService.getInstance().fileSend(device, new LinkedList<>(fileSelects));
-            ((ChildBaseMethod) fragFiles).clearSelect();
+            ((IChildBaseMethod) fragFiles).clearSelect();
             fileSelects.clear();
             setSelectCount(fileSelects.size());
         });
@@ -309,27 +314,23 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     @SuppressLint("SetTextI18n")
     public boolean addASendFile(FileInfo fileInfo) {
-        if (fragFiles.getFileSelects().size() >= 1000) return false;
-        List fileSelects = fragFiles.getFileSelects();
+        if (fileSelects.size() >= 1000) return false;
         fileSelects.add(fileInfo);
         setSelectCount(fileSelects.size());
         return true;
     }
 
     public void removeSendFile(FileInfo fileInfo) {
-        List fileSelects = fragFiles.getFileSelects();
         fileSelects.remove(fileInfo);
         setSelectCount(fileSelects.size());
     }
 
     public void removeSendALL(List infos) {
-        List fileSelects = fragFiles.getFileSelects();
         fileSelects.removeAll(infos);
         setSelectCount(fileSelects.size());
     }
 
     public void removeSendALL() {
-        List fileSelects = fragFiles.getFileSelects();
         fileSelects.clear();
     }
 
@@ -370,9 +371,51 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         return uris;
     }
 
+
+    public void requestAccessAndroidData() {
+        try {
+            Uri uri = Uri.parse("content://com.android.externalstorage.documents/document/primary%3AAndroid%2Fdata");
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+            //flag看实际业务需要可再补充
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            startActivityForResult(intent, REQUEST_VISIT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public void startForRoot() {
+        Uri uri1 = Uri.parse("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata");
+        String uri = FileUtil.changeToUri(Environment.getExternalStorageDirectory().getPath());
+        uri = uri + "/document/primary%3A" + Environment.getExternalStorageDirectory().getPath().replace("/storage/emulated/0/", "").replace("/", "%2F");
+        Uri parse = Uri.parse(uri);
+        DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri1);
+        Intent intent1 = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent1.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        intent1.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.getUri());
+        startActivityForResult(intent1, REQUEST_VISIT);
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_VISIT && data != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Uri uri = data.getData();
+                //这个是保存权限的
+                getContentResolver().takePersistableUriPermission(uri, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));//关键是这里，这个就是保存这个目录的访问权限
+            }
+
+        }
         if (requestCode == REQUEST_CODE) {
             IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
             String qrContent = scanResult.getContents();

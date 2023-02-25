@@ -16,14 +16,14 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.fragment.adapter.ViewGroupAdapter;
 import com.fgsqw.lanshare.fragment.child.*;
-import com.fgsqw.lanshare.fragment.minterface.ChildBaseMethod;
+import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 
-public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeListener, ChildBaseMethod {
+public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeListener, IChildBaseMethod {
 
     View view;
 
@@ -41,7 +41,6 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
 
     int currentPosition;
 
-    public List fileSelects = new LinkedList<>();
 
     public FragFiles() {
         fragAppList = new FragAppList();
@@ -81,7 +80,8 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
     }
 
     public void initFragment() {
-        ViewGroupAdapter mAdapter = new ViewGroupAdapter(getActivity().getSupportFragmentManager(), tabTitles, fragments);
+        ViewGroupAdapter mAdapter = new ViewGroupAdapter(Objects.requireNonNull(getActivity())
+                .getSupportFragmentManager(), tabTitles, fragments);
         viewPager.setAdapter(mAdapter);
         viewPager.addOnPageChangeListener(this);
         tabFiles.setTabMode(TabLayout.MODE_FIXED);
@@ -110,16 +110,12 @@ public class FragFiles extends BaseFragment implements ViewPager.OnPageChangeLis
         return fragment.onKeyDown(n, keyEvent);
     }
 
-    public List getFileSelects() {
-        return fileSelects;
-    }
-
     @SuppressLint("RestrictedApi")
     @Override
     public void clearSelect() {
         for (Fragment fragment : fragments) {
-            if (fragment instanceof ChildBaseMethod) {
-                ((ChildBaseMethod) fragment).clearSelect();
+            if (fragment instanceof IChildBaseMethod) {
+                ((IChildBaseMethod) fragment).clearSelect();
             }
         }
     }

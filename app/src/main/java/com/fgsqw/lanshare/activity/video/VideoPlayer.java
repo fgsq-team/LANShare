@@ -21,6 +21,7 @@ import com.fgsqw.lanshare.pojo.FileInfo;
 import com.maning.mnvideoplayerlibrary.player.MNViderPlayer;
 
 import java.io.File;
+import java.util.Objects;
 
 public class VideoPlayer extends AppCompatActivity {
 
@@ -31,7 +32,7 @@ public class VideoPlayer extends AppCompatActivity {
     String path;
 
     protected void fullScann() {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);// 隐藏标题
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);// 隐藏标题
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);// 设置全屏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -56,7 +57,8 @@ public class VideoPlayer extends AppCompatActivity {
         // 全屏
         fullScann();
         setContentView(R.layout.video_player);
-        path = getIntent().getExtras().getString("path");
+        path = Objects.requireNonNull(getIntent().getExtras())
+                .getString("path");
         initViews();
         initPlayer();
         start();

@@ -261,7 +261,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                     if (messageContent instanceof MessageUriContent) {
                         T.s("暂不支持分享文件查看");
                     } else if (messageContent instanceof MessageFolderContent) {
-                        T.s("暂不支持打开文件夹,请在文件管理器中查看");
+                        T.s("暂不支持打开文件夹,请在件管理器中查看");
                     } else {
                         if (fileContent.getStatus() == MessageContent.SUCCESS) {
                             FileUtil.openFile(dataCenterActivity, new File(fileContent.getPath()));
@@ -390,6 +390,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void addListMessage(List<MessageContent> messageContent, boolean save) {
         // 保存消息内容
         if (Config.SAVE_MESSAGE && save) {
