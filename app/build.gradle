@@ -42,10 +42,10 @@ dependencies {
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     //权限申请框架
     implementation 'com.github.getActivity:XXPermissions:16.6'
-
-    // https://mvnrepository.com/artifact/com.sun.net.httpserver/http
+    // webServer
     implementation 'com.sun.net.httpserver:http:20070405'
-
+    // webSocket
+    implementation 'org.java-websocket:Java-WebSocket:1.5.3'
     // 视频预览
     implementation project(':mnvideoplayerlibrary')
 }

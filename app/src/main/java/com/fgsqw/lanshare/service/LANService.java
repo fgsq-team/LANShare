@@ -595,7 +595,7 @@ public class LANService extends BaseService {
     }
 
     /**
-     * 发送文件同时接收指令 此线程用于接收端取消接收文件
+     * 发送文件同时接收指令 此线程用于接收端取消接收文件命令
      */
     public void startRecvCmd(List<MessageFileContent> fileContentList, InputStream input) {
         ViewUpdate.runThread(() -> {
