@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -14,12 +15,16 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.DeviceQrCodeActivity;
 import com.fgsqw.lanshare.base.BaseService;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
+import com.fgsqw.lanshare.config.LVersion;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.pojo.FileSource;
@@ -44,11 +49,12 @@ import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.LLog;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
-import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.UDPTools;
 import com.fgsqw.lanshare.utils.ViewUpdate;
 import com.fgsqw.lanshare.utils.mUtil;
+import com.fgsqw.lanshare.web.HttpServer;
+import com.fgsqw.lanshare.web.LWebServer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,6 +69,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -80,6 +87,8 @@ public class LANService extends BaseService {
     private NetWorkReceiver netWorkReceiver;
 
     private boolean running = true;
+
+    HttpServer httpServer;
 
     public void addDevice(Device device) {
         String address = device.getDevIP() + ":" + device.getDevPort();
@@ -110,12 +119,107 @@ public class LANService extends BaseService {
 
     WifiManager.MulticastLock multicastLock;
 
+    public void startWebServer() {
+        httpServer = new HttpServer();
+        httpServer.addPath("/", (request, response) -> {
+            String path = request.getRequestURL();
+            String filePath = "web";
+            if (StringUtils.isEmpty(path) || path.equals("/")) {
+                filePath += "/lanshare.html";
+            } else {
+                filePath += path;
+            }
+            App instance = App.getInstance();
+            InputStream open = instance.getAssets().open(filePath);
+            byte[] bytes = IOUtil.readBytes(open);
+            int i = filePath.lastIndexOf(".");
+            if (i > 0) {
+                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
+                response.writeBytes(bytes, myMIMEType);
+            }
+        });
+        httpServer.addPath("/images", (request, response) -> {
+            String path = request.getRequestURL();
+            String filePath = "web";
+            filePath += path;
+            App instance = App.getInstance();
+            InputStream open = instance.getAssets().open(filePath);
+            byte[] bytes = IOUtil.readBytes(open);
+            int i = filePath.lastIndexOf(".");
+            if (i > 0) {
+                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
+                response.writeBytes(bytes, myMIMEType);
+            }
+        });
+
+        httpServer.addPath("/favicon.ico", (request, response) -> {
+            String path = request.getRequestURL();
+            String filePath = "web";
+            filePath += path;
+            response.writeFile(new File(filePath));
+            App instance = App.getInstance();
+            InputStream open = instance.getAssets().open(filePath);
+            byte[] bytes = IOUtil.readBytes(open);
+            int i = filePath.lastIndexOf(".");
+            if (i > 0) {
+                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
+                response.writeBytes(bytes, myMIMEType);
+            }
+        });
+
+        httpServer.addPath("/files", (request, response) -> {
+            String str = request.getRequestBody();
+            JSONObject jsonObject = JSON.parseObject(str);
+            Boolean isBack = jsonObject.getBoolean("isBack");
+            String path = jsonObject.getString("path");
+            File file = null;
+            if (!StringUtils.isEmpty(path)) {
+                file = new File(path);
+                if (isBack) {
+                    file = file.getParentFile();
+                }
+            }
+            if (file == null) {
+                file = Environment.getExternalStorageDirectory();
+            }
+            JSONObject object = new JSONObject();
+            object.put("path", file.getAbsolutePath());
+
+            JSONArray jsonArray = new JSONArray();
+            File[] files = file.listFiles();
+            if (files != null) {
+                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd HH:ss:mm");
+
+                for (File file1 : files) {
+                    JSONObject item = new JSONObject();
+                    item.put("name", file1.getName());
+                    item.put("path", file1.getAbsolutePath());
+                    item.put("isFile", file1.isFile());
+                    item.put("time", sfd.format(new Date(file1.lastModified())));
+                    item.put("isDirectory", file1.isDirectory());
+                    jsonArray.add(item);
+                }
+            }
+            object.put("list", jsonArray);
+            response.writeString(object.toJSONString());
+        });
+        httpServer.addPath("/file/", (request, response) -> {
+            String requestBody = request.getRequestBody();
+            String path = request.getPathParam("path");
+            File file = new File(path);
+            response.writeFile(file);
+        });
+
+
+    }
+
     @Override
     public void onCreate() {
         WifiManager mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         multicastLock = mWifiManager.createMulticastLock("multicastLock");
 //        multicastLock.setReferenceCounted(false);
         super.onCreate();
+        startWebServer();
         instance = this;
         // Service保活
         mUtil.showNotification(this, getString(R.string.app_name), "服务正在运行...");
@@ -167,20 +271,19 @@ public class LANService extends BaseService {
     }
 
     // 监听接收文件信息
-    public void handleTcp(Socket client) {
-        InputStream input;
-        OutputStream out;
-        try {
-            input = client.getInputStream();
-            out = client.getOutputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+    public void handleTcp(Socket client, byte[] magicBytes, InputStream input, OutputStream out) {
         byte[] buffer = new byte[1024 * 1024];
         try {
-            if (IOUtil.read(input, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
-                return;
+            // 新版本兼容
+            if (magicBytes != null) {
+                System.arraycopy(magicBytes, 0, buffer, 0, 4);
+                int headSize = DataEnc.getHeaderSize() - 4;
+                if (IOUtil.read(input, buffer, 4, headSize) != headSize)
+                    return;
+            } else {
+                if (IOUtil.read(input, buffer, 0, DataEnc.getHeaderSize()) != DataEnc.getHeaderSize())
+                    return;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -240,9 +343,17 @@ public class LANService extends BaseService {
             int port = dataDec.getInt();
             String ip = dataDec.getString();
             String name = dataDec.getString();
-            Device device = devices.get(ip + ":" + port);
+            int devMode = dataDec.getInt();
+            String address = ip + ":" + port;
+            Device device = devices.get(address);
             if (device == null) {
-                device = new Device(name, ip, port);
+                device = new Device();
+                device.setDevPort(port);
+                device.setDevIP(ip);
+                device.setDevName(name);
+                device.setDevMode(devMode);
+                device.setSetTime(System.currentTimeMillis());
+                devices.put(address, device);
             }
             List<MessageFileContent> fileContentList = new ArrayList<>();
             Message mMessage;
@@ -647,10 +758,16 @@ public class LANService extends BaseService {
 
             InputStream input = null;
             OutputStream output = null;
-
             try {
                 input = socket.getInputStream();
                 output = socket.getOutputStream();
+//                // 魔法数组
+//                byte[] magicBytes = ByteUtil.intToBytes(Config.MAGIC_NUM);
+//                // 数据协议版本
+//                byte[] dataVersionBytes = ByteUtil.intToBytes(Config.DATA_VERSION);
+//                output.write(magicBytes);
+//                output.write(dataVersionBytes);
+                TimeUnit.MILLISECONDS.sleep(10);
                 fileSend(input, output, device, fileList);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -676,6 +793,7 @@ public class LANService extends BaseService {
                         dataEnc.putInt(d.getDevPort());
                         dataEnc.putString(d.getDevIP());
                         dataEnc.putString(App.getPrefUtil().getString(PreConfig.USER_NAME));
+                        dataEnc.putInt(d.getDevMode());
 
                         IOUtil.write(out, dataEnc.getData(), dataEnc.getDataLen());
 
@@ -991,9 +1109,42 @@ public class LANService extends BaseService {
                 try {
                     // 等待客户端连接
                     Socket client = fileRecive.accept();
-                    ViewUpdate.runThread(() -> handleTcp(client));
+                    byte[] magicBytes = new byte[4];
+                    InputStream is = client.getInputStream();
+                    OutputStream out = client.getOutputStream();
+                    int read = is.read(magicBytes);
+                    if (read == 4) {
+                        int magicNum = ByteUtil.bytesToInt(magicBytes, 0);
+                        // 版本兼容
+                        if (magicNum == Config.MAGIC_NUM) {
+                            int dataVersion = is.read(magicBytes);
+                            // 版本1
+                            if (dataVersion == LVersion.DATA_VERSION_1) {
+                                ViewUpdate.runThread(() -> handleTcp(client, null, is, out));
+                            }
+                            continue;
+                        }
+                        try {
+                            String http = new String(magicBytes);
+                            String s = http.toUpperCase();
+                            if (s.contains("GET") || s.contains("POST")) {
+                                ViewUpdate.runThread(() -> {
+                                    httpServer.newClient(client, magicBytes, is, out);
+                                });
+                                continue;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        ViewUpdate.runThread(() -> handleTcp(client, magicBytes, is, out));
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
             }
         });
@@ -1039,6 +1190,7 @@ public class LANService extends BaseService {
                 dataEnc.putString(device.getDevIP());
                 dataEnc.putString(getDevName());
                 dataEnc.putInt(device.getDevMode());
+                dataEnc.putInt(Config.DATA_VERSION);
                 try {
                     UDPTools.sendData(new DatagramSocket(), dataEnc.getData(), dataEnc.getDataLen(), ip, Config.UDP_PORT);
                 } catch (SocketException e) {
@@ -1067,7 +1219,6 @@ public class LANService extends BaseService {
             }
         }
     }
-
 
 
     DatagramSocket ipGetSocket = null;
@@ -1134,8 +1285,11 @@ public class LANService extends BaseService {
                         int devPort = dataDec.getInt();
                         String devIp = dataDec.getString();
                         String devName = dataDec.getString();
+                        // 设备类型
                         int devMode = dataDec.getInt();
-
+                        // 通讯协议版本
+                        int dataVersion = dataDec.getInt();
+                        Log.d("dataVersion", "" + dataVersion);
                         // 排除自己发送的数据
                         for (Device device : mDevice) {
                             if (devIp != null && devIp.equals(device.getDevIP())) {
@@ -1153,6 +1307,7 @@ public class LANService extends BaseService {
                         device.setDevName(devName);
                         device.setDevMode(devMode);
                         device.setSetTime(System.currentTimeMillis());
+                        device.setDataVersion(dataVersion);
                         devices.put(address, device);
 
                     } else if (cmd == mCmd.UDP_DEVICES_OFF_LINE) {

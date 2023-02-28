@@ -3,6 +3,7 @@ package com.fgsqw.lanshare.utils;
 import android.content.Context;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,6 +107,23 @@ public class IOUtil {
         return true;
     }
 
+    public static String readHttpLine(InputStream is) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            int read = is.read();
+            if (read == -1) {
+                return null;
+            }
+            char c = (char) read;
+            if ((c == '\r')) {
+                is.read();
+                break;
+            }
+            sb.append((char) read);
+        }
+        return sb.toString();
+    }
+
 
     public static void write(OutputStream out, DataEnc dataEnc) throws IOException {
         write(out, dataEnc.getData(), dataEnc.getDataLen());
@@ -122,6 +140,25 @@ public class IOUtil {
     public static void write(OutputStream out, byte[] buf, int offset, int len) throws IOException {
         out.write(buf, offset, len);
         out.flush();
+    }
+
+
+    public static byte[] readBytes(InputStream is) throws IOException {
+        byte[] buffer = new byte[1024];
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int ten = 0;
+        while ((ten = is.read(buffer)) != -1) {
+            out.write(buffer, 0, ten);
+        }
+        return out.toByteArray();
+    }
+
+    public static void transfer(InputStream is, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int ten = 0;
+        while ((ten = is.read(buffer)) != -1) {
+            out.write(buffer, 0, ten);
+        }
     }
 
 

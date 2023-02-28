@@ -1,0 +1,200 @@
+<head>
+    <meta charset="utf-8">
+</head>
+
+<div class="bottom-list">
+    <div class="file-item">
+        <div class="file-item-icon file-item-base"></div>
+        <div class="file-item-info">
+            <div class="file-item-name file-item-base ">文件名</div>
+            <div class="file-item-time file-item-base ">2020-08-15 12:00:06 1GB</div>
+        </div>
+    </div>
+
+</div>
+
+
+<style>
+    .file-item:hover {
+        cursor: pointer;
+        background: #f5f5f5;
+        border-radius: 10px;
+        color: #000;
+    }
+
+    @media screen and (max-width: 639px) {
+        .bottom-list {
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .file-item {
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            height: 50px;
+            color: #000;
+            border-bottom: solid 1px #f5f5f5;
+            font-size: 1.4rem;
+        }
+
+        .file-item-name {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .file-item-time {
+            display: flex;
+            font-size: 10px;
+            color: #939393;
+        }
+
+        .file-item-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .file-item-icon {
+            height: 40px;
+            width: 50px;
+            display: flex;
+            background-size: 100% 100%;
+            background: url('images/wenjianjia_60.png') no-repeat;
+        }
+
+    }
+
+    /* 中等屏幕（桌面显示器，大于等于 992px） */
+    @media screen and (min-width: 640px) and (max-width: 1000px) {
+        .bottom-list {
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .file-item {
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            height: 50px;
+            color: #000;
+            border-bottom: solid 1px #f5f5f5;
+            font-size: 1.4rem;
+        }
+
+        .file-item-name {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .file-item-time {
+            display: flex;
+            font-size: 10px;
+            color: #939393;
+        }
+
+        .file-item-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .file-item-icon {
+            height: 40px;
+            width: 50px;
+            display: flex;
+            background-size: 100% 100%;
+            background: url('images/wenjianjia_60.png') no-repeat;
+        }
+
+    }
+
+    /* 大屏幕（大桌面显示器，大于等于 1200px） */
+    @media screen and (min-width: 1000px) {
+        .bottom-list {
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .file-item :hover {
+            cursor: pointer;
+            background: #000000;
+            border-radius: 10px;
+            color: #000;
+        }
+
+        .file-item {
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            height: 50px;
+            width: 100%;
+            color: #000;
+            border-bottom: solid 1px #f5f5f5;
+            font-size: 1.4rem;
+        }
+
+        .file-item-name {
+            flex: 2;
+            color: #4d5259;
+            font-size: 18px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .file-item-time {
+            display: flex;
+            font-size: 16px;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            flex: 2;
+            overflow: hidden;
+        }
+
+        .file-item-info {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            flex: 4;
+            overflow: hidden;
+        }
+
+        .file-item-icon {
+            align-items: center;
+            height: 20px;
+            width: 40px;
+            display: flex;
+            background-size: 100% 100%;
+            background: url('images/wenjianjia_20.png') no-repeat;
+        }
+
+    }
+</style>

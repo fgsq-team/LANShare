@@ -7,6 +7,11 @@ public class Config {
 
     public static final String APP_NAME = "LANShare";
     public static final String KEY = "6c9b%8ErII@Rc&f";
+    // 魔法数字
+    public static final int MAGIC_NUM = 0x66677371;
+    // 数据版本/协议版本
+    public static final int DATA_VERSION = 1;
+    // UDP端口
     public static final int UDP_PORT = 4573;
     // 隐私协议版本
     public static final int PRIVACY_VERSION = 1;

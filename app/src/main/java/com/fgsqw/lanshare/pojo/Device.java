@@ -10,13 +10,14 @@ public class Device implements Serializable {
     public static final int MAC = 4;
     public static final int IOS = 5;
 
-    String devName;
-    String devIP;
-    String devNetMask; // 子网掩码
-    String devBrotIP;  // 广播IP
-    int devPort;
-    int devMode;       // 设备代号
-    long setTime;
+    private String devName;
+    private String devIP;
+    private String devNetMask; // 子网掩码
+    private String devBrotIP;  // 广播IP
+    private int devPort;
+    private int devMode;       // 设备代号
+    private long setTime;
+    private int dataVersion; // 通讯协议版本
 
     public Device() {
     }
@@ -81,6 +82,14 @@ public class Device implements Serializable {
 
     public void setDevMode(int devMode) {
         this.devMode = devMode;
+    }
+
+    public int getDataVersion() {
+        return dataVersion;
+    }
+
+    public void setDataVersion(int dataVersion) {
+        this.dataVersion = dataVersion;
     }
 
     public String getDeviceName() {
