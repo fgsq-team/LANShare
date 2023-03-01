@@ -1106,38 +1106,10 @@ public class LANService extends BaseService {
         }
         ViewUpdate.runThread(() -> {
             while (running) {
+                Socket client;
                 try {
                     // 等待客户端连接
-                    Socket client = fileRecive.accept();
-                    byte[] magicBytes = new byte[4];
-                    InputStream is = client.getInputStream();
-                    OutputStream out = client.getOutputStream();
-                    int read = is.read(magicBytes);
-                    if (read == 4) {
-                        int magicNum = ByteUtil.bytesToInt(magicBytes, 0);
-                        // 版本兼容
-                        if (magicNum == Config.MAGIC_NUM) {
-                            int dataVersion = is.read(magicBytes);
-                            // 版本1
-                            if (dataVersion == LVersion.DATA_VERSION_1) {
-                                ViewUpdate.runThread(() -> handleTcp(client, null, is, out));
-                            }
-                            continue;
-                        }
-                        try {
-                            String http = new String(magicBytes);
-                            String s = http.toUpperCase();
-                            if (s.contains("GET") || s.contains("POST")) {
-                                ViewUpdate.runThread(() -> {
-                                    httpServer.newClient(client, magicBytes, is, out);
-                                });
-                                continue;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        ViewUpdate.runThread(() -> handleTcp(client, magicBytes, is, out));
-                    }
+                    client = fileRecive.accept();
                 } catch (IOException e) {
                     e.printStackTrace();
                     try {
@@ -1145,7 +1117,47 @@ public class LANService extends BaseService {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
+                    continue;
                 }
+                ViewUpdate.runThread(() -> {
+                    try {
+                        byte[] magicBytes = new byte[4];
+                        InputStream is = client.getInputStream();
+                        OutputStream out = client.getOutputStream();
+                        int read = is.read(magicBytes);
+                        if (read == 4) {
+                            int magicNum = ByteUtil.bytesToInt(magicBytes, 0);
+                            // 版本兼容
+                            if (magicNum == Config.MAGIC_NUM) {
+                                int dataVersion = is.read(magicBytes);
+                                // 版本1
+                                if (dataVersion == LVersion.DATA_VERSION_1) {
+                                    handleTcp(client, null, is, out);
+                                }
+                                return;
+                            }
+                            try {
+                                String http = new String(magicBytes);
+                                String s = http.toUpperCase();
+                                if (s.contains("GET") || s.contains("POST")) {
+                                    httpServer.newClient(client, magicBytes, is, out);
+                                    return;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            handleTcp(client, magicBytes, is, out);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                });
+
             }
         });
     }
