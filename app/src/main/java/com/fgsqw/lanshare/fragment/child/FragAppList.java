@@ -30,7 +30,7 @@ import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.utils.CopFileTask;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -138,13 +138,13 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
 
     @SuppressLint("SetTextI18n")
     private void loading() {
-        ViewUpdate.runThread(() -> {
-            ViewUpdate.threadUi(() -> {
+        ThreadUtils.runThread(() -> {
+            ThreadUtils.threadUi(() -> {
                 tvCount.setText("加载中");
                 appSwipe.setRefreshing(true);
             });
             apkFileList = FIleSerachUtils.loadApk(getContext());
-            ViewUpdate.threadUi(() -> {
+            ThreadUtils.threadUi(() -> {
                 if (apkFileList != null && !apkFileList.isEmpty()) {
                     if (appAdapter != null) {
                         appAdapter.refresh();

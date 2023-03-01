@@ -12,7 +12,7 @@ import com.fgsqw.lanshare.pojo.AddDevice;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.utils.QRcodeUtils;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class DeviceQrCodeActivity extends AppCompatActivity {
         Bitmap qrcode = QRcodeUtils.qrcode(json, 400, 400);
         ImageView imageView = findViewById(R.id.qr_code);
         imageView.setImageBitmap(qrcode);
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             while (!exitFlag) {
                 try {
                     TimeUnit.SECONDS.sleep(1);

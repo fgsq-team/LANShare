@@ -51,10 +51,9 @@ import com.fgsqw.lanshare.utils.LLog;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.UDPTools;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 import com.fgsqw.lanshare.utils.mUtil;
 import com.fgsqw.lanshare.web.HttpServer;
-import com.fgsqw.lanshare.web.LWebServer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -232,7 +231,7 @@ public class LANService extends BaseService {
         // 文件接收监听
         fileServer();
         // 广播局域网所有设备我已上线
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             for (Device device : mDevice) {
                 noticeDeviceOnLineByIp(device.getDevBrotIP());
             }
@@ -544,7 +543,7 @@ public class LANService extends BaseService {
 
 
     public void startRecvFile(Object[] objects, boolean isAgree) {
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             List<MessageFileContent> messageFileContents = (List<MessageFileContent>) objects[1];
             Socket client = (Socket) objects[2];
             InputStream input = (InputStream) objects[3];
@@ -693,7 +692,7 @@ public class LANService extends BaseService {
      * 接收文件时发送取消接收某一文件命令
      */
     public void sendCloseCmd(MessageFileContent fileContent, OutputStream out) {
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             DataEnc dataEnc = new DataEnc();
             dataEnc.setByteCmd(mCmd.FS_CLOSE);
             dataEnc.setCount(fileContent.getIndex());
@@ -709,7 +708,7 @@ public class LANService extends BaseService {
      * 发送文件同时接收指令 此线程用于接收端取消接收文件命令
      */
     public void startRecvCmd(List<MessageFileContent> fileContentList, InputStream input) {
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             DataDec dataDec = new DataDec();
             try {
                 while (running) {
@@ -744,7 +743,7 @@ public class LANService extends BaseService {
      */
 
     public void fileSend(Device device, List<FileInfo> fileList) {
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             Socket socket = null;
             try {
                 socket = new Socket(device.getDevIP(), device.getDevPort());
@@ -1104,7 +1103,7 @@ public class LANService extends BaseService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             while (running) {
                 Socket client;
                 try {
@@ -1119,7 +1118,7 @@ public class LANService extends BaseService {
                     }
                     continue;
                 }
-                ViewUpdate.runThread(() -> {
+                ThreadUtils.runThread(() -> {
                     try {
                         byte[] magicBytes = new byte[4];
                         InputStream is = client.getInputStream();
@@ -1138,9 +1137,9 @@ public class LANService extends BaseService {
                             }
                             try {
                                 String http = new String(magicBytes);
-                                String s = http.toUpperCase();
-                                if (s.contains("GET") || s.contains("POST")) {
-                                    httpServer.newClient(client, magicBytes, is, out);
+                                String magicStr = http.toUpperCase();
+                                if (magicStr.contains("GET") || magicStr.contains("POST")) {
+                                    httpServer.newClient(client, magicStr, is, out);
                                     return;
                                 }
                             } catch (Exception e) {
@@ -1238,7 +1237,7 @@ public class LANService extends BaseService {
     // 监听并处理获取客户和设置客户端命令
     public void runRecive() {
 
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             byte[] buf = new byte[4096];
 //            byte[] newBuf = new byte[4096];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -1280,7 +1279,7 @@ public class LANService extends BaseService {
                 int len = packet.getLength();
 //                System.arraycopy(data, 0, newBuf, 0, len);
 
-                ViewUpdate.runThread(() -> {
+                ThreadUtils.runThread(() -> {
                     DataDec dataDec = new DataDec(data.clone(), len);
                     int cmd = dataDec.getCmd();
                     if (cmd == mCmd.UDP_GET_DEVICES) {
@@ -1391,7 +1390,7 @@ public class LANService extends BaseService {
         LLog.info("onDestroy 退出");
 
         running = false;
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             for (Device device : mDevice) {
                 noticeDeviceOffLineByIp(device.getDevBrotIP());
             }
@@ -1402,7 +1401,7 @@ public class LANService extends BaseService {
 
     // 局域网扫描设备
     public void scannDevice() {
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             while (running) {
                 for (Device selfDevice : mDevice) {
                     try {
@@ -1448,7 +1447,7 @@ public class LANService extends BaseService {
         if (message.length() > 700) {
             return;
         }
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             for (Device fromDevice : mDevice) {
                 DataEnc dataEnc = new DataEnc(1024 + message.getBytes().length);
                 dataEnc.setCmd(isClip ? mCmd.UDP_DEVICES_MESSAGE_TO_CLIPBOARD : mCmd.UDP_DEVICES_MESSAGE);

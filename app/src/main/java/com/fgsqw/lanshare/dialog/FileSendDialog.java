@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,7 +14,7 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.dialog.adapter.DeviceDialogAdapter;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.pojo.Device;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,7 @@ public class FileSendDialog extends Dialog implements DeviceDialogAdapter.OnItem
         flag = true;
         initView();
         initList();
-        ViewUpdate.runThread(this);
+        ThreadUtils.runThread(this);
     }
 
     public void initView() {
@@ -96,7 +95,7 @@ public class FileSendDialog extends Dialog implements DeviceDialogAdapter.OnItem
     public void run() {
         while (flag) {
             List<Device> deviceList = getDeviceList();
-            ViewUpdate.threadUi(() -> {
+            ThreadUtils.threadUi(() -> {
                         if (deviceList.size() > 0) {
                             tvNotDev.setVisibility(View.GONE);
                         } else {

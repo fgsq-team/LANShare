@@ -42,7 +42,7 @@ import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.utils.DateUtils;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
 import com.fgsqw.lanshare.utils.PrefUtil;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.io.File;
 import java.util.Collections;
@@ -125,14 +125,14 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
     }
 
     private void loadImageForSDCard() {
-        ViewUpdate.runThread(() -> {
-            ViewUpdate.threadUi(() -> {
+        ThreadUtils.runThread(() -> {
+            ThreadUtils.threadUi(() -> {
                 sizImgTv.setText("加载中");
                 swipe.setRefreshing(true);
             });
             mediaResult = FIleSerachUtils.loadImageForSDCard(Objects.requireNonNull(getContext()));
             mFolders = mediaResult.getmFolders();
-            ViewUpdate.threadUi(() -> {
+            ThreadUtils.threadUi(() -> {
                 if (mFolders != null && !mFolders.isEmpty()) {
                     isOpenFolder = true;
                     posiition = 0;

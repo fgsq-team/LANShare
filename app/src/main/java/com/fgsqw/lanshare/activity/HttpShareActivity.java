@@ -3,7 +3,6 @@ package com.fgsqw.lanshare.activity;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
@@ -15,7 +14,7 @@ import com.fgsqw.lanshare.pojo.NetInfo;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 import com.fgsqw.lanshare.utils.mUtil;
 
 import java.io.BufferedReader;
@@ -46,7 +45,7 @@ public class HttpShareActivity extends BaseActivity implements CompoundButton.On
     }
 
     public void startHttpServer() {
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             try {
                 serverSocket = new ServerSocket(HTTP_PORT);
             } catch (IOException e) {

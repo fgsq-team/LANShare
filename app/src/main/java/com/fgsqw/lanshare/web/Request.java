@@ -1,6 +1,5 @@
 package com.fgsqw.lanshare.web;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -8,22 +7,32 @@ import java.util.Map;
 import java.util.TreeMap;
 
 
+/**
+ * 请求信息
+ * @Author: fgsqme
+ */
 public class Request {
 
     public static final String CONTENT_LENGTH = "Content-Length";
 
+    // 请求体长度
     private long contentLength = 0;
 
-    private InputStream is;
+    private final InputStream is;
 
-    private Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    // 请求头解析
+    private final Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
+    // 请求路径
     private String requestURL;
 
+    // 请求路径参数
     private String requestURLParams;
 
-    private Map<String, String> pathParams = new HashMap<>();
+    // 请求路径参数解析
+    private final Map<String, String> pathParams = new HashMap<>();
 
+    // 请求协议 POST/GET
     private String requestMethod;
 
     private boolean headerReady = false;

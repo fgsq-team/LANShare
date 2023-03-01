@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -46,7 +45,7 @@ import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -426,7 +425,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                     if (!Config.KEY.equals(addDevice.getKey())) {
                         throw new RuntimeException();
                     }
-                    ViewUpdate.runThread(() -> {
+                    ThreadUtils.runThread(() -> {
                         List<Device> devices = addDevice.getDevices();
                         if (devices != null && !devices.isEmpty()) {
                             for (Device device : devices) {

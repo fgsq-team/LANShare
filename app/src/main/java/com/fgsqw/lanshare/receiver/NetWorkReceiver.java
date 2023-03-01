@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.fgsqw.lanshare.service.LANService;
-import com.fgsqw.lanshare.utils.ViewUpdate;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +25,7 @@ public class NetWorkReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, intent.getAction());
-        ViewUpdate.runThread(() -> {
+        ThreadUtils.runThread(() -> {
             try {
                 TimeUnit.SECONDS.sleep(1);
                 lanService.initData();

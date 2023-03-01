@@ -1,6 +1,7 @@
 package com.fgsqw.lanshare.web;
 
 
+
 import com.fgsqw.lanshare.utils.ContentTypes;
 import com.fgsqw.lanshare.utils.IOUtil;
 
@@ -9,10 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 响应信息
+ * @Author: fgsqme
+ */
 public class Response {
+
 
     private OutputStream out;
 
+    // 响应头
     private Map<String, String> headers = new HashMap<>();
 
     public static final String HTTP_VERSION = "HTTP/1.1";
@@ -23,14 +30,12 @@ public class Response {
 
     private long contentLength = 0;
 
-
     public Response(OutputStream out) {
         this.out = out;
         headers.put(HTTP_VERSION, "200 OK");
         headers.put("Content-Length", contentLength + "");
         headers.put("Content-Type", TEXT_CONTEXT_TYPE);
     }
-
 
     public void setStatus(String status) {
         headers.put(HTTP_VERSION, status);
@@ -93,6 +98,11 @@ public class Response {
         writeBytes(bytes, STREAM_CONTEXT_TYPE);
     }
 
+    /**
+     * 返回字节数组
+     * @param bytes 字节数组
+     * @param contentType 响应体contentType
+     */
     public void writeBytes(byte[] bytes, String contentType) throws IOException {
         setContentLength(bytes.length);
         setContentType(contentType);
@@ -102,8 +112,10 @@ public class Response {
         out.flush();
     }
 
-
-
+    /**
+     * 返回文件，根据文件名判断响应体的contentType类型
+     * @param file 文件
+     */
     public void writeFile(File file) throws IOException {
         setContentLength(file.length());
         setContentType(STREAM_CONTEXT_TYPE);
@@ -124,10 +136,17 @@ public class Response {
         is.close();
     }
 
+
     public void writeStream(InputStream is, long length) throws IOException {
         writeStream(is, STREAM_CONTEXT_TYPE, length);
     }
 
+    /**
+     * 返回数据流
+     * @param is 数据流
+     * @param contentType 响应体contentType类型
+     * @param length 返回数据长度
+     */
     public void writeStream(InputStream is, String contentType, long length) throws IOException {
         setContentLength(length);
         setContentType(contentType);
