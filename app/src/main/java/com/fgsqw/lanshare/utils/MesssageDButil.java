@@ -83,6 +83,7 @@ public class MesssageDButil {
                 byte[] data = cursor.getBlob(cursor.getColumnIndex("message"));
                 try {
                     MessageContent messageContent = ByteUtil.byteToObject(data);
+                    if (messageContent == null) continue;
                     if (messageContent instanceof MessageUriContent) {
                         MessageUriContent messageUriContent = (MessageUriContent) messageContent;
                         if (messageUriContent.existStatus(MessageContent.IN)) {

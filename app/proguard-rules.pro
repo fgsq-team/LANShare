@@ -21,3 +21,7 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.fgsqw.lanshare.pojo.AddDevice {*;}
+-keep class com.fgsqw.lanshare.pojo.MessageContent {*;}
+-keep class com.fgsqw.lanshare.pojo.MessageFileContent {*;}
+-keep class com.fgsqw.lanshare.pojo.MessageFolderContent {*;}
+-keep class com.fgsqw.lanshare.pojo.MessageMediaContent {*;}
