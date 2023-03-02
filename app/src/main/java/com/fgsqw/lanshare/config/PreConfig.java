@@ -22,4 +22,8 @@ public class PreConfig {
     public static String SAVE_TO_GALLERY = "save_to_gallery";
     // 是否显示隐藏文件夹
     public static String SHOW_HIDDEN_FILES = "show_hidden_files";
+    // tcpPort
+    public static String TCP_PORT = "tcpPort";
+    // udpPort
+    public static String UDP_PORT = "udpPort";
 }

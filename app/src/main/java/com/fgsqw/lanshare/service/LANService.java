@@ -1,5 +1,6 @@
 package com.fgsqw.lanshare.service;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -41,19 +42,9 @@ import com.fgsqw.lanshare.pojo.mOutputStream;
 import com.fgsqw.lanshare.pojo.mSocket;
 import com.fgsqw.lanshare.receiver.NetWorkReceiver;
 import com.fgsqw.lanshare.toast.T;
-import com.fgsqw.lanshare.utils.ByteUtil;
-import com.fgsqw.lanshare.utils.DataDec;
-import com.fgsqw.lanshare.utils.DataEnc;
-import com.fgsqw.lanshare.utils.FIleSerachUtils;
-import com.fgsqw.lanshare.utils.FileUtil;
-import com.fgsqw.lanshare.utils.IOUtil;
-import com.fgsqw.lanshare.utils.LLog;
-import com.fgsqw.lanshare.utils.NetWorkUtil;
-import com.fgsqw.lanshare.utils.StringUtils;
-import com.fgsqw.lanshare.utils.UDPTools;
-import com.fgsqw.lanshare.utils.ThreadUtils;
-import com.fgsqw.lanshare.utils.mUtil;
+import com.fgsqw.lanshare.utils.*;
 import com.fgsqw.lanshare.web.HttpServer;
+import com.fgsqw.lanshare.web.LHttpServer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -87,7 +78,7 @@ public class LANService extends BaseService {
 
     private boolean running = true;
 
-    HttpServer httpServer;
+    private LHttpServer httpServer;
 
     public void addDevice(Device device) {
         String address = device.getDevIP() + ":" + device.getDevPort();
@@ -119,96 +110,8 @@ public class LANService extends BaseService {
     WifiManager.MulticastLock multicastLock;
 
     public void startWebServer() {
-        httpServer = new HttpServer();
-        httpServer.addPath("/", (request, response) -> {
-            String path = request.getRequestURL();
-            String filePath = "web";
-            if (StringUtils.isEmpty(path) || path.equals("/")) {
-                filePath += "/lanshare.html";
-            } else {
-                filePath += path;
-            }
-            App instance = App.getInstance();
-            InputStream open = instance.getAssets().open(filePath);
-            byte[] bytes = IOUtil.readBytes(open);
-            int i = filePath.lastIndexOf(".");
-            if (i > 0) {
-                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
-                response.writeBytes(bytes, myMIMEType);
-            }
-        });
-        httpServer.addPath("/images", (request, response) -> {
-            String path = request.getRequestURL();
-            String filePath = "web";
-            filePath += path;
-            App instance = App.getInstance();
-            InputStream open = instance.getAssets().open(filePath);
-            byte[] bytes = IOUtil.readBytes(open);
-            int i = filePath.lastIndexOf(".");
-            if (i > 0) {
-                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
-                response.writeBytes(bytes, myMIMEType);
-            }
-        });
 
-        httpServer.addPath("/favicon.ico", (request, response) -> {
-            String path = request.getRequestURL();
-            String filePath = "web";
-            filePath += path;
-            response.writeFile(new File(filePath));
-            App instance = App.getInstance();
-            InputStream open = instance.getAssets().open(filePath);
-            byte[] bytes = IOUtil.readBytes(open);
-            int i = filePath.lastIndexOf(".");
-            if (i > 0) {
-                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
-                response.writeBytes(bytes, myMIMEType);
-            }
-        });
-
-        httpServer.addPath("/files", (request, response) -> {
-            String str = request.getRequestBody();
-            JSONObject jsonObject = JSON.parseObject(str);
-            Boolean isBack = jsonObject.getBoolean("isBack");
-            String path = jsonObject.getString("path");
-            File file = null;
-            if (!StringUtils.isEmpty(path)) {
-                file = new File(path);
-                if (isBack) {
-                    file = file.getParentFile();
-                }
-            }
-            if (file == null) {
-                file = Environment.getExternalStorageDirectory();
-            }
-            JSONObject object = new JSONObject();
-            object.put("path", file.getAbsolutePath());
-
-            JSONArray jsonArray = new JSONArray();
-            File[] files = file.listFiles();
-            if (files != null) {
-                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd HH:ss:mm");
-
-                for (File file1 : files) {
-                    JSONObject item = new JSONObject();
-                    item.put("name", file1.getName());
-                    item.put("path", file1.getAbsolutePath());
-                    item.put("isFile", file1.isFile());
-                    item.put("time", sfd.format(new Date(file1.lastModified())));
-                    item.put("isDirectory", file1.isDirectory());
-                    jsonArray.add(item);
-                }
-            }
-            object.put("list", jsonArray);
-            response.writeString(object.toJSONString());
-        });
-        httpServer.addPath("/file/", (request, response) -> {
-            String requestBody = request.getRequestBody();
-            String path = request.getPathParam("path");
-            File file = new File(path);
-            response.writeFile(file);
-        });
-
+        httpServer = new LHttpServer();
 
     }
 
@@ -584,8 +487,7 @@ public class LANService extends BaseService {
 
             synchronized (recvBuffer) {
                 // 接收文件列表遍历
-                for (int i = 0; i < messageFileContents.size(); i++) {
-                    MessageFileContent fileContent = messageFileContents.get(i);
+                for (MessageFileContent fileContent : messageFileContents) {
                     // 接收文件总大小
                     long totalRecv = 0;
                     File file;
@@ -751,22 +653,24 @@ public class LANService extends BaseService {
                 e.printStackTrace();
             }
             if (socket == null || !socket.isConnected()) {
-                T.s("连接" + device.getDevName() + "失败");
+                T.s("连接" + device.getDevName() + "失败，请检查设备是否在线");
                 return;
             }
-
             InputStream input = null;
             OutputStream output = null;
             try {
                 input = socket.getInputStream();
                 output = socket.getOutputStream();
-//                // 魔法数组
-//                byte[] magicBytes = ByteUtil.intToBytes(Config.MAGIC_NUM);
-//                // 数据协议版本
-//                byte[] dataVersionBytes = ByteUtil.intToBytes(Config.DATA_VERSION);
-//                output.write(magicBytes);
-//                output.write(dataVersionBytes);
-                TimeUnit.MILLISECONDS.sleep(10);
+                if (device.getDataVersion() == LVersion.DATA_VERSION_1) {
+                    // 魔法数字
+                    byte[] magicBytes = ByteUtil.intToBytes(Config.MAGIC_NUM);
+                    // 数据协议版本
+                    byte[] dataVersionBytes = ByteUtil.intToBytes(Config.DATA_VERSION);
+                    output.write(magicBytes);
+                    output.write(dataVersionBytes);
+                    output.flush();
+                    TimeUnit.MILLISECONDS.sleep(10);
+                }
                 fileSend(input, output, device, fileList);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1094,74 +998,6 @@ public class LANService extends BaseService {
     }
 
 
-    // 文件接收服务
-    public void fileServer() {
-        try {
-            fileRecive = new ServerSocket(Config.FILE_SERVER_PORT);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ThreadUtils.runThread(() -> {
-            while (running) {
-                Socket client;
-                try {
-                    // 等待客户端连接
-                    client = fileRecive.accept();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                    continue;
-                }
-                ThreadUtils.runThread(() -> {
-                    try {
-                        byte[] magicBytes = new byte[4];
-                        InputStream is = client.getInputStream();
-                        OutputStream out = client.getOutputStream();
-                        int read = is.read(magicBytes);
-                        if (read == 4) {
-                            int magicNum = ByteUtil.bytesToInt(magicBytes, 0);
-                            // 版本兼容
-                            if (magicNum == Config.MAGIC_NUM) {
-                                int dataVersion = is.read(magicBytes);
-                                // 版本1
-                                if (dataVersion == LVersion.DATA_VERSION_1) {
-                                    handleTcp(client, null, is, out);
-                                }
-                                return;
-                            }
-                            try {
-                                String http = new String(magicBytes);
-                                String magicStr = http.toUpperCase();
-                                if (magicStr.contains("GET") || magicStr.contains("POST")) {
-                                    httpServer.newClient(client, magicStr, is, out);
-                                    return;
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            handleTcp(client, magicBytes, is, out);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        try {
-                            TimeUnit.SECONDS.sleep(1);
-                        } catch (InterruptedException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                });
-
-            }
-        });
-    }
-
-
     // 获取自己的设备信息
     public List<Device> getDevices() {
 //        NetInfo oneNetWorkInfo = NetWorkUtil.getOneNetWorkInfo(service);
@@ -1175,6 +1011,7 @@ public class LANService extends BaseService {
             device.setDevBrotIP(netInfo.getBrodIp());
             device.setDevPort(Config.FILE_SERVER_PORT);
             device.setDevMode(Device.ANDROID);
+            device.setDataVersion(Config.DATA_VERSION);
             mDeviceList.add(device);
         }
         if (!netInfoList.isEmpty()) {
@@ -1232,16 +1069,84 @@ public class LANService extends BaseService {
     }
 
 
-    DatagramSocket ipGetSocket = null;
+
+    // 文件接收服务
+    public void fileServer() {
+        try {
+            fileRecive = new ServerSocket(Config.FILE_SERVER_PORT);
+        } catch (SocketException e) {
+            e.printStackTrace();
+            T.ss("启动TCP服务失败，请检查端口是否被使用");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ThreadUtils.runThread(() -> {
+            while (running) {
+                Socket client;
+                try {
+                    // 等待客户端连接
+                    client = fileRecive.accept();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    continue;
+                }
+                ThreadUtils.runThread(() -> {
+                    try {
+                        byte[] magicBytes = new byte[4];
+                        InputStream is = client.getInputStream();
+                        OutputStream out = client.getOutputStream();
+                        if (is.read(magicBytes) != 4) return;
+                        int magicNum = ByteUtil.bytesToInt(magicBytes, 0);
+                        // 版本兼容
+                        if (magicNum == Config.MAGIC_NUM) {
+                            if (is.read(magicBytes) != 4) return;
+                            int dataVersion = ByteUtil.bytesToInt(magicBytes, 0);
+                            // 版本1
+                            if (dataVersion == LVersion.DATA_VERSION_1) {
+                                handleTcp(client, null, is, out);
+                            }
+                            return;
+                        }
+                        // HTTP服务
+                        try {
+                            String http = new String(magicBytes);
+                            String magicStr = http.toUpperCase();
+                            if (magicStr.contains("GET") || magicStr.contains("POST")) {
+                                httpServer.getHttpServer().newClient(client, magicStr, is, out);
+                                return;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        handleTcp(client, magicBytes, is, out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+        });
+    }
+
+
+    private DatagramSocket ipGetSocket = null;
 
     // 监听并处理获取客户和设置客户端命令
     public void runRecive() {
 
         ThreadUtils.runThread(() -> {
             byte[] buf = new byte[4096];
-//            byte[] newBuf = new byte[4096];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
-
             try {
                 ipGetSocket = new DatagramSocket(null);
                 ipGetSocket.setReuseAddress(true);
@@ -1274,11 +1179,8 @@ public class LANService extends BaseService {
                 } finally {
                     multicastLock.release();
                 }
-
                 byte[] data = packet.getData();
                 int len = packet.getLength();
-//                System.arraycopy(data, 0, newBuf, 0, len);
-
                 ThreadUtils.runThread(() -> {
                     DataDec dataDec = new DataDec(data.clone(), len);
                     int cmd = dataDec.getCmd();
@@ -1290,7 +1192,6 @@ public class LANService extends BaseService {
                             }
                         }
                         // 向设备发送自己的数据
-                        /* ViewUpdate.runThread(() ->*/
                         noticeDeviceOnLineByIp(devIp);
                     } else if (cmd == mCmd.UDP_SET_DEVICES) {
                         int devPort = dataDec.getInt();
@@ -1331,7 +1232,10 @@ public class LANService extends BaseService {
                             }
                         }
                         String address = devIp + ":" + devPort;
-                        devices.remove(address);
+                        Device device = devices.get(address);
+                        if (device != null && device.isCanRemove()) {
+                            devices.remove(address);
+                        }
                     } else if (cmd == mCmd.UDP_DEVICES_MESSAGE) {
                         String devIp = dataDec.getString();
                         // 排除自己发送的w数据
@@ -1388,7 +1292,6 @@ public class LANService extends BaseService {
     public void onDestroy() {
         super.onDestroy();
         LLog.info("onDestroy 退出");
-
         running = false;
         ThreadUtils.runThread(() -> {
             for (Device device : mDevice) {
@@ -1421,7 +1324,7 @@ public class LANService extends BaseService {
                         // 移除没有心跳的设备
                         for (String key : devices.keySet()) {
                             Device device = devices.get(key);
-                            if (device != null) {
+                            if (device != null && device.isCanRemove()) {
                                 long setTime = device.getSetTime();
                                 long timeOut = currentTime - setTime;
                                 // 超过20秒没有心跳的设备直接移除

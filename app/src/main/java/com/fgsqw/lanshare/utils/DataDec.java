@@ -55,7 +55,11 @@ public class DataDec {
 
 
     public byte getByte() {
-        return getByte(index++);
+        int dataIndex = index + TypeLength.LONG_LEN;
+        if (dataIndex <= byteLen) {
+            return getByte(index++);
+        }
+        return 0;
     }
 
     public byte getByte(int i) {
@@ -63,9 +67,13 @@ public class DataDec {
     }
 
     public int getInt() {
-        int data = getInt(index);
-        index += TypeLength.INT_LEN;
-        return data;
+        int dataIndex = index + TypeLength.INT_LEN;
+        if (dataIndex <= byteLen) {
+            int data = getInt(index);
+            index += TypeLength.INT_LEN;
+            return data;
+        }
+        return 0;
     }
 
     public int getInt(int i) {
@@ -77,9 +85,13 @@ public class DataDec {
     }
 
     public long getLong() {
-        long data = getLong(index);
-        index += TypeLength.LONG_LEN;
-        return data;
+        int dataIndex = index + TypeLength.LONG_LEN;
+        if (dataIndex <= byteLen) {
+            long data = getLong(index);
+            index += TypeLength.LONG_LEN;
+            return data;
+        }
+        return 0;
     }
 
     public long getLong(int i) {

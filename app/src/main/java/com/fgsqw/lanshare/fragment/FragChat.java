@@ -109,7 +109,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 addMessage(messageContent, true);
             } else if (msg.what == mCmd.SERVICE_NETWORK_CHANGES) {    // 网络变化
                 NetInfo netInfo = (NetInfo) msg.obj;
-                dataCenterActivity.updateIP(netInfo.getIp());
+                dataCenterActivity.updateIP(netInfo.getIp() + ":" + Config.DEFAULT_FILE_SERVER_PORT);
             }
         }
     };

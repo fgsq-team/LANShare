@@ -17,9 +17,7 @@ import com.fgsqw.lanshare.pojo.PhotoFolder;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class FIleSerachUtils {
 
@@ -49,6 +47,8 @@ public class FIleSerachUtils {
         //读取扫描到的图片
         if (mCursor != null) {
             while (mCursor.moveToNext()) {
+
+
                 // 获取图片的路径
                 String path = mCursor.getString(
                         mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
@@ -250,24 +250,37 @@ public class FIleSerachUtils {
         List<PhotoFolder> folders = new ArrayList<>();
         List<MediaInfo> allMedia = new ArrayList<>();
 
+        Map<Integer, MediaInfo> allMediaMap = new HashMap<>();
         allMedia.addAll(photoList);
         allMedia.addAll(videoList);
 
         folders.add(new PhotoFolder("所有图片", photoList));
         folders.add(new PhotoFolder("所有视频", videoList));
 
-        if (!allMedia.isEmpty()) {           //判断对象不为空
-            int size = allMedia.size();
-            for (int i = 0; i < size; i++) {                     // 遍历所有图片
-                String path = allMedia.get(i).getPath();       // 获取所有图片目录
-                String name = getFolderName(path);               // 获取所有图片所在目录
-                if (name != null && name.length() > 0) {         // 判断字符串不为空
-                    PhotoFolder folder = getFolder(name, folders); // 传入对象
-                    folder.addImage(allMedia.get(i));
+
+        int index = 0;
+        if (!allMedia.isEmpty()) {
+            for (MediaInfo mediaInfo : allMedia) {
+                mediaInfo.setIndex(index);
+                allMediaMap.put(index++, mediaInfo);
+                String path = mediaInfo.getPath();
+                String name = getFolderName(path);
+                if (name != null && name.length() > 0) {
+                    PhotoFolder folder = getFolder(name, folders);
+                    folder.addImage(mediaInfo);
                 }
             }
         }
+
+        if (!videoList.isEmpty()) {
+            for (MediaInfo mediaInfo : videoList) {
+                mediaInfo.setIndex(index);
+                allMediaMap.put(index++, mediaInfo);
+            }
+        }
+
         mediaResult.setAllMedia(allMedia);
+        mediaResult.setAllMediaMap(allMediaMap);
         mediaResult.setmFolders(folders);
         return mediaResult;
     }

@@ -1,8 +1,6 @@
 package com.fgsqw.lanshare.web;
 
 
-
-
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.ThreadUtils;
@@ -112,20 +110,25 @@ public class HttpServer {
             request.setHeaderReady(true);
             Set<String> strings = handlerMap.keySet();
             boolean isMatch = false;
+            Response response = new Response(outputStream);
             // 请求路径匹配
             for (String path : strings) {
                 isMatch = request.getRequestURL().startsWith(path);
                 if (isMatch) {
                     HttpHandler httpHandler = handlerMap.get(path);
                     if (httpHandler != null) {
-                        httpHandler.handle(request, new Response(outputStream));
+                        try {
+                            httpHandler.handle(request, response);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            response.write404();
+                        }
                     }
                     break;
                 }
             }
             // 请求路径找不到直接返回404
             if (!isMatch) {
-                Response response = new Response(outputStream);
                 response.write404();
             }
         } catch (IOException e) {

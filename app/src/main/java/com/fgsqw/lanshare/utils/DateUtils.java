@@ -24,9 +24,7 @@ public final class DateUtils {
         } else if (sameMonth(calendar, imageTime)) {
             return "本月";
         } else {
-            Date date = new Date(time);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-            return sdf.format(date);//直接显示当前文件时间
+            return formatDate(new Date(time), "yyyy/MM/dd");//直接显示当前文件时间
         }
     }
 

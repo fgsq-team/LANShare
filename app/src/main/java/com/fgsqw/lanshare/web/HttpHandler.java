@@ -7,5 +7,5 @@ import java.io.IOException;
  * @Author: fgsqme
  */
 public interface HttpHandler {
-    void handle(Request request, Response response) throws IOException;
+    void handle(Request request, Response response) throws Exception;
 }

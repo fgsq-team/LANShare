@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.web;
 
 
-
 import com.fgsqw.lanshare.utils.ContentTypes;
 import com.fgsqw.lanshare.utils.IOUtil;
 
@@ -12,6 +11,7 @@ import java.util.Set;
 
 /**
  * 响应信息
+ *
  * @Author: fgsqme
  */
 public class Response {
@@ -33,7 +33,7 @@ public class Response {
     public Response(OutputStream out) {
         this.out = out;
         headers.put(HTTP_VERSION, "200 OK");
-        headers.put("Content-Length", contentLength + "");
+//        headers.put("Content-Length", contentLength + "");
         headers.put("Content-Type", TEXT_CONTEXT_TYPE);
     }
 
@@ -100,11 +100,12 @@ public class Response {
 
     /**
      * 返回字节数组
-     * @param bytes 字节数组
+     *
+     * @param bytes       字节数组
      * @param contentType 响应体contentType
      */
     public void writeBytes(byte[] bytes, String contentType) throws IOException {
-        setContentLength(bytes.length);
+//        setContentLength(bytes.length);
         setContentType(contentType);
         StringBuilder sb = createHeader();
         out.write(sb.toString().getBytes());
@@ -112,21 +113,30 @@ public class Response {
         out.flush();
     }
 
+    public static String getContentTypeByName(String name) {
+        int i = name.lastIndexOf(".");
+        if (i > 0) {
+            String suffix = name.substring(i + 1);
+            String contentType = ContentTypes.contentTypeMap.get(suffix);
+            if (contentType != null) {
+                return contentType;
+            }
+        }
+        return null;
+    }
+
     /**
      * 返回文件，根据文件名判断响应体的contentType类型
+     *
      * @param file 文件
      */
     public void writeFile(File file) throws IOException {
         setContentLength(file.length());
         setContentType(STREAM_CONTEXT_TYPE);
         String name = file.getName();
-        int i = name.lastIndexOf(".");
-        if (i > 0) {
-            String suffix = name.substring(i + 1);
-            String contentType = ContentTypes.contentTypeMap.get(suffix);
-            if (contentType != null) {
-                setContentType(contentType);
-            }
+        String contentTypeByName = getContentTypeByName(name);
+        if (contentTypeByName != null) {
+            setContentType(contentTypeByName);
         }
         StringBuilder sb = createHeader();
         out.write(sb.toString().getBytes());
@@ -137,23 +147,34 @@ public class Response {
     }
 
 
-    public void writeStream(InputStream is, long length) throws IOException {
-        writeStream(is, STREAM_CONTEXT_TYPE, length);
+    public void writeStream(InputStream is) throws IOException {
+        writeStream(is, STREAM_CONTEXT_TYPE);
     }
 
     /**
      * 返回数据流
-     * @param is 数据流
+     *
+     * @param is          数据流
      * @param contentType 响应体contentType类型
-     * @param length 返回数据长度
      */
-    public void writeStream(InputStream is, String contentType, long length) throws IOException {
-        setContentLength(length);
+    public void writeStream(InputStream is, String contentType) throws IOException {
         setContentType(contentType);
         StringBuilder sb = createHeader();
         out.write(sb.toString().getBytes());
         IOUtil.transfer(is, out);
         out.flush();
     }
+
+    public OutputStream getOutputStream() throws IOException {
+        return getOutputStream(STREAM_CONTEXT_TYPE);
+    }
+
+    public OutputStream getOutputStream(String contentType) throws IOException {
+        setContentType(contentType);
+        StringBuilder sb = createHeader();
+        out.write(sb.toString().getBytes());
+        return out;
+    }
+
 
 }

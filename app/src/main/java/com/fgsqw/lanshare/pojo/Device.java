@@ -19,6 +19,9 @@ public class Device implements Serializable {
     private long setTime;
     private int dataVersion; // 通讯协议版本
 
+
+    private boolean canRemove = true;
+
     public Device() {
     }
 
@@ -90,6 +93,14 @@ public class Device implements Serializable {
 
     public void setDataVersion(int dataVersion) {
         this.dataVersion = dataVersion;
+    }
+
+    public boolean isCanRemove() {
+        return canRemove;
+    }
+
+    public void setCanRemove(boolean canRemove) {
+        this.canRemove = canRemove;
     }
 
     public String getDeviceName() {

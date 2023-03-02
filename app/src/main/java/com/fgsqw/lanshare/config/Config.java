@@ -4,6 +4,8 @@ import com.fgsqw.lanshare.utils.MD5Utils;
 
 @SuppressWarnings("all")
 public class Config {
+    public static final int DEFAULT_FILE_SERVER_PORT = 5856;
+    public static final int DEFAULT_UDP_PORT = 4573;
 
     public static final String APP_NAME = "LANShare";
     public static final String KEY = "6c9b%8ErII@Rc&f";
@@ -12,11 +14,11 @@ public class Config {
     // 数据版本/协议版本
     public static final int DATA_VERSION = 1;
     // UDP端口
-    public static final int UDP_PORT = 4573;
+    public static int UDP_PORT = 4573;
     // 隐私协议版本
     public static final int PRIVACY_VERSION = 1;
     // 接受文件服务端口号
-    public static final int FILE_SERVER_PORT = 5856;
+    public static int FILE_SERVER_PORT = 5856;
     // 局域网设备扫描时间间隔
     public static final int SCANN_TIME = 5;
     // 文件保存路径

@@ -13,7 +13,7 @@
     <string name="delete">删除</string>
     <string name="about">关于</string>
     <string name="help">使用帮助</string>
-    <string name="github">github</string>
+    <string name="github">Github</string>
     <string name="copyright">版权所有©fgsq</string>
     <string name="version">V0.0.1_beta</string>
     <string name="privacy">隐私声明</string>
@@ -59,6 +59,10 @@
     <string name="enter_search_content">请输入搜索内容</string>
     <string name="show_hidden_files">显示隐藏文件</string>
     <string name="show_hidden_files_detail">文件管理中是否显示隐藏的文件</string>
+    <string name="tcp_port">文件接收/网页服务端口</string>
+    <string name="tcp_port_detail">接收文件端口时监听的端口</string>
+    <string name="udp_port">UDP端口(不建议更改)</string>
+    <string name="udp_port_detail">修改此此端口需要保证每个设备UDP端口一致，否则将无法搜索到设备</string>
 
 
 </resources>

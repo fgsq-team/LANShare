@@ -1,10 +1,4 @@
-/*
- * IPCamImageView - IPCamView.java
- * Created by Marcos Calvo García on 14/12/18 16:14.
- * Copyright (c) 2018. All rights reserved.
- *
- * Last modified 14/12/18 16:14.
- */
+
 
 package com.fgsqw.lanshare.widget;
 

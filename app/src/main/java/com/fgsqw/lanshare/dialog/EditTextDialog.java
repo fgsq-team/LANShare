@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.InputFilter;
+import android.text.method.DigitsKeyListener;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.toast.T;
+import com.fgsqw.lanshare.utils.StringUtils;
 
 public class EditTextDialog extends Dialog implements View.OnClickListener {
 
@@ -26,16 +28,22 @@ public class EditTextDialog extends Dialog implements View.OnClickListener {
     private TextView tvTitle;
 
     private OnClickListener onClickListener;
+    private OnClickCheck onClickCheck;
 
     private boolean canEmpty;
 
     private int maxLen = -1;
+    private String accepted = null;
+
+    public static final String ACCEPTED_NUM = "0123456789";
+
 
     public EditTextDialog(@NonNull Context context, boolean canEmpty, String title, String str) {
         super(context);
         this.canEmpty = canEmpty;
         this.str = str;
         this.title = title;
+
     }
 
     public EditTextDialog(@NonNull Context context, boolean canEmpty, String title, String str, String hint) {
@@ -67,6 +75,9 @@ public class EditTextDialog extends Dialog implements View.OnClickListener {
         if (maxLen != -1) {
             editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLen)});
         }
+        if (!StringUtils.isEmpty(accepted)) {
+            editText.setKeyListener(DigitsKeyListener.getInstance(accepted));
+        }
         tvTitle.setText(title);
         okLayout.setOnClickListener(this);
         cencelLayout.setOnClickListener(this);
@@ -83,6 +94,11 @@ public class EditTextDialog extends Dialog implements View.OnClickListener {
                     break;
                 }
                 if (onClickListener != null) {
+                    if (onClickCheck != null) {
+                        if (!onClickCheck.onClick(text)) {
+                            return;
+                        }
+                    }
                     onClickListener.onClick(true, text);
                 }
                 break;
@@ -94,11 +110,24 @@ public class EditTextDialog extends Dialog implements View.OnClickListener {
         dismiss();
     }
 
+    public void setAccepted(String accepted) {
+        this.accepted = accepted;
+    }
+
     public void setOnClickListener(OnClickListener onClickListener) {
         this.onClickListener = onClickListener;
+    }
+
+    public void setOnClickCheck(OnClickCheck onClickCheck) {
+        this.onClickCheck = onClickCheck;
     }
 
     public interface OnClickListener {
         void onClick(boolean ok, String str);
     }
+
+    public interface OnClickCheck {
+        boolean onClick(String str);
+    }
+
 }

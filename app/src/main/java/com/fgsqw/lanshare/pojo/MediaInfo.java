@@ -7,6 +7,7 @@ public class MediaInfo extends FileInfo implements Serializable {
     boolean isGif;
     boolean isVideo;
     String videoTime;
+    int index;
 
     public String getVideoTime() {
         return videoTime;
@@ -30,5 +31,13 @@ public class MediaInfo extends FileInfo implements Serializable {
 
     public boolean isGif() {
         return isGif;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

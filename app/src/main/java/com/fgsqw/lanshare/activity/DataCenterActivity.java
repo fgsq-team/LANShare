@@ -6,12 +6,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.os.Messenger;
 import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.provider.DocumentFile;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -60,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.fgsqw.lanshare.utils.PermissionsUtils.REQUEST_VISIT;
 import static com.google.zxing.integration.android.IntentIntegrator.REQUEST_CODE;
@@ -91,7 +94,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private FragChat fragChat;
 
     public List<FileInfo> fileSelects = new LinkedList<>();
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -131,6 +133,24 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         processExtraData();
     }
 
+    public void showExitDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setIcon(R.mipmap.ic_launcher)
+                .setCancelable(false)
+                .setTitle("端口修改提示")
+                .setMessage("端口修改需要重启软件后才能生效，是否退出软件？")
+                .setPositiveButton("退出", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    stopService(new Intent(this, LANService.class));
+                    finish();
+                    finish();
+                }).setNegativeButton("不退出", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                });
+        builder.create().show();
+    }
+
+
     public void getConfig() {
         PrefUtil prefUtil = App.getPrefUtil();
         String filePath = prefUtil.getString(PreConfig.FILE_PATH);
@@ -138,19 +158,22 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             prefUtil.saveString(PreConfig.FILE_PATH, Config.DEFAULT_FILE_SAVE_PATH);
             filePath = Config.DEFAULT_FILE_SAVE_PATH;
         }
-
         String userName = prefUtil.getString(PreConfig.USER_NAME);
         if (userName.isEmpty()) {
             prefUtil.saveString(PreConfig.USER_NAME, android.os.Build.MODEL);
         }
         Config.FILE_SAVE_PATH = new File(Environment.getExternalStorageDirectory(), filePath).getPath() + File.separator;
-
         File file = new File(Config.FILE_SAVE_PATH);
         if (!file.exists()) {
             file.mkdirs();
         }
         Config.SAVE_MESSAGE = prefUtil.getBoolean(PreConfig.SAVE_MESSAGE, true);
         Config.SAVE_TO_GALLERY = prefUtil.getBoolean(PreConfig.SAVE_TO_GALLERY, true);
+        Config.FILE_SERVER_PORT = prefUtil.getInt(PreConfig.TCP_PORT, Config.DEFAULT_FILE_SERVER_PORT);
+        Config.UDP_PORT = prefUtil.getInt(PreConfig.UDP_PORT, Config.DEFAULT_UDP_PORT);
+       /* if (tcpPort != Config.FILE_SERVER_PORT || udpPort != Config.UDP_PORT) {
+            showExitDialog();
+        }*/
     }
 
     public void initView() {
@@ -371,39 +394,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    public void requestAccessAndroidData() {
-        try {
-            Uri uri = Uri.parse("content://com.android.externalstorage.documents/document/primary%3AAndroid%2Fdata");
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
-            //flag看实际业务需要可再补充
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            startActivityForResult(intent, REQUEST_VISIT);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-    public void startForRoot() {
-        Uri uri1 = Uri.parse("content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fdata");
-        String uri = FileUtil.changeToUri(Environment.getExternalStorageDirectory().getPath());
-        uri = uri + "/document/primary%3A" + Environment.getExternalStorageDirectory().getPath().replace("/storage/emulated/0/", "").replace("/", "%2F");
-        Uri parse = Uri.parse(uri);
-        DocumentFile documentFile = DocumentFile.fromTreeUri(this, uri1);
-        Intent intent1 = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        intent1.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-        intent1.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.getUri());
-        startActivityForResult(intent1, REQUEST_VISIT);
-    }
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -414,8 +404,12 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 getContentResolver().takePersistableUriPermission(uri, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));//关键是这里，这个就是保存这个目录的访问权限
             }
 
-        }
-        if (requestCode == REQUEST_CODE) {
+        } else if (requestCode == SettingActivity.SETTING_REQUEST_CODE) {
+            boolean portUpdate = data.getBooleanExtra("portUpdate", false);
+            if (portUpdate) {
+                showExitDialog();
+            }
+        } else if (requestCode == REQUEST_CODE) {
             IntentResult scanResult = IntentIntegrator.parseActivityResult(resultCode, data);
             String qrContent = scanResult.getContents();
             if (!StringUtils.isEmpty(qrContent)) {
@@ -435,6 +429,14 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                                     socket.connect(new InetSocketAddress(device.getDevIP(), device.getDevPort()), 2000);
                                     InputStream inputStream = socket.getInputStream();
                                     OutputStream outputStream = socket.getOutputStream();
+                                    // 魔法数字
+                                    byte[] magicBytes = ByteUtil.intToBytes(Config.MAGIC_NUM);
+                                    // 数据协议版本
+                                    byte[] dataVersionBytes = ByteUtil.intToBytes(Config.DATA_VERSION);
+                                    outputStream.write(magicBytes);
+                                    outputStream.write(dataVersionBytes);
+                                    outputStream.flush();
+                                    TimeUnit.MILLISECONDS.sleep(10);
                                     String uuid = StringUtils.getUUID();
                                     byte[] buffer = new byte[1024];
                                     String userName = prefUtil.getString(PreConfig.USER_NAME);
@@ -458,11 +460,12 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                                         continue;
                                     String sgin = dataDec.getString();
                                     if (sgin.equals(Config.sgin(uuid))) {
-                                        String address = device.getDevIP() + ":" + device.getDevPort();
+                                        device.setCanRemove(false);
+//                                        String address = device.getDevIP() + ":" + device.getDevPort();
                                         LANService.getInstance().addDevice(device);
                                         T.s("添加设备 " + device.getDevName() + " 成功!");
                                     }
-                                } catch (IOException e) {
+                                } catch (IOException | InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -488,7 +491,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
         switch (menuItem.getItemId()) {
             case R.id.menu_setting:
-                startActivity(new Intent(this, SettingActivity.class));
+                Intent intent = new Intent(this, SettingActivity.class);
+                startActivityForResult(intent, SettingActivity.SETTING_REQUEST_CODE);
                 break;
             case R.id.menu_about:
                 startActivity(new Intent(this, AboutActivity.class));
