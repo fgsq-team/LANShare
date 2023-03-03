@@ -14,7 +14,7 @@ public class MD5Utils {
             mdInst.update(btInput);
             byte[] md = mdInst.digest();
             int j = md.length;
-            char str[] = new char[j * 2];
+            char[] str = new char[j * 2];
             int k = 0;
             for (byte byte0 : md) {
                 str[k++] = hexDigits[byte0 >>> 4 & 0xf];

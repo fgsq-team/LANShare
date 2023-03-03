@@ -1,83 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
+              xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#FFFFFF"
+              android:orientation="vertical">
 
 
-    <RelativeLayout
-        android:id="@+id/photo_back_layout"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:paddingLeft="20dp">
+    <LinearLayout
+            android:id="@+id/photo_back_layout"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:paddingLeft="20dp" android:orientation="horizontal">
+
+        <LinearLayout
+                android:gravity="center_vertical"
+
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent">
+            <TextView
+                    android:id="@+id/app_tv_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="0个应用"
+                    android:textColor="#FF000000"
+                    android:textSize="16sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:gravity="center_vertical|right"
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="wrap_content" tools:ignore="RtlHardcoded">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/display_system_app"
+                    android:textColor="#FF000000"
+                    android:textSize="16sp"/>
+            <CheckBox
+                    android:id="@+id/app_check_sys_app"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_all"
+                    android:textColor="#FF000000"
+                    android:textSize="16sp"/>
+            <CheckBox
+                    android:id="@+id/app_check_select_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginRight="20dp"/>
+        </LinearLayout>
 
 
-        <TextView
-            android:id="@+id/app_tv_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="0个应用"
-            android:textColor="#FF000000"
-            android:textSize="16sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/app_check_select_all"
-            android:layout_toLeftOf="@+id/app_check_select_all"
-            android:text="@string/select_all"
-            android:textColor="#FF000000"
-            android:textSize="16sp" />
-
-        <CheckBox
-            android:id="@+id/app_check_select_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp" />
-
-    </RelativeLayout>
+    </LinearLayout>
 
 
-  <!--  <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:orientation="horizontal"
-        android:paddingLeft="20dp"
-        android:paddingTop="10dp">
+    <!--  <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="10dp"
+          android:orientation="horizontal"
+          android:paddingLeft="20dp"
+          android:paddingTop="10dp">
 
-        <TextView
-            android:id="@+id/app_tv_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0个应用"
-            android:textColor="#000000"
-            android:textSize="16sp" />
+          <TextView
+              android:id="@+id/app_tv_count"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="0个应用"
+              android:textColor="#000000"
+              android:textSize="16sp" />
 
-        <CheckBox
-            android:id="@+id/app_check_select_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="全选" />
+          <CheckBox
+              android:id="@+id/app_check_select_all"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="全选" />
 
 
-    </LinearLayout>-->
+      </LinearLayout>-->
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/app_swipe"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:id="@+id/app_swipe"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/app_recy"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+                android:id="@+id/app_recy"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

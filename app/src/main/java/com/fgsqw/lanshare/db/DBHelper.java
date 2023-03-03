@@ -1,4 +1,4 @@
-package com.fgsqw.lanshare.utils;
+package com.fgsqw.lanshare.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

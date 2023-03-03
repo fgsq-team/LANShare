@@ -21,6 +21,7 @@ import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
 import com.fgsqw.lanshare.fragment.adapter.SerachAdapter;
+import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.pojo.FileInfo;
@@ -183,7 +184,7 @@ public class FragSearch extends BaseFragment implements IChildBaseMethod, View.O
         searchs.clear();
         selectFileList.clear();
         if (!StringUtils.isEmpty(str)) {
-            List<ApkInfo> apkFileList = FragAppList.apkFileList;
+            List<ApkInfo> apkFileList = AnyData.apkFileList;
             if (apkFileList != null && !apkFileList.isEmpty()) {
                 for (ApkInfo apkInfo : apkFileList) {
                     if (apkInfo.getName().contains(str)) {
@@ -195,7 +196,7 @@ public class FragSearch extends BaseFragment implements IChildBaseMethod, View.O
                     }
                 }
             }
-            List<MediaInfo> mediaInfos = FragMediaList.mediaResult.getAllMedia();
+            List<MediaInfo> mediaInfos = AnyData.mediaResult.getAllMedia();
             if (mediaInfos != null && !mediaInfos.isEmpty()) {
                 for (MediaInfo image : mediaInfos) {
                     if (image.getName().contains(str)) {

@@ -26,4 +26,6 @@ public class PreConfig {
     public static String TCP_PORT = "tcpPort";
     // udpPort
     public static String UDP_PORT = "udpPort";
+    // 显示系统软件
+    public static String DISPLAY_SYSTEM_APP = "display_system_app";
 }

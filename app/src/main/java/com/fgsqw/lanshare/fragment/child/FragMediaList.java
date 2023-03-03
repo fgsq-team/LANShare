@@ -14,6 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.MediaAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
+import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.pojo.MediaResult;
@@ -69,7 +71,7 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
     private MediaAdapter mMediaAdapter;
     private GridLayoutManager mLayoutManager;
     public List<PhotoFolder> mFolders;
-    public static MediaResult mediaResult;
+
     public final List<MediaInfo> mSelectList = new LinkedList<>();
 
 
@@ -98,7 +100,7 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
             view = inflater.inflate(R.layout.fragment_child_photo, container, false);
             prefUtil = App.getPrefUtil();
             initView();
-            loadImageForSDCard();
+            loadImageForSDCard(false);
         }
         ViewGroup parent = (ViewGroup) view.getParent();
         if (parent != null) {
@@ -120,25 +122,26 @@ public class FragMediaList extends BaseFragment implements View.OnClickListener,
         backLayout.setOnClickListener(this);
         selectAll.setOnClickListener(this);
         selectMode.setOnCheckedChangeListener(this);
-        swipe.setOnRefreshListener(this::loadImageForSDCard);
+        swipe.setOnRefreshListener(() -> loadImageForSDCard(true));
         selectMode.setChecked(prefUtil.getBoolean(PreConfig.MEDIA_SELECT_MODEL));
     }
 
-    private void loadImageForSDCard() {
+    private void loadImageForSDCard(boolean refresh) {
+        sizImgTv.setText("加载中");
+        swipe.setRefreshing(true);
         ThreadUtils.runThread(() -> {
-            ThreadUtils.threadUi(() -> {
-                sizImgTv.setText("加载中");
-                swipe.setRefreshing(true);
-            });
-            mediaResult = FIleSerachUtils.loadImageForSDCard(Objects.requireNonNull(getContext()));
-            mFolders = mediaResult.getmFolders();
+            FIleSerachUtils.loadImageForSDCard(Objects.requireNonNull(getContext()), refresh);
+            Log.i("rrrrrrrrrrrrrrr", "加载完成");
+            if (AnyData.mediaResult != null) {
+                mFolders = AnyData.mediaResult.getmFolders();
+            }
             ThreadUtils.threadUi(() -> {
                 if (mFolders != null && !mFolders.isEmpty()) {
                     isOpenFolder = true;
                     posiition = 0;
                     folderview();//初始化文件列表
-                    swipe.setRefreshing(false);//关闭加载进度条
                 }
+                swipe.setRefreshing(false);//关闭加载进度条
             });
         });
 

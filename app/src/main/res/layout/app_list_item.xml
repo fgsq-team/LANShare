@@ -37,14 +37,14 @@
                 android:id="@+id/app_item_tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="应用名称"
+                android:text="@string/itme_app_name"
                 android:textSize="10sp" />
 
             <TextView
                 android:id="@+id/app_item_tv_size"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="应用大小"
+                android:text="@string/item_app_size"
                 android:textSize="10sp" />
         </LinearLayout>
 

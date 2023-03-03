@@ -20,16 +20,20 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLayoutManager;
 import com.fgsqw.lanshare.config.Config;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.AppAdapter;
+import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
 import com.fgsqw.lanshare.pojo.ApkInfo;
 import com.fgsqw.lanshare.utils.CopFileTask;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
+import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.util.LinkedList;
@@ -43,10 +47,10 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
 
     private TextView tvCount;
     private CheckBox checkSelectAll;
+    private CheckBox sysApp;
     private SwipeRefreshLayout appSwipe;
     private RecyclerView appRecy;
 
-    public static List<ApkInfo> apkFileList;//所有扫描到的Apk文件
     public final List<ApkInfo> mSelectlist = new LinkedList<>();
 
     private AppAdapter appAdapter;
@@ -73,7 +77,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         if (parent != null) {
             parent.removeView(view);
         }
-        loading();
+        loading(false);
         return view;
 
     }
@@ -83,9 +87,14 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
     public void initView() {
         tvCount = view.findViewById(R.id.app_tv_count);
         checkSelectAll = view.findViewById(R.id.app_check_select_all);
+        sysApp = view.findViewById(R.id.app_check_sys_app);
         appSwipe = view.findViewById(R.id.app_swipe);
         appRecy = view.findViewById(R.id.app_recy);
+        PrefUtil prefUtil = App.getPrefUtil();
+        boolean flag = prefUtil.getBoolean(PreConfig.DISPLAY_SYSTEM_APP, false);
+        sysApp.setChecked(flag);
         checkSelectAll.setOnCheckedChangeListener(this);
+        sysApp.setOnCheckedChangeListener(this);
     }
 
     public void initList() {
@@ -94,7 +103,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         appRecy.setLayoutManager(mManagerLayout);
         appRecy.setAdapter(appAdapter);
         appAdapter.setOnItemClickListener(this);
-        appSwipe.setOnRefreshListener(this::loading);
+        appSwipe.setOnRefreshListener(() -> loading(true));
     }
 
 
@@ -137,22 +146,20 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
 
 
     @SuppressLint("SetTextI18n")
-    private void loading() {
+    private void loading(boolean refresh) {
+        tvCount.setText("加载中");
+        appSwipe.setRefreshing(true);
         ThreadUtils.runThread(() -> {
-            ThreadUtils.threadUi(() -> {
-                tvCount.setText("加载中");
-                appSwipe.setRefreshing(true);
-            });
-            apkFileList = FIleSerachUtils.loadApk(getContext());
-            ThreadUtils.threadUi(() -> {
-                if (apkFileList != null && !apkFileList.isEmpty()) {
-                    if (appAdapter != null) {
+            FIleSerachUtils.loadApp(getContext(), refresh);
+            if (AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty()) {
+                if (appAdapter != null) {
+                    ThreadUtils.threadUi(() -> {
                         appAdapter.refresh();
-                        tvCount.setText(apkFileList.size() + "个应用");
+                        tvCount.setText(AnyData.apkFileList.size() + "个应用");
                         appSwipe.setRefreshing(false);
-                    }
+                    });
                 }
-            });
+            }
         });
     }
 
@@ -190,10 +197,16 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
         switch (buttonView.getId()) {
             case R.id.app_check_select_all: {
                 if (isChecked) {
-                    appAdapter.setSelecteByApkinfo(apkFileList);
+                    appAdapter.setSelecteByApkinfo(AnyData.apkFileList);
                 } else {
                     appAdapter.clearImageSelect();
                 }
+                break;
+            }
+            case R.id.app_check_sys_app: {
+                PrefUtil prefUtil = App.getPrefUtil();
+                prefUtil.saveBoolean(PreConfig.DISPLAY_SYSTEM_APP, isChecked);
+                loading(true);
                 break;
             }
             default:
@@ -202,7 +215,7 @@ public class FragAppList extends BaseFragment implements AppAdapter.OnItemClickL
     }
 
     public List<ApkInfo> getApkFileList() {
-        return apkFileList;
+        return AnyData.apkFileList;
     }
 
     public List<ApkInfo> getSelectlist() {

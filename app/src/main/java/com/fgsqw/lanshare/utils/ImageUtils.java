@@ -2,46 +2,40 @@ package com.fgsqw.lanshare.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
+import android.graphics.*;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.ColorInt;
 import com.fgsqw.lanshare.App;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class ImageUtils {
+
     /**
      * 转换Drawable为Bitmap
-     *
-     * @param drawable
-     * @return
      */
     public static Bitmap drawableToBitmap(Drawable drawable) {
-        // 取 drawable 的长宽
-        int w = drawable.getIntrinsicWidth();
-        int h = drawable.getIntrinsicHeight();
-
-        // 取 drawable 的颜色格式
-        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
-                : Bitmap.Config.RGB_565;
-        // 建立对应 bitmap
-        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
-        // 建立对应 bitmap 的画布
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, drawable
+                .getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                : Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, w, h);
-        // 把 drawable 内容画到画布中
+        drawable.setBounds(0, 0, width, height);
         drawable.draw(canvas);
         return bitmap;
     }
 
 
     /**
-     * 扫描文件夹下的图片
+     * 通知系统扫描文件夹下的图片
      *
      * @param path 文件夹路径
      */
@@ -54,6 +48,7 @@ public class ImageUtils {
 
     /**
      * 通过资源名获取资源id
+     *
      * @param name 资源名
      * @return 资源id
      */
@@ -114,7 +109,7 @@ public class ImageUtils {
      * @return 指定大小的视频缩略图
      */
     public static Bitmap getVideoThumbnail(String videoPath, int width, int height
-                                           ) {
+    ) {
         Bitmap bitmap = null;
         // 获取视频的缩略图
         bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);
@@ -124,4 +119,43 @@ public class ImageUtils {
     }
 
 
+    public static Bitmap drawable2Bitmap(Drawable drawable) {
+        return ((BitmapDrawable) drawable).getBitmap();
+    }
+
+
+    /**
+     * Bitmap转png字节数组
+     */
+    public static byte[] bitmap2PngBytes(Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
+
+    /**
+     * byte[]转换成Bitmap
+     */
+    public Bitmap bytesToBitmap(byte[] bytes) {
+        if (bytes != null) {
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        }
+        return null;
+    }
+
+    public static Bitmap byteArray2Bitmap(byte[] data) {
+        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+        if (bitmap != null) {
+            Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(newBitmap);
+            canvas.drawColor(Color.WHITE);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            return newBitmap;
+        }
+        return null;
+    }
 }

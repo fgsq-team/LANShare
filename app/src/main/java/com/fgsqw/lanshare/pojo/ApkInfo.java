@@ -1,9 +1,10 @@
 package com.fgsqw.lanshare.pojo;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 public class ApkInfo extends FileInfo {
-    private Drawable icon;
+    private byte[] icon;
     private String packageName;
 
     public String getPackageName() {
@@ -14,11 +15,11 @@ public class ApkInfo extends FileInfo {
         this.packageName = packageName;
     }
 
-    public Drawable getIcon() {
+    public  byte[] getIcon() {
         return icon;
     }
 
-    public void setIcon(Drawable icon) {
+    public void setIcon( byte[] icon) {
         this.icon = icon;
     }
 }

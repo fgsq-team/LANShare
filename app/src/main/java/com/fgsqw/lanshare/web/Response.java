@@ -86,7 +86,6 @@ public class Response {
     }
 
     public void writeString(String responseBody, String contentType) throws IOException {
-        setContentLength(responseBody.getBytes().length);
         setContentType(contentType);
         StringBuilder sb = createHeader();
         sb.append(responseBody);

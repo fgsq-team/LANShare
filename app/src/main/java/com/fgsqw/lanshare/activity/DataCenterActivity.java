@@ -6,13 +6,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Message;
 import android.os.Messenger;
-import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -40,14 +37,7 @@ import com.fgsqw.lanshare.pojo.UriFileInfo;
 import com.fgsqw.lanshare.pojo.mCmd;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
-import com.fgsqw.lanshare.utils.ByteUtil;
-import com.fgsqw.lanshare.utils.DataDec;
-import com.fgsqw.lanshare.utils.DataEnc;
-import com.fgsqw.lanshare.utils.FileUtil;
-import com.fgsqw.lanshare.utils.IOUtil;
-import com.fgsqw.lanshare.utils.PrefUtil;
-import com.fgsqw.lanshare.utils.StringUtils;
-import com.fgsqw.lanshare.utils.ThreadUtils;
+import com.fgsqw.lanshare.utils.*;
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -58,10 +48,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.fgsqw.lanshare.utils.PermissionsUtils.REQUEST_VISIT;
@@ -106,6 +93,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         lanService.putExtra("messenger", new Messenger(fragChat.getHandler()));
         startService(lanService);
         processExtraData();
+        initAllData();
     }
 
     public void updateIP(String ip) {
@@ -134,19 +122,14 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     public void showExitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setIcon(R.mipmap.ic_launcher)
-                .setCancelable(false)
-                .setTitle("端口修改提示")
-                .setMessage("端口修改需要重启软件后才能生效，是否退出软件？")
-                .setPositiveButton("退出", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    stopService(new Intent(this, LANService.class));
-                    finish();
-                    finish();
-                }).setNegativeButton("不退出", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                });
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setIcon(R.mipmap.ic_launcher).setCancelable(false).setTitle("端口修改提示").setMessage("端口修改需要重启软件后才能生效，是否退出软件？").setPositiveButton("退出", (dialogInterface, i) -> {
+            dialogInterface.dismiss();
+            stopService(new Intent(this, LANService.class));
+            finish();
+            finish();
+        }).setNegativeButton("不退出", (dialogInterface, i) -> {
+            dialogInterface.dismiss();
+        });
         builder.create().show();
     }
 
@@ -358,8 +341,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     @Override
     public boolean onKeyDown(int n, KeyEvent keyEvent) {
-        if ((n != KeyEvent.KEYCODE_BACK) || (keyEvent.getRepeatCount() != 0))
-            return super.onKeyDown(n, keyEvent);
+        if ((n != KeyEvent.KEYCODE_BACK) || (keyEvent.getRepeatCount() != 0)) return super.onKeyDown(n, keyEvent);
         if (!currentFragment.onKeyDown(n, keyEvent)) {
             moveTaskToBack(true);
         }
@@ -520,6 +502,18 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         return true;
     }
 
+
+    /**
+     * 预加载文件
+     */
+    public void initAllData() {
+        ThreadUtils.runThread(() -> {
+            FIleSerachUtils.loadApp(DataCenterActivity.this, true);
+        });
+        ThreadUtils.runThread(() -> {
+            FIleSerachUtils.loadImageForSDCard(DataCenterActivity.this, true);
+        });
+    }
 
 }
 

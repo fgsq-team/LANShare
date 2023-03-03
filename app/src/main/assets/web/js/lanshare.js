@@ -12,7 +12,31 @@ let files = [fastFile, {
 }]
 
 let medias = []
+let rootPath = "/"
 
+initConfig();
+
+function initConfig() {
+    $.ajax({
+        url: "/initConfig",
+        type: "post",
+        dataType: "json",
+        contentType: "json/application",
+        data: JSON.stringify({"test": 1}),
+        success: function (result) {
+            rootPath = result.rootPath;
+            initView();
+        },
+        error: function (result) {
+            console.error(result.message)
+        }
+    });
+}
+
+function initView(){
+    mediaList(-1)
+    onfile(false, rootPath)
+}
 function openFile(name, path) {
     let requestUrl = "/file/" + name + "?path=" + path;
     window.open(requestUrl, "_blank");
@@ -54,7 +78,6 @@ function mediaList(index) {
     });
 }
 
-mediaList(-1)
 
 function onfile(isBack, path) {
     $(".filelist").empty();
@@ -70,8 +93,8 @@ function onfile(isBack, path) {
             $('.path-text').text(result.path);
             // 文件列表
             files = result.list;
-            // 插入首行的返回按钮
-            files.splice(0, 0, fastFile);
+            // // 插入首行的返回按钮
+            // files.splice(0, 0, fastFile);
             let i = 0;
             // 循环遍历上面的json数据，每一行代表一个li
             files.forEach(function (item, index) {
@@ -104,7 +127,7 @@ function onfile(isBack, path) {
     });
 }
 
-onfile(false, "/sdcard/")
+
 
 $(".nav-item-media").click(function () {
     $(".filelist").empty();
@@ -118,6 +141,6 @@ $(".nav-item-files").click(function () {
     $(".media-content").empty();
     $(".file-list-div").show();
     $(".media-content").hide();
-    onfile(false, "/sdcard/")
+    onfile(false, rootPath)
 });
 

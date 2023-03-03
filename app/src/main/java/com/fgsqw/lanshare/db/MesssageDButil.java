@@ -1,37 +1,41 @@
-package com.fgsqw.lanshare.utils;
+package com.fgsqw.lanshare.db;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import android.database.sqlite.SQLiteOpenHelper;
 import com.fgsqw.lanshare.pojo.MessageContent;
 import com.fgsqw.lanshare.pojo.MessageFileContent;
 import com.fgsqw.lanshare.pojo.MessageUriContent;
+import com.fgsqw.lanshare.utils.ByteUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 消息持久化
  */
-public class MesssageDButil {
+public class MesssageDButil  extends SQLiteOpenHelper {
 
-    private final DBHelper dbHelper;
+//    private final DBHelper dbHelper;
+
+    private static final int DB_VERSION = 1;
+    private static final String DB_NAME = "msg.db";
+    public static final String TABLE_NAME = "LANShre_Msg";
+
 
     public MesssageDButil(Context context) {
-        dbHelper = new DBHelper(context);
+        super(context, DB_NAME, null, DB_VERSION);
     }
 
 
     public void addMessage(MessageContent messageContent) {
         try {
             byte[] data = ByteUtil.objectToByte(messageContent);
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            String sql = "insert into " + DBHelper.TABLE_NAME + " values (?,?,1)";
+            SQLiteDatabase db = getWritableDatabase();
+            String sql = "insert into " + TABLE_NAME + " values (?,?,1)";
             db.execSQL(sql, new Object[]{messageContent.getId(), data});
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,10 +43,10 @@ public class MesssageDButil {
     }
 
     public void updateMessage(MessageContent messageContent) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         try {
             byte[] data = ByteUtil.objectToByte(messageContent);
-            String sql = "update " + DBHelper.TABLE_NAME + " set message = ?2 where id = ?1 ";
+            String sql = "update " + TABLE_NAME + " set message = ?2 where id = ?1 ";
             db.execSQL(sql, new Object[]{messageContent.getId(), data});
         } catch (Exception e) {
             e.printStackTrace();
@@ -57,10 +61,10 @@ public class MesssageDButil {
     }
 
     public void delMessage(MessageContent messageContent) {
-//        SQLiteDatabase db = orderDBHelper.getWritableDatabase();
-//        db.delete(OrderDBHelper.TABLE_NAME, "id = ?", new String[]{messageContent.getId()});
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String sql = "update " + DBHelper.TABLE_NAME + " set isdel = -1 where id = ?1 ";
+//        SQLiteDatabase db = ordergetWritableDatabase();
+//        db.delete(OrderTABLE_NAME, "id = ?", new String[]{messageContent.getId()});
+        SQLiteDatabase db = getWritableDatabase();
+        String sql = "update " + TABLE_NAME + " set isdel = -1 where id = ?1 ";
         db.execSQL(sql, new Object[]{messageContent.getId()});
     }
 
@@ -75,9 +79,9 @@ public class MesssageDButil {
 
         List<MessageContent> messageContents = new ArrayList<>();
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        Cursor cursor = db.rawQuery("select * from " + DBHelper.TABLE_NAME + " where isdel = 1 ", null);
+        Cursor cursor = db.rawQuery("select * from " + TABLE_NAME + " where isdel = 1 ", null);
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 byte[] data = cursor.getBlob(cursor.getColumnIndex("message"));
@@ -116,5 +120,16 @@ public class MesssageDButil {
         return messageContents;
     }
 
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String sql = "create table if not exists " + TABLE_NAME + " (id VARCHAR(32) primary key, message blob,isdel INTEGER)";
+        db.execSQL(sql);
+    }
 
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        String sql = "DROP TABLE IF EXISTS " + TABLE_NAME;
+        db.execSQL(sql);
+        onCreate(db);
+    }
 }

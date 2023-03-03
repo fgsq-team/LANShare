@@ -33,6 +33,7 @@ import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
 import com.fgsqw.lanshare.fragment.interfaces.IChildBaseMethod;
+import com.fgsqw.lanshare.pojo.FileInfo;
 import com.fgsqw.lanshare.pojo.FileSource;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FIleSerachUtils;
@@ -65,7 +66,7 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
     private MLinearLayoutManager mLayoutManager;
 
     private final List<Integer> mSign = new ArrayList<>();      // 保存上一级item 位置
-    private final List<FileSource> fileList = new ArrayList<>();  // 当前文件所有列表
+    private  List<FileSource> fileList = new ArrayList<>();  // 当前文件所有列表
     private final List<FileSource> paths = new ArrayList<>();   // 当前文件列表
 
     private final List<FileSource> selectFileList = new LinkedList<>();   // 当前文件列表
@@ -185,225 +186,13 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
         if (f == null) {
             f = new File("/");
         }
-        if (VersionUtils.isAndroid11() && PermissionsUtils.isAndroidData(f.getPath())) {
-            boolean isGet = XXPermissions.isGranted(requireContext(), Permission.MANAGE_EXTERNAL_STORAGE);
-            //已有权限则返回
-            if (!isGet) {
-                XXPermissions.with(requireContext())
-                        // 申请单个权限
-                        .permission(Permission.MANAGE_EXTERNAL_STORAGE)
-                        // 设置不触发错误检测机制（局部设置）
-                        .unchecked()
-                        .request(new OnPermissionCallback() {
-                            @Override
-                            public void onGranted(List<String> permissions, boolean all) {
-                                T.s("成功");
-                            }
-
-                            @Override
-                            public void onDenied(List<String> permissions, boolean never) {
-                                if (never) {
-                                    //如果是被永久拒绝就跳转到应用权限系统设置页面
-                                    XXPermissions.startPermissionActivity(requireActivity(), permissions);
-                                } else {
-                                }
-
-                            }
-                        });
-                return;
-            }
-
-            // 保存当前路径
-            currentDirectory = f;
-            // 显示当前路径到界面
-            mPathTv.setText("    " + f.getPath());
-            fileList.clear();
-            Resources res = getResources();
-            FileSource fileSource = new FileSource();
-            fileSource.setName("...");
-            fileSource.setPreView(decodeResource(res, R.drawable.ic_folder_upload));
-            fileSource.setIsPreView(false);
-            fileList.add(fileSource);
-            List<String> packageNames = FIleSerachUtils.getPackageNames(getContext());
-            for (String packageName : packageNames) {
-                File file = new File(PermissionsUtils.ANDROID_DATA + "/" + packageName);
-                if (file.exists()) {
-                    String name = file.getName();
-                    Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
-                    fileSource = new FileSource();
-                    fileSource.setName(mUtil.StringSize(name, 20));
-                    fileSource.setPath(file.getPath());
-                    fileSource.setPreView(bmp);
-                    fileSource.setIsPreView(false);
-                    fileSource.setTime(file.lastModified());
-                    fileSource.setFile(false);
-                    fileList.add(fileSource);
-                }
-            }
+        List<FileSource> fileList1 = FIleSerachUtils.getFileList(f, showHiddenFiles, dataCenterActivity);
+        if (fileList1.size() > 0) {
+            this.fileList = fileList1;
             mFileAdapter.refresh();
-        } else if (PermissionsUtils.isSubAndroidData(f.getPath())) {
-            Uri uri = PermissionsUtils.path2Uri(f.getPath());
-            //获取权限,没有权限返回null有权限返回授权uri字符串
-            String existsPermission = PermissionsUtils.existsGrantedUriPermission(uri, getContext());
-            if (existsPermission == null) {
-                PermissionsUtils.goApplyUriPermissionPage(uri, dataCenterActivity);
-                return;
-            }
-            Uri targetUri = Uri.parse(existsPermission + uri.toString()
-                    .replaceFirst(PermissionsUtils.URI_PERMISSION_REQUEST_COMPLETE_PREFIX, ""));
-            //Mtools.log(targetUri);
-            DocumentFile rootDocumentFile = DocumentFile.fromSingleUri(getContext(), targetUri);
-            Objects.requireNonNull(rootDocumentFile, "rootDocumentFile is null");
-            //创建一个 DocumentFile表示以给定的 Uri根的文档树。其实就是获取子目录的权限
-            DocumentFile pickedDir = DocumentFile.fromTreeUri(getContext(), targetUri);
-            Objects.requireNonNull(pickedDir, "pickedDir is null");
-            DocumentFile[] documentFiles = pickedDir.listFiles();
             currentDirectory = f;
-            // 显示当前路径到界面
             mPathTv.setText("    " + f.getPath());
-            fileList.clear();
-            paths.clear();
-            Resources res = getResources();
-            FileSource fileSource = new FileSource();
-            fileSource.setName("...");
-            fileSource.setPreView(decodeResource(res, R.drawable.ic_folder_upload));
-            fileSource.setIsPreView(false);
-            fileList.add(fileSource);
-            for (DocumentFile documentFile : documentFiles) {
-                String name = documentFile.getName();
-                if (StringUtils.isEmpty(name)) {
-                    continue;
-                }
-                if (documentFile.isDirectory()) {
-                    if (!showHiddenFiles) {
-                        if (name.startsWith(".")) {
-                            continue;
-                        }
-                    }
-                    Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
-                    fileSource = new FileSource();
-                    fileSource.setName(mUtil.StringSize(name, 20));
-                    fileSource.setPath(f.getPath() + "/" + name);
-                    fileSource.setPreView(bmp);
-                    fileSource.setIsPreView(false);
-                    fileSource.setTime(documentFile.lastModified());
-                    fileSource.setFile(false);
-
-                    fileList.add(fileSource);
-                } else if (documentFile.isFile()) {
-                    fileSource = new FileSource();
-                    fileSource.setName(name);
-                    fileSource.setPath(f.getPath() + "/" + name);
-                    fileSource.setPreView(decodeResource(res, R.drawable.ic_file_file));
-                    fileSource.setIsPreView(false);
-                    fileSource.setTime(documentFile.lastModified());
-                    fileSource.setLength(documentFile.length());
-                    fileSource.setFile(true);
-                    paths.add(fileSource);
-                }
-            }
-            fileList.addAll(paths);
-            mFileAdapter.refresh();
-        } else if (f.isDirectory()) {  // 如果是文件夹
-
-            if (f.canRead()) {  // 如果能读取
-                // 保存当前路径
-                currentDirectory = f;
-                // 显示当前路径到界面
-                mPathTv.setText("    " + f.getPath());
-                // 在文件列表视图添加子文件或目录
-                // 当前文件列表
-                File[] files = f.listFiles();
-                // 排序
-                Arrays.sort(files);
-                fileList.clear();
-                paths.clear();
-                Resources sres = getResources();
-
-                FileSource fileSource = new FileSource();
-                fileSource.setName("...");
-                fileSource.setPreView(decodeResource(sres, R.drawable.ic_folder_upload));
-                fileSource.setIsPreView(false);
-
-                fileList.add(fileSource);
-
-                for (File file : files) {
-                    // 如果是文件夹
-                    if (file.isDirectory()) {
-                        String name = file.getName();
-                        if (!showHiddenFiles) {
-                            if (name.startsWith(".")) {
-                                continue;
-                            }
-                        }
-                        Resources res = getResources();
-                        Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
-                        fileSource = new FileSource();
-                        fileSource.setName(mUtil.StringSize(name, 20));
-                        fileSource.setPath(file.getPath());
-                        fileSource.setPreView(bmp);
-                        fileSource.setIsPreView(false);
-                        fileSource.setTime(file.lastModified());
-                        fileSource.setFile(false);
-
-                        fileList.add(fileSource);
-                        // 如果是文件
-                    } else if (file.isFile()) {
-                        String name = file.getName();
-                        if (!showHiddenFiles) {
-                            if (name.startsWith(".")) {
-                                continue;
-                            }
-                        }
-                        Resources res = getResources();
-                        Bitmap bmp = null;
-                        String suffixName = name.substring(name.lastIndexOf(".") + 1);
-                        boolean isPreView = false;
-                        if (suffixName.equalsIgnoreCase("txt")) {
-                            bmp = decodeResource(res, R.drawable.ic_txts_file);
-                        } else if (suffixName.equalsIgnoreCase("jpg")//图片及视频文件
-                                || suffixName.equalsIgnoreCase("png")
-                                || suffixName.equalsIgnoreCase("jpeg")
-                                || suffixName.equalsIgnoreCase("gif")
-                                || suffixName.equalsIgnoreCase("mp4")
-                        ) {
-                            isPreView = true;
-                        } else if (suffixName.equalsIgnoreCase("zip")) {//压缩包文件
-                            bmp = decodeResource(res, R.drawable.ic_zip_file);
-                        } else if (suffixName.equalsIgnoreCase("apk")) {//apk文件
-                           /* Drawable drawable = FileUtil.getApkIcon(getContext(), file.getPath());
-                            if (drawable != null) {
-                                bmp = ImageUtils.drawableToBitmap(drawable);
-                            } else {
-                                bmp = decodeResource(res, R.drawable.ic_null_android_file);
-                            }*/
-                            bmp = decodeResource(res, R.drawable.ic_null_android_file);
-                        } else if (suffixName.equalsIgnoreCase("java")) {//java文件
-                            bmp = decodeResource(res, R.drawable.ic_coder_file);
-                        } else {
-                            bmp = decodeResource(res, R.drawable.ic_file_file);
-                        }
-
-                        fileSource = new FileSource();
-                        fileSource.setName(name);
-                        fileSource.setPath(file.getPath());
-                        fileSource.setPreView(bmp);
-                        fileSource.setIsPreView(isPreView);
-                        fileSource.setTime(file.lastModified());
-                        fileSource.setLength(file.length());
-                        fileSource.setFile(true);
-
-                        paths.add(fileSource);
-                    }
-                }
-                fileList.addAll(paths);
-                mFileAdapter.refresh();
-            } else {
-                // 不能读取文件夹
-                T.s("此文件夹不能被读取");
-            }
         }
-
     }
 
     private void dialogFolder(final int position) {

@@ -110,9 +110,7 @@ public class LANService extends BaseService {
     WifiManager.MulticastLock multicastLock;
 
     public void startWebServer() {
-
         httpServer = new LHttpServer();
-
     }
 
     @Override

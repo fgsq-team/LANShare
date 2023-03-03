@@ -16,14 +16,15 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.FutureTarget;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.fragment.child.FragMediaList;
+import com.fgsqw.lanshare.fragment.data.AnyData;
+import com.fgsqw.lanshare.pojo.FileSource;
 import com.fgsqw.lanshare.pojo.MediaInfo;
 import com.fgsqw.lanshare.pojo.MediaResult;
 import com.fgsqw.lanshare.pojo.PhotoFolder;
-import com.fgsqw.lanshare.utils.FileUtil;
-import com.fgsqw.lanshare.utils.IOUtil;
-import com.fgsqw.lanshare.utils.ImageUtils;
-import com.fgsqw.lanshare.utils.StringUtils;
+import com.fgsqw.lanshare.service.LANService;
+import com.fgsqw.lanshare.utils.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -42,10 +43,18 @@ public class LHttpServer {
 
     public LHttpServer() {
         httpServer = new HttpServer();
+        // 初始化配置
+        httpServer.addPath("/initConfig", (request, response) -> {
+            JSONObject object = new JSONObject();
+            object.put("rootPath", Environment.getExternalStorageDirectory().getPath());
+            String string = object.toJSONString();
+            response.writeString(string);
+        });
+
         // 相册图片
         httpServer.addPath("/imageload/", (request, response) -> {
             String index = request.getPathParam("index");
-            MediaResult mediaResult = FragMediaList.mediaResult;
+            MediaResult mediaResult = AnyData.mediaResult;
             Map<Integer, MediaInfo> allMediaMap = mediaResult.getAllMediaMap();
             MediaInfo mediaInfo = allMediaMap.get(Integer.valueOf(index));
             if (mediaInfo != null) {
@@ -91,21 +100,6 @@ public class LHttpServer {
             }
         });
 
-//        httpServer.addPath("/favicon.ico", (request, response) -> {
-//            String path = request.getRequestURL();
-//            String filePath = "web";
-//            filePath += path;
-//            response.writeFile(new File(filePath));
-//            App instance = App.getInstance();
-//            InputStream open = instance.getAssets().open(filePath);
-//            byte[] bytes = IOUtil.readBytes(open);
-//            int i = filePath.lastIndexOf(".");
-//            if (i > 0) {
-//                String myMIMEType = FileUtil.getMyMIMEType(filePath.substring(i + 1));
-//                response.writeBytes(bytes, myMIMEType);
-//            }
-//        });
-
         httpServer.addPath("/files", (request, response) -> {
             String str = request.getRequestBody();
             JSONObject jsonObject = JSON.parseObject(str);
@@ -121,21 +115,27 @@ public class LHttpServer {
             if (file == null) {
                 file = Environment.getExternalStorageDirectory();
             }
+            boolean showHiddenFiles = App.getPrefUtil().getBoolean(PreConfig.SHOW_HIDDEN_FILES, false);
+            List<FileSource> fileList = FIleSerachUtils.getFileList(file, showHiddenFiles, LANService.getInstance());
             JSONObject object = new JSONObject();
             object.put("path", file.getAbsolutePath());
-
             JSONArray jsonArray = new JSONArray();
-            File[] files = file.listFiles();
-            if (files != null) {
+            if (fileList.size() > 0) {
                 @SuppressLint("SimpleDateFormat")
                 SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd HH:ss:mm");
-                for (File file1 : files) {
+                for (FileSource fileSource : fileList) {
+                    String name = fileSource.getName();
+                    if (showHiddenFiles) {
+                        if (name.startsWith(".")) {
+                            continue;
+                        }
+                    }
                     JSONObject item = new JSONObject();
-                    item.put("name", file1.getName());
-                    item.put("path", file1.getAbsolutePath());
-                    item.put("isFile", file1.isFile());
-                    item.put("time", sfd.format(new Date(file1.lastModified())));
-                    item.put("isDirectory", file1.isDirectory());
+                    item.put("name", name);
+                    item.put("path", fileSource.getPath());
+                    item.put("isFile", fileSource.isFile());
+                    item.put("time", sfd.format(fileSource.getTime()));
+                    item.put("isDirectory", !fileSource.isFile());
                     jsonArray.add(item);
                 }
             }
@@ -147,7 +147,7 @@ public class LHttpServer {
             String str = request.getRequestBody();
             JSONObject jsonObject = JSON.parseObject(str);
 //            jsonObject.get()
-            MediaResult mediaResult = FragMediaList.mediaResult;
+            MediaResult mediaResult = AnyData.mediaResult;
             if (mediaResult != null) {
                 int folderIndex = jsonObject.getIntValue("folderIndex");
                 JSONArray jsonArray = new JSONArray();

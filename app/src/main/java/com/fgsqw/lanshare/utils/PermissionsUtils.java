@@ -76,14 +76,12 @@ public class PermissionsUtils {
     }
 
     public static void goApplyUriPermissionPage(Uri uri, Activity activity) {
-
 //
 //        //获取所有已授权并存储的Uri列表，遍历并判断需要申请的uri是否在其中,在则说明已经授权了
 //        boolean isGet = isGrantedUriPermission(uri, activity, fragment);//这里会对activity重新赋值
 //        if (isGet) {
 //            return;
 //        }
-
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.setFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION

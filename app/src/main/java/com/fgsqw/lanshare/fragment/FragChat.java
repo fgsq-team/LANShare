@@ -50,7 +50,7 @@ import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.ImageUtils;
-import com.fgsqw.lanshare.utils.MesssageDButil;
+import com.fgsqw.lanshare.db.MesssageDButil;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
 import com.fgsqw.lanshare.utils.mUtil;
@@ -69,16 +69,26 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
     InputMethodManager mInputManager;
 
     private View view;
+    // 发下消息按钮
     private Button btnSned;
+    // 消息编辑框
     private EditText editContent;
     private LinearLayout messageLayout;
+    // 选中设备名称
     private TextView devSelectLTv;
+    // 消息列表视图
     private RecyclerView recyclerView;
+    // 消息列表适配器
     private ChatAdabper chatAdabper;
+    // 消息列表布局管理器
     private LinearLayoutManager layoutManager;
+    // 消息列表
     private final List<MessageContent> messageContentList = new ArrayList<>();
+    // 选中的设备
     private Device selectedDevice;
+    // 配置文件加载工具
     private PrefUtil prefUtil;
+    // 消息数据库工具
     private MesssageDButil messsageDButil;
 
 
@@ -109,7 +119,7 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                 addMessage(messageContent, true);
             } else if (msg.what == mCmd.SERVICE_NETWORK_CHANGES) {    // 网络变化
                 NetInfo netInfo = (NetInfo) msg.obj;
-                dataCenterActivity.updateIP(netInfo.getIp() + ":" + Config.DEFAULT_FILE_SERVER_PORT);
+                dataCenterActivity.updateIP(netInfo.getIp() + ":" + Config.FILE_SERVER_PORT);
             }
         }
     };
@@ -151,6 +161,9 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         }
     }
 
+    /**
+     * 显示确认接收消息弹窗
+     */
     public void showIsRecyDialog(Message msg) {
         Object[] dataObject = (Object[]) msg.obj;
         Device device = (Device) dataObject[0];
@@ -216,7 +229,6 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
             return false;
         });
 
-
         editContent.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 // 得到焦点
@@ -228,27 +240,33 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         });
     }
 
+    /**
+     * 初始化消息
+     */
     public void initData() {
         List<MessageContent> messageContents = messsageDButil.queryMessage();
         addListMessage(messageContents, false);
     }
 
 
+    /**
+     * 消息列表项目点击
+     * @param messageContent 消息内容
+     * @param position 点击位置
+     */
     @Override
     public void onItemClick(MessageContent messageContent, int position) {
         boolean POEN_MEDIA_PLAYER = prefUtil.getBoolean(PreConfig.POEN_MEDIA_PLAYER, true);
         if (messageContent instanceof MessageFileContent) {
             MessageFileContent fileContent = (MessageFileContent) messageContent;
+            // 消息内容传输完成
             if (fileContent.getStatus() == MessageContent.SUCCESS) {
-
                 if (POEN_MEDIA_PLAYER && messageContent instanceof MessageMediaContent) {
                     MessageMediaContent mediaContent = (MessageMediaContent) fileContent;
-
                     MediaInfo mediaInfo = new MediaInfo();
                     mediaInfo.setPath(mediaContent.getPath());
                     mediaInfo.setLength(mediaContent.getLength());
                     mediaInfo.setName(mediaContent.getContent());
-
                     if (mediaContent.isVideo()) {
                         VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                     } else {
@@ -257,7 +275,6 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                                 mediaInfos, false, 0, 1);
                     }
                 } else {
-
                     if (messageContent instanceof MessageUriContent) {
                         T.s("暂不支持分享文件查看");
                     } else if (messageContent instanceof MessageFolderContent) {
@@ -268,7 +285,6 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
                         }
                     }
                 }
-
             } else {
                 T.s("文件传输未完成");
             }
@@ -304,39 +320,6 @@ public class FragChat extends BaseFragment implements View.OnClickListener, View
         return handler;
     }
 
-//
-//    @RequiresApi(api = Build.VERSION_CODES.M)
-//    public void updateLocalItemInfo(Message message) {
-//        MessageFileContent fileContent = (MessageFileContent) message.obj;
-//        // 获取数据在列表中的下标
-//        int dataPosition = chatAdabper.getDataPosition(fileContent);
-//        if (fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_RIGHT) {
-//            // 获取视图并更新视图数据
-//            FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
-//            if (viewHolder != null) {
-//                viewHolder.progressBar.setProgress(fileContent.getProgress());
-//
-//                if (fileContent.getSuccess() != null) {
-//                    viewHolder.progressBar.setVisibility(View.GONE);
-//                    viewHolder.stateTv.setVisibility(View.VISIBLE);
-//                    viewHolder.stateTv.setText(fileContent.getStateMessage());
-//                    if (!fileContent.getSuccess()) {
-//                        viewHolder.stateTv.setTextColor(Color.RED);
-//                    } else {
-//                        viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
-//                    }
-//                } else {
-//                    viewHolder.progressBar.setVisibility(View.VISIBLE);
-//                    viewHolder.stateTv.setVisibility(View.GONE);
-//                    viewHolder.stateTv.setTextColor(getContext().getColor(R.color.item_text));
-//                }
-//            } else {
-//                chatAdabper.notifyItemChanged(dataPosition);
-//            }
-//        } else {
-//            chatAdabper.notifyItemChanged(dataPosition);
-//        }
-//    }
 
     @SuppressWarnings("all")
     @RequiresApi(api = Build.VERSION_CODES.M)

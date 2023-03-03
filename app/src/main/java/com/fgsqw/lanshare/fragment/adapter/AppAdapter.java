@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,9 +56,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final ApkInfo apkInfo = fragAppList.getApkFileList().get(position);
-        Glide.with(mContext).load(apkInfo.getIcon())
-                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
+        Glide.with(mContext)
+                .load(apkInfo.getIcon())
+                .centerCrop()
+                .placeholder(R.drawable.ic_null)
                 .into(holder.mIcon);
+
         setItemSelect(holder, isSelect(apkInfo));
         holder.mName.setText(mUtil.StringSize(apkInfo.getName().replace(".apk", ""), 6));
         holder.mSize.setText(FileUtil.computeSize(apkInfo.getLength()));
