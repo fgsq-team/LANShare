@@ -2,8 +2,10 @@ package com.fgsqw.lanshare.pojo;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import com.alibaba.fastjson.annotation.JSONField;
 
 public class ApkInfo extends FileInfo {
+    @JSONField(serialize = false)
     private byte[] icon;
     private String packageName;
 

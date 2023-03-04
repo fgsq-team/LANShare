@@ -13,7 +13,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -22,7 +21,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.provider.DocumentFile;
-import android.util.Log;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.PreConfig;
@@ -190,8 +188,7 @@ public class FIleSerachUtils {
                 List<ApkInfo> apkInfoList = new ArrayList<>();
                 PrefUtil prefUtil = App.getPrefUtil();
                 boolean flag = prefUtil.getBoolean(PreConfig.DISPLAY_SYSTEM_APP, false);
-                for (int i = 0; i < packages.size(); i++) {
-                    PackageInfo packageInfo = packages.get(i);
+                for (PackageInfo packageInfo : packages) {
                     if (flag || (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                         ApkInfo apkInfo = new ApkInfo();
                         String packageName = packageInfo.packageName;
@@ -200,12 +197,12 @@ public class FIleSerachUtils {
                         apkInfo.setLength(length);
                         apkInfo.setPath(packageInfo.applicationInfo.sourceDir);
                         apkInfo.setPackageName(packageName);
-                        byte[] png = apkIconDBUtil.queryByPackageName(packageName);
+                        byte[] png = apkIconDBUtil.queryIconByPackageName(packageName);
                         if (png == null) {
                             Drawable drawable = packageInfo.applicationInfo.loadIcon(context.getPackageManager());
                             Bitmap bitmap = ImageUtils.drawableToBitmap(drawable);
                             png = ImageUtils.bitmap2PngBytes(bitmap);
-                            apkIconDBUtil.addIcon(packageName, png);
+                            apkIconDBUtil.addIcon(packageName, apkInfo.getPath(), png);
                         }
                         apkInfo.setIcon(png);
                         apkInfoList.add(apkInfo);
@@ -361,9 +358,8 @@ public class FIleSerachUtils {
             boolean isGet = XXPermissions.isGranted(context, Permission.MANAGE_EXTERNAL_STORAGE);
             //已有权限则返回
             if (!isGet) {
-                if(!(context instanceof Activity)){
-                    T.s("请手动在软件中授权此文件夹");
-                    return fileList;
+                if (!(context instanceof Activity)) {
+                    throw new RuntimeException("请手动在软件中授权此文件夹");
                 }
                 XXPermissions.with(context)
                         // 申请单个权限
@@ -375,6 +371,7 @@ public class FIleSerachUtils {
                             public void onGranted(List<String> permissions, boolean all) {
                                 T.s("成功");
                             }
+
                             @Override
                             public void onDenied(List<String> permissions, boolean never) {
                                 if (never) {
@@ -414,9 +411,8 @@ public class FIleSerachUtils {
             //获取权限,没有权限返回null有权限返回授权uri字符串
             String existsPermission = PermissionsUtils.existsGrantedUriPermission(uri, context);
             if (existsPermission == null) {
-                if(!(context instanceof Activity)){
-                    T.s("请手动在软件中授权此文件夹");
-                    return fileList;
+                if (!(context instanceof Activity)) {
+                    throw new RuntimeException("请手动在软件中授权此文件夹");
                 }
                 PermissionsUtils.goApplyUriPermissionPage(uri, (Activity) context);
                 return fileList;
@@ -550,7 +546,7 @@ public class FIleSerachUtils {
                 fileList.addAll(paths);
             } else {
                 // 不能读取文件夹
-                T.s("此文件夹不能被读取");
+                throw new RuntimeException("此文件夹不能被读取");
             }
         }
         return fileList;
@@ -618,7 +614,6 @@ public class FIleSerachUtils {
      */
     public static String timeParse(long duration) {
         String time = "";
-
         long minute = duration / 60000;
         long seconds = duration % 60000;
         long second = Math.round((float) seconds / 1000);
@@ -626,7 +621,6 @@ public class FIleSerachUtils {
             time += "0";
         }
         time += minute + ":";
-
         if (second < 10) {
             time += "0";
         }

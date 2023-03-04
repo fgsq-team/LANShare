@@ -8,6 +8,15 @@ import com.fgsqw.lanshare.utils.ThreadUtils;
 public class T {
 
 
+    public static void s(int resId) {
+        App application = App.getInstance();
+        if (application != null) {
+            String string = application.getString(resId);
+            ThreadUtils.threadUi(() -> Toast.makeText(application, string, Toast.LENGTH_LONG).show());
+        }
+    }
+
+
     public static void s(Object s) {
         App application = App.getInstance();
         if (application != null) {

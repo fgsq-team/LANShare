@@ -13,6 +13,7 @@ let files = [fastFile, {
 
 let medias = []
 let rootPath = "/"
+let apps = []
 
 initConfig();
 
@@ -33,12 +34,18 @@ function initConfig() {
     });
 }
 
-function initView(){
+function initView() {
     mediaList(-1)
     onfile(false, rootPath)
 }
+
 function openFile(name, path) {
     let requestUrl = "/file/" + name + "?path=" + path;
+    window.open(requestUrl, "_blank");
+}
+
+function openApkFile(name, packageName) {
+    let requestUrl = "/apkfile/" + name + "?packageName=" + packageName;
     window.open(requestUrl, "_blank");
 }
 
@@ -67,8 +74,6 @@ function mediaList(index) {
                 if (item.isDirectory) {
                     cardBox.append("<div>" + item.name + "</div>");
                 }
-
-
                 $(".media-content").append(cardBox);
             });
         },
@@ -78,6 +83,31 @@ function mediaList(index) {
     });
 }
 
+
+function appList() {
+    $(".app-content").empty();
+    $.ajax({
+        url: "/apps",
+        type: "post",
+        dataType: "json",
+        contentType: "json/application",
+        data: JSON.stringify({}),
+        success: function (result) {
+            apps = result.list;
+            apps.forEach(function (item, index) {
+                let appbox = $("<div class='appBox media-item' onclick='openApkFile(\"" + item.name + "\",\"" + item.packageName + "\")'></div>");
+                appbox.append($("<img class='app-img' src='/appicon?packageName=" + item.packageName + "'/>"))
+                appbox.append($("<div>" + item.name + "</div>"))
+                appbox.append($("<div>" + item.length + "</div>"))
+                appbox.append($("<img class='app-select' src='/drawable?name=ic_image_un_select'/>"))
+                $(".app-content").append(appbox);
+            });
+        },
+        error: function (result) {
+            // console.error(result)
+        }
+    });
+}
 
 function onfile(isBack, path) {
     $(".filelist").empty();
@@ -128,12 +158,10 @@ function onfile(isBack, path) {
 }
 
 
-
 $(".nav-item-media").click(function () {
     $(".filelist").empty();
     $(".file-list-div").hide();
     $(".media-content").show();
-
     mediaList(-1)
 });
 
@@ -144,3 +172,11 @@ $(".nav-item-files").click(function () {
     onfile(false, rootPath)
 });
 
+$(".nav-item-apps").click(function () {
+    $(".media-content").empty();
+    $(".filelist").empty();
+    $(".app-content").show();
+    $(".filelist").hide();
+    $(".media-content").hide();
+    appList()
+});

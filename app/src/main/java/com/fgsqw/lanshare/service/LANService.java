@@ -119,8 +119,8 @@ public class LANService extends BaseService {
         multicastLock = mWifiManager.createMulticastLock("multicastLock");
 //        multicastLock.setReferenceCounted(false);
         super.onCreate();
-        startWebServer();
         instance = this;
+        startWebServer();
         // Service保活
         mUtil.showNotification(this, getString(R.string.app_name), "服务正在运行...");
         // 初始化数据

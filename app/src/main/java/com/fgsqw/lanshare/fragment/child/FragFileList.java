@@ -66,7 +66,7 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
     private MLinearLayoutManager mLayoutManager;
 
     private final List<Integer> mSign = new ArrayList<>();      // 保存上一级item 位置
-    private  List<FileSource> fileList = new ArrayList<>();  // 当前文件所有列表
+    private List<FileSource> fileList = new ArrayList<>();  // 当前文件所有列表
     private final List<FileSource> paths = new ArrayList<>();   // 当前文件列表
 
     private final List<FileSource> selectFileList = new LinkedList<>();   // 当前文件列表
@@ -139,7 +139,10 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
                 } else {
                     File mFile = new File(fileList.get(position).getPath());
                     if (mFile.isDirectory()) {                 //点击的文件如果是文件夹的话
-                        int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();//获取当前屏幕第一个显示的item
+                        int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                                .findFirstVisibleItemPosition();
+
+                        //获取当前屏幕第一个显示的item
                         mSign.add(i);
                         initFileList(mFile);
                     } else if (mFile.isFile()) {                      //点击的文件如果是文件的话
@@ -147,13 +150,13 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
                             dialog(position);
                         }
                     } else if (mFile.isAbsolute()) {
-                        int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();//获取当前屏幕第一个显示的item
+                        int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                                .findFirstVisibleItemPosition();//获取当前屏幕第一个显示的item
                         mSign.add(i);
                         initFileList(mFile);
                     }
                 }
             }
-
             @Override
             public void OnLongClick(int position) {//列表长按时间
                 if (position != 0) {
@@ -162,14 +165,12 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
                         dialog(position);
                     } else {
                         dialogFolder(position);
-
                     }
                 }
 
             }
         });
         mRecyclerView.setAdapter(mFileAdapter);
-
     }
 
     //文件列表返回上一级
@@ -186,30 +187,32 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
         if (f == null) {
             f = new File("/");
         }
-        List<FileSource> fileList1 = FIleSerachUtils.getFileList(f, showHiddenFiles, dataCenterActivity);
-        if (fileList1.size() > 0) {
-            this.fileList = fileList1;
-            mFileAdapter.refresh();
-            currentDirectory = f;
-            mPathTv.setText("    " + f.getPath());
+        try {
+            List<FileSource> fileList1 = FIleSerachUtils.getFileList(f, showHiddenFiles, dataCenterActivity);
+            if (fileList1.size() > 0) {
+                this.fileList = fileList1;
+                mFileAdapter.refresh();
+                currentDirectory = f;
+                mPathTv.setText("    " + f.getPath());
+            }
+        } catch (RuntimeException e) {
+            T.s(e.getMessage());
         }
+
     }
 
     private void dialogFolder(final int position) {
         FileSource fileSource = fileList.get(position);
         File file = new File(fileSource.getPath());
-
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("请选择操作");
         String[] items;
-
         if (file.canRead()) {
             items = new String[]{"发送", "取消",};
         } else {
             T.s("文件夹不能读取");
             return;
         }
-
         // 绑定选项和点击事件
         builder.setItems(items, (arg0, arg1) -> {
             switch (arg1) {
@@ -230,7 +233,6 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
     private void dialog(final int position) {
         FileSource fileSource = fileList.get(position);
         File file = new File(fileSource.getPath());
-
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("请选择操作");
         String[] items;
@@ -244,7 +246,6 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
             T.s("文件不能读取");
             return;
         }
-
         // 绑定选项和点击事件
         builder.setItems(items, (arg0, arg1) -> {
             switch (arg1) {
@@ -257,7 +258,6 @@ public class FragFileList extends BaseFragment implements IChildBaseMethod {
                     break;
                 }
                 case 2: {
-
                     break;
                 }
 

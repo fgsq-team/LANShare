@@ -76,11 +76,8 @@ public class MesssageDButil  extends SQLiteOpenHelper {
 
 
     public List<MessageContent> queryMessage() {
-
         List<MessageContent> messageContents = new ArrayList<>();
-
         SQLiteDatabase db = getWritableDatabase();
-
         Cursor cursor = db.rawQuery("select * from " + TABLE_NAME + " where isdel = 1 ", null);
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -116,7 +113,6 @@ public class MesssageDButil  extends SQLiteOpenHelper {
             }
             cursor.close();
         }
-
         return messageContents;
     }
 

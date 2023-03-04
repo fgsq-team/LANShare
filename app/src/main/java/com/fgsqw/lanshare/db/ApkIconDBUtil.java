@@ -17,17 +17,17 @@ public class ApkIconDBUtil extends SQLiteOpenHelper {
     }
 
 
-    public void addIcon(String packageName, byte[] bytes) {
+    public void addIcon(String packageName, String path, byte[] bytes) {
         try {
             SQLiteDatabase db = getWritableDatabase();
-            String sql = "insert into " + TABLE_NAME + " values (?,?,1)";
-            db.execSQL(sql, new Object[]{packageName, bytes});
+            String sql = "insert into " + TABLE_NAME + " values (?,?,?,1)";
+            db.execSQL(sql, new Object[]{packageName, bytes, path});
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public byte[] queryByPackageName(String packageName) {
+    public byte[] queryIconByPackageName(String packageName) {
         SQLiteDatabase db = getWritableDatabase();
         @SuppressLint("Recycle")
         Cursor cursor = db.rawQuery("select * from " + TABLE_NAME + " where id = ?1 and isdel = 1 ", new String[]{packageName});
@@ -39,10 +39,22 @@ public class ApkIconDBUtil extends SQLiteOpenHelper {
         return null;
     }
 
+    public String queryPathByPackageName(String packageName) {
+        SQLiteDatabase db = getWritableDatabase();
+        @SuppressLint("Recycle")
+        Cursor cursor = db.rawQuery("select * from " + TABLE_NAME + " where id = ?1 and isdel = 1 ", new String[]{packageName});
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                return cursor.getString(cursor.getColumnIndex("path"));
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "create table if not exists " + TABLE_NAME + " (id VARCHAR(32) primary key, data blob,isdel INTEGER)";
+        String sql = "create table if not exists " + TABLE_NAME + " (id VARCHAR(32) primary key, data blob,path VARCHAR(255),isdel INTEGER)";
         db.execSQL(sql);
     }
 

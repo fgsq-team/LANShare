@@ -122,14 +122,19 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     public void showExitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this).setIcon(R.mipmap.ic_launcher).setCancelable(false).setTitle("端口修改提示").setMessage("端口修改需要重启软件后才能生效，是否退出软件？").setPositiveButton("退出", (dialogInterface, i) -> {
-            dialogInterface.dismiss();
-            stopService(new Intent(this, LANService.class));
-            finish();
-            finish();
-        }).setNegativeButton("不退出", (dialogInterface, i) -> {
-            dialogInterface.dismiss();
-        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setIcon(R.mipmap.ic_launcher)
+                .setCancelable(false)
+                .setTitle("端口修改提示")
+                .setMessage("端口修改需要重启软件后才能生效，是否退出软件？")
+                .setPositiveButton("退出", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    stopService(new Intent(this, LANService.class));
+                    finish();
+                    finish();
+                }).setNegativeButton("不退出", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                });
         builder.create().show();
     }
 
@@ -470,7 +475,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
-
         switch (menuItem.getItemId()) {
             case R.id.menu_setting:
                 Intent intent = new Intent(this, SettingActivity.class);
@@ -479,9 +483,9 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             case R.id.menu_about:
                 startActivity(new Intent(this, AboutActivity.class));
                 break;
-            case R.id.menu_http_share:
+         /*   case R.id.menu_http_share:
                 startActivity(new Intent(this, HttpShareActivity.class));
-                break;
+                break;*/
             case R.id.menu_delete_message:
                 if (fragChat != null) {
                     fragChat.messageDelete();
