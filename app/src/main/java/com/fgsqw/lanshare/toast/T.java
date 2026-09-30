@@ -1,0 +1,48 @@
+package com.fgsqw.lanshare.toast;
+
+import android.widget.Toast;
+
+import com.fgsqw.lanshare.App;
+import com.fgsqw.lanshare.utils.ThreadUtils;
+
+public class T {
+
+    public static void s(int resId) {
+        App application = App.getInstance();
+        if (application != null) {
+            String string = application.getString(resId);
+            ThreadUtils.threadUi(() -> Toast.makeText(application, string, Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    public static void s(int resId, Object ... param) {
+        App application = App.getInstance();
+        if (application != null) {
+            String string = application.getString(resId);
+            String str = String.format(string, param);
+            ThreadUtils.threadUi(() -> Toast.makeText(application, str, Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    public static void ss(int resId) {
+        App application = App.getInstance();
+        if (application != null) {
+            String string = application.getString(resId);
+            ThreadUtils.threadUi(() -> Toast.makeText(application, string, Toast.LENGTH_LONG).show());
+        }
+    }
+
+    public static void s(Object s) {
+        App application = App.getInstance();
+        if (application != null) {
+            ThreadUtils.threadUi(() -> Toast.makeText(application, s == null ? "" : s.toString(), Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    public static void ss(Object s) {
+        App application = App.getInstance();
+        if (application != null) {
+            ThreadUtils.threadUi(() -> Toast.makeText(application, s == null ? "" : s.toString(), Toast.LENGTH_LONG).show());
+        }
+    }
+}

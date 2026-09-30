@@ -1,0 +1,2 @@
+const SEND_MSSAGE = 1;
+const SYNC_DEVICE_LIST = 2;

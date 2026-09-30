@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LANShare</string>
+    <string name="default_ip">Default IP</string>
+    <string name="record">Record</string>
+    <string name="send">Send</string>
+    <string name="file">File</string>
+    <string name="files">Files</string>
+    <string name="cancel">Cancel</string>
+    <string name="name">Name</string>
+    <string name="size">Size</string>
+    <string name="not_file">No Records</string>
+    <string name="photos">Photos</string>
+    <string name="setting">Settings</string>
+    <string name="select_all">Select All</string>
+    <string name="delete">Delete</string>
+    <string name="about">About</string>
+    <string name="help">Help</string>
+    <string name="github">Github</string>
+    <string name="copyright">Copyright © fgsq</string>
+    <string name="version">V0.0.1_beta</string>
+    <string name="privacy">Privacy Statement</string>
+    <string name="join_group">Join QQ Group</string>
+    <string name="lan_not_device">No devices found in the local network</string>
+    <string name="send_message_hint">Long press to send to device clipboard</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="copy_text">Copy Text</string>
+
+    <string name="delete_message">Clear Messages</string>
+    <string name="scan">Scan and input into the message box</string>
+    <string name="add_manually">Manually scan to add device</string>
+    <string name="exit">Exit Application</string>
+    <string name="delete_all_message">Delete All Messages</string>
+    <string name="delete_all_message_text">Delete All Text Messages</string>
+    <string name="delete_all_message_file">Delete All Files</string>
+    <string name="delete_all_message_is_not_exist_file">Delete All Non-existent Files</string>
+
+
+    <string name="test_text">test text</string>
+    <string name="time_zero">00:00</string>
+    <string name="select_mode">Select Mode</string>
+    <string name="confirm">Confirm</string>
+    <string name="agree">Agree</string>
+    <string name="disagree">Disagree</string>
+    <string name="set_dev_name">Set Device Name</string>
+    <string name="recv_file_path">Path for Storing Received Files</string>
+    <string name="after_opening_not_dialog">No longer prompt when receiving files after opening</string>
+    <string name="use_self_media_player">Use built-in editor to open media</string>
+    <string name="recv_file_don_t_confirm">Receive files without confirmation</string>
+    <string name="set_recv_file_path">Set file storage path</string>
+    <string name="media_default_model_select">Media defaults to selection mode</string>
+    <string name="after_opening_chick_media_only_select">After opening, clicking on media will only select it</string>
+
+    <string name="save_message">Save Message Records</string>
+    <string name="save_message_detail">Enable to save all message content</string>
+    <string name="save_to_gallery">Save Media to Gallery</string>
+    <string name="save_to_gallery_detail">Enable to directly add received media files to the gallery</string>
+    <string name="device_qr_code_info">Long press to copy address, devices need to scan the QR code in the same LAN to
+        take effect
+    </string>
+    <string name="search">Search</string>
+    <string name="enter_search_content">Please enter search content</string>
+    <string name="show_hidden_files">Show Hidden Files</string>
+    <string name="show_hidden_files_detail">Whether to display hidden files in file management</string>
+    <string name="tcp_port">File Receive / Web Service Port</string>
+    <string name="tcp_port_detail">Port for receiving files and web services</string>
+    <string name="udp_port">UDP Port (Not recommended to change)</string>
+    <string name="udp_port_detail">Changing this port requires ensuring that the UDP ports of each device are
+        consistent, otherwise devices cannot be discovered
+    </string>
+    <string name="itme_app_name">App Name</string>
+    <string name="item_app_size">App Size</string>
+    <string name="display_system_app">System Apps</string>
+    <string name="ipv6_connection">IPv6 Connection</string>
+    <string name="select_storage_space">Internal Shared Storage</string>
+    <string name="auto_start">Auto Start on Boot</string>
+    <string name="auto_start_detail">
+        Automatically start LANShare and run in the background after system startup (For Android 10 and above, the app
+        needs "draw over other apps" and "display pop-up windows" permissions to auto-start on boot)
+    </string>
+    <string name="receive_broadcast_messages">Receive System Broadcast Messages and Send</string>
+    <string name="receive_broadcast_messages_detail">Receive system broadcast messages and send them to specified
+        devices
+    </string>
+    <string name="broadcast_message">Send Messages via System Broadcast</string>
+    <string name="broadcast_message_detail">Permission to resend received messages via system broadcast</string>
+    <string name="tisp">Tip</string>
+    <string name="message_key">Message Encryption Key</string>
+    <string name="message_key_detail">This key is used for encrypting messages during transmission. The key must be
+        consistent on each device, or messages cannot be received
+    </string>
+    <string name="web_service">Enable Web File Access</string>
+    <string name="web_service_detail">Enable to use the web interface for uploading, downloading files, or sending
+        messages
+    </string>
+    <string name="sync_notification">Sync Device Notifications (Experimental)</string>
+    <string name="sync_notification_detail">Enable to send notifications to LAN devices when the system has a
+        notification
+    </string>
+    <string name="web_client_management">Web Client Management</string>
+    <string name="message_notification">New Message Notification</string>
+    <string name="message_notification_detail">
+        Send a notification when a message is received. For global notifications, go to the app\'s notification settings
+        and enable banner/floating notifications for this to take effect.
+    </string>
+
+    <string name="encrypted_file_transfer">Encrypted File Transfer</string>
+    <string name="encrypted_file_transfer_detail">Encrypts data packets during file transfer, but may significantly
+        reduce transfer speed.
+    </string>
+    <string name="web_open_access">Web Open LAN Access (Unsafe)</string>
+    <string name="web_open_access_detail">
+        Allows direct access to LANShare web services within the local network without requiring approval on the mobile
+        device. Enabling this option may pose a risk of data leakage, so please use with caution.
+    </string>
+    <string name="send_mute_broadcast_when_dialing_phone">Send Mute Broadcast When Dialing Phone</string>
+    <string name="send_mute_broadcast_when_dialing_phone_detail">Sends a mute broadcast to devices within the local
+        network when making a phone call.
+    </string>
+    <string name="receive_mute_broadcast">Receive Mute Broadcast</string>
+    <string name="receive_mute_broadcast_detail">Allows other devices to control the device\'s volume status through
+        mute broadcasts when enabled.
+    </string>
+    <string name="file_expired">Download failed, file has expired!</string>
+    <string name="web_access_denied">Access permission has expired. Please refresh the homepage to authorize again.
+    </string>
+    <string name="save_files_path">Save File Browsing Path</string>
+    <string name="save_files_path_detail">Saves the last browsing position on the file browsing interface.</string>
+    <string name="save_files_by_category">Do Not Classify Save Files When Received</string>
+    <string name="save_files_by_category_detal">When enabled, received files will not be stored in categorized
+        folders.
+    </string>
+    <string name="path_not_found">Path not found</string>
+    <string name="file_scan_complete">File scan complete</string>
+    <string name="scanning_files">Scanning files</string>
+    <string name="number_between_1000_and_65535">Please enter a number between 1000 and 65535</string>
+    <string name="no_available_ipv4_address_found">Generation failed, no available IPv4 address found</string>
+    <string name="no_available_ipv6_address_found">Generation failed, no available IPv6 address found</string>
+    <string name="link_has_been_copied_to_clipboard">Link has been copied to clipboard</string>
+    <string name="web_service_has_been_enabled">Web service has been enabled</string>
+    <string name="web_service_has_been_disabled">Web service has been disabled</string>
+    <string name="please_enter_the_correct_ip_address">Please enter the correct IP address</string>
+    <string name="please_enter_an_ip_address">Please enter an IP address</string>
+    <string name="unresolvable_notification">Unresolvable notification</string>
+    <string name="no_corresponding_program_found">No corresponding program found</string>
+    <string name="ip_is_not_in_local_network">IP is not in the same local network, addition failed</string>
+    <string name="file_deletion_successful">File deletion successful</string>
+    <string name="file_deletion_failed">File deletion failed</string>
+    <string name="file_deletion_failed_operation_terminated">File deletion failed, operation terminated. File path:
+    </string>
+    <string name="warning">Warning</string>
+    <string name="file_deletion_is_irreversible">File deletion is irreversible. Do you want to continue with the
+        selected files?
+    </string>
+    <string name="Input_cannot_be_empty">Input cannot be empty</string>
+    <string name="all_devices">All devices</string>
+    <string name="text_length_max_700">Clipboard character length cannot exceed 700</string>
+    <string name="file_transfer_unfinished">File transfer unfinished</string>
+    <string name="file_sharing_view_not_supported">File sharing view not supported</string>
+    <string name="folder_opening_not_supported">Folder opening not supported. Please check in the file manager.</string>
+    <string name="web_page_file_sharing_view_not_supported">Web page file sharing view not supported</string>
+    <string name="system_information_displayed">System information displayed</string>
+    <string name="click_twice_to_display_system_information">Click twice again to display system information</string>
+    <string name="privacy_statement">Privacy Statement</string>
+    <string name="privacy_statement_detail">
+        This application does not collect any user information. When the software requires and requests permissions, you
+        have the right to refuse to grant those permissions.
+    </string>
+
+    <string name="receive_file">Receive File</string>
+    <string name="copied_to_clipboard">Copied to Clipboard</string>
+    <string name="please_select_file">Please Select a File</string>
+    <string name="backup_successful">Backup Successful</string>
+    <string name="backup_failed">Backup Failed</string>
+    <string name="cannot_open_file_format">Cannot Open File with This Format</string>
+    <string name="file_size_is_zero">File Size is 0</string>
+    <string name="please_select_operation">Please Select an Operation</string>
+    <string name="generate_ipv6_sharing_link">Generate IPv6 Sharing Link</string>
+    <string name="generate_ipv4_sharing_link">Generate IPv4 Sharing Link</string>
+    <string name="open">Open</string>
+    <string name="file_cannot_be_read">File Cannot Be Read</string>
+    <string name="ipv6_address_not_found">IPv6 Address Not Found</string>
+    <string name="failed_to_get_device_ipv6">Failed to Get Device IPv6</string>
+    <string name="failed_to_get_ip">Failed to Get IP, please connect to the local network and try again</string>
+    <string name="authorize_file_access_permission">Please authorize file access permission; otherwise, the software
+        will not function properly
+    </string>
+    <string name="you_need_to_agree_to_storage_permissions">
+        You need to agree to storage permissions to use this software properly. The software will not upload any data.
+    </string>
+    <string name="you_must_authorize_permissions">You must authorize permissions to use the software properly</string>
+    <string name="need_overlay_permission">Android 10 and above require overlay permission for auto-startup</string>
+    <string name="need_do_not_disturb_permission">Control mute operations require Do Not Disturb permission; please
+        manually authorize this permission
+    </string>
+    <string name="need_notification_permission">Synchronized notifications require notification permission; please
+        manually authorize this permission
+    </string>
+    <string name="storage_permission_request_successful">Storage permission request successful</string>
+    <string name="storage_permission_request_failed">Storage permission request failed</string>
+    <string name="broadcast_service_reception_exception">Broadcast service reception exception; please check if the
+        parameters are correct
+    </string>
+    <string name="add_device_failed_devices_not_on_same_local_network">Add device failed, devices are not on the same
+        local network
+    </string>
+    <string name="add_device_successful">Add device %s successful</string>
+    <string name="message_decryption_failed">Message decryption failed</string>
+    <string name="connection_to_device_failed">Connection to %s failed; please check if the device is online</string>
+    <string name="cancel_file_reception">Cancel File Reception</string>
+    <string name="copy_text_to_clipboard_successful">Copy text to clipboard successful</string>
+    <string name="message_encryption_failed">Message encryption failed</string>
+    <string name="text_length_exceeds_limit">Text length exceeds the limit; text will be transmitted using the file
+        channel
+    </string>
+    <string name="please_authorize_file_access_permission_or_else_software">Please authorize file access permission;
+        otherwise, the software will not function properly
+    </string>
+    <string name="please_manually_authorize_this_folder_in_the_software">Please manually authorize this folder in the
+        software
+    </string>
+    <string name="this_folder_cannot_be_read">This folder cannot be read</string>
+    <string name="input_content_cannot_be_empty">Input content cannot be empty</string>
+    <string name="start_tcp_service_failed">Start TCP service failed; please check if the port is in use</string>
+    <string name="start_udp_service_failed">Start UDP service failed; please check if the port is in use</string>
+    <string name="use_help">User Guide</string>
+    <string name="smartphone_manufacturer">Smartphone Manufacturer</string>
+    <string name="phone_model">Phone Model</string>
+    <string name="android_version">Android Version</string>
+    <string name="kernel_version">Kernel Version</string>
+    <string name="operating_system_version">Operating System Version</string>
+    <string name="api_level">API Level</string>
+    <string name="send_message_to">Send message to %s</string>
+    <string name="port_changes_notice">Port Changes Notice</string>
+    <string name="port_changes_require_a_software_restart">Port changes require a software restart to take effect. Do
+        you want to exit the software?
+    </string>
+    <string name="not_exit">Do Not Exit</string>
+    <string name="application">App</string>
+    <string name="media">Media</string>
+    <string name="general_settings">General Settings</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="media_settings">Media Settings</string>
+    <string name="extension_settings">Extension Settings</string>
+    <string name="applications">Apps</string>
+    <string name="selected_x_file">Selected %d Files</string>
+    <string name="all_images">All Images</string>
+    <string name="all_videos">All Videos</string>
+
+    <string name="clear_all_messages">Clear All Messages</string>
+    <string name="clear_all_text_messages">Clear All Text Messages</string>
+    <string name="clear_all_file_messages">Clear All File Messages</string>
+    <string name="clear_all_deleted_file_messages">Clear All Deleted File Messages</string>
+
+    <string name="web_authorization_list">Web Authorization List</string>
+    <string name="add_new">Add New</string>
+    <string name="file_management_settings">File Management Settings</string>
+    <string name="info">Info</string>
+    <string name="loading">Loading</string>
+    <string name="accept_file_from_x">Accept %2$d files from %1$s</string>
+
+    <string name="accept_files">Accept Files?</string>
+    <string name="use_help_detail">
+        Two mobile phones only need to be on the same local network and have the software open to transfer files between
+        each other. \n\n1.Select the file. \n2.Choose the device. \n3.On the receiving end, select to receive the
+        file. \n\nWeb file transfer:\n Enter the software\'s main interface top-left corner address into the browser,
+        then
+        agree to access permissions in the software to access.
+    </string>
+
+    <string name="user_greement">Hi, dear user, nice to meet you! For the security of your privacy data, please
+        carefully read the \'User Agreement\' and \'Privacy Policy\' before using the app. Clicking the \'Agree\' button
+        signifies your acceptance of these policies and agreements. 《UserAgreement》 and 《PrivacyPolicy》
+    </string>
+    <string name="user_greement_hint">#《UserAgreement》# and #《PrivacyPolicy》#</string>
+
+    <string name="this_month">This Month</string>
+    <string name="this_week">This Week</string>
+    <string name="day_before_yesterday">Day Before Yesterday</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="today">Today</string>
+    <string name="file_not_found">File not found</string>
+
+    <string name="canceled">Cancelled</string>
+    <string name="hint">Hint</string>
+    <string name="file_selection">File Selection</string>
+    <string name="to_be_added">To Be Added</string>
+    <string name="selected">Selected</string>
+    <string name="selected_data_has_been_cleared">Selected data has been cleared</string>
+    <string name="service_is_running">Service is running...</string>
+
+    <string name="sure_one_time_download">One-time Download Only</string>
+    <string name="one_day">One Day</string>
+    <string name="three_days">Three Days</string>
+    <string name="select_valid_days">Please select valid days</string>
+    <string name="acquire_advanced_version">Acquire Advanced Version</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="backup">Backup</string>
+    <string name="unique_id">Unique ID</string>
+    <string name="media_sharing_amnagement">Media Sharing Management</string>
+    <string name="media_sync_task_already_exists">Sync task for this device already exists, old records will be
+        overwritten
+    </string>
+    <string name="select_device_to_receive">Please select the device to receive</string>
+    <string name="sync_function_set_up_successfully">Setup successful, syncing data...</string>
+    <string name="media_sync_switch">Media Sync Switch</string>
+    <string name="media_sync_switch_detail">Media sync master switch, only when turned on can media be automatically
+        synchronized
+    </string>
+    <string name="media_sync">Media Sync</string>
+    <string name="check_update">Check Version Update</string>
+    <string name="update_version">Update Version</string>
+    <string name="hide">Hide</string>
+    <string name="downloading">Downloading...</string>
+    <string name="already_up_to_date">Already up to date</string>
+    <string name="update">Update</string>
+    <string name="official_website">Official Website</string>
+    <string name="new_web_client">New web client request</string>
+    <string name="new_web_client_detail">Do you agree to allow this client to access files on your phone?</string>
+    <string name="play">play</string>
+    <string name="audio">Audio</string>
+    <string name="close">Close</string>
+    <string name="upload_logs">Upload logs</string>
+    <string name="select_need_update_apps">Select apps that need to be updated</string>
+
+    <string name="theme_setting">Theme Setting</string>
+    <string name="theme_setting_detail">Theme Setting Details</string>
+    <string name="light_theme">Light Theme</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="follow_system">Follow System</string>
+    <string name="is_backing_up">Backing Up</string>
+    <string name="set_global_top_margin">Set Global Top Margin</string>
+    <string name="default_select_device_when_sending_files">Default select this device when sending files to single device</string>
+    <string name="default_select_device_when_single_device">Default select this device for file sending when only one device in device list</string>
+    <string name="no_music_selected">No music selected</string>
+    <string name="no_new_media_to_sync">No new media to sync</string>
+    <string name="cancel_file_transfer_success">Cancel file transfer success</string>
+    <string name="file_send_failed">File send failed</string>
+
+</resources>

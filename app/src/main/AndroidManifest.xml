@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.fgsqw.lanshare">
+
+    <uses-feature
+            android:name="android.hardware.camera"
+            android:required="false"/>
+
+    <!-- 通知权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- app列表获取权限 -->
+    <uses-permission android:name="android.permission.GET_INSTALLED_APPS"/>
+    <uses-permission
+            android:name="android.permission.QUERY_ALL_PACKAGES"
+            tools:ignore="QueryAllPackagesPermission"/>
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <!-- 安卓11权限 -->
+    <uses-permission
+            android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+            tools:ignore="ScopedStorage"/>
+    <!-- 在SDCard中创建与删除文件权限 -->
+    <uses-permission
+            android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+            tools:ignore="ProtectedPermissions"/>
+    <!-- 往SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+                     tools:ignore="CoarseFineLocation"/>
+    <uses-permission
+            android:name="android.permission.OVERRIDE_WIFI_CONFIG"
+            tools:ignore="ProtectedPermissions"/>
+
+    <uses-permission
+            android:name="android.permission.WRITE_SETTINGS"
+            tools:ignore="ProtectedPermissions"/>
+
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!--保证息屏service不被杀死-->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT"/>
+    <!--卸载程序权限-->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!--usb相关权限-->
+    <uses-permission
+            android:name="android.hardware.usb.host"
+            android:required="false"/>
+
+    <!--开机启动权限-->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <!--电话接听状态监听-->
+<!--    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>-->
+<!--    <uses-permission android:name="android.permission.CALL_PHONE"/>-->
+<!--    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>-->
+<!--    <uses-permission android:name="android.permission.READ_CALL_LOG"/>-->
+
+    <!--悬浮窗、后台显示权限-->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
+
+
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+
+
+    <!--    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>-->
+    <!--    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>-->
+    <!--    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"-->
+    <!--                     tools:ignore="MockLocation,ProtectedPermissions"/>-->
+
+
+    <application
+            android:name="com.fgsqw.lanshare.App"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:preserveLegacyExternalStorage="true"
+            android:requestLegacyExternalStorage="true"
+            android:roundIcon="@mipmap/ic_launcher_round_1"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme"
+            android:usesCleartextTraffic="true"
+            tools:targetApi="m">
+        <activity
+                android:name="com.fgsqw.lanshare.activity.HelloActivity"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+<!--        <activity android:name="com.fgsqw.lanshare.activity.MainActivity"/>-->
+        <activity android:name="com.fgsqw.lanshare.activity.DeviceQrCodeActivity"/>
+<!--        <activity android:name="com.fgsqw.lanshare.activity.TestActivity"/>-->
+<!--        <activity android:name="com.fgsqw.lanshare.activity.RemoteControlActivity"/>-->
+        <activity
+                android:name="com.fgsqw.lanshare.activity.DataCenterActivity"
+                android:configChanges="orientation|screenSize"
+                android:exported="true"
+                android:launchMode="singleTask">
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:mimeType="*/*"/>
+
+            </intent-filter>
+
+
+        </activity>
+
+        <activity android:name="com.fgsqw.lanshare.activity.preview.ReviewImages"/>
+        <activity android:name="com.fgsqw.lanshare.activity.SettingActivity"/>
+        <activity android:name="com.fgsqw.lanshare.activity.ZxingActivity"/>
+        <activity android:name="com.fgsqw.lanshare.activity.AboutActivity"/>
+        <activity android:name="com.fgsqw.lanshare.activity.web.PrivacyWebActivity"/>
+        <activity android:name="com.fgsqw.lanshare.activity.WebClientManagerActivity"/>
+        <activity android:name="com.fgsqw.lanshare.activity.FileSyncManagerActivity"/>
+        <activity
+                android:name="com.fgsqw.lanshare.activity.video.VideoPlayer"
+                android:configChanges="keyboardHidden|orientation|screenSize"
+                android:launchMode="singleTask"
+                android:windowSoftInputMode="adjustPan|stateAlwaysVisible"/>
+
+        <service android:name="com.fgsqw.lanshare.service.LANService"/>
+        <service android:name="com.fgsqw.lanshare.service.MusicService"/>
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="com.fgsqw.lanshare.provider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/filepaths"/>
+        </provider>
+
+        <!--开机自启动监听-->
+        <receiver
+                android:name=".receiver.AutoStartReceiver"
+                android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+                android:name=".receiver.LANShareReceiver"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="com.fgsqw.lanshare.LANSHARE_EXPORT_INERFACE"/>
+            </intent-filter>
+        </receiver>
+
+      <!--  <service
+                android:name="com.fgsqw.lanshare.service.LNotifiService"
+                android:priority="1000"
+                android:label="LANShare通知同步服务"
+                android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+        </service>-->
+
+
+    </application>
+
+</manifest>

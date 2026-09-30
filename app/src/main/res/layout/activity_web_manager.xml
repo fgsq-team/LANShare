@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:fitsSystemWindows="true"
+
+              android:orientation="vertical">
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/toolbarBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp">
+
+            <ImageView
+                    android:id="@+id/web_manager_exit_img"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:src="@drawable/ic_exit"/>
+            <TextView
+                    android:id="@+id/web_manager_title"
+                    android:layout_marginLeft="20px"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/textColor"
+                    android:textSize="20sp"
+                    android:text="@string/web_authorization_list">
+            </TextView>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!--  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+              android:id="@+id/web_manager_swipe"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">-->
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="20dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:layout_above="@+id/web_manager_add_layout"
+                android:id="@+id/web_manager_recy"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        <!--    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
+        <LinearLayout
+                android:id="@+id/web_manager_add_layout"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+            <Button
+                    android:id="@+id/web_manager_add_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_new"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

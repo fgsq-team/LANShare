@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>LANShare</title>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <meta name="keywords" content="LANShare">
+    <meta name="description" content="LANShare">
+    <meta name="author" content="fgsq">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.min.css" rel="stylesheet">
+    <link href="css/lanshare.min.css" rel="stylesheet">
+    <link rel="preload" href="/images/no_network.png" as="image">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes"/>
+</head>
+
+<body>
+<div class="lyear-layout-web" style="display: none;">
+    <div class="lyear-layout-container">
+        <!--左侧导航-->
+        <aside class="lyear-layout-sidebar">
+            <!-- logo -->
+            <div id="logo" class="sidebar-header">
+                <a href="/"><img src="images/lanshare.png" title="LANShare" alt="LANShare"/></a>
+            </div>
+            <div class="lyear-layout-sidebar-scroll">
+                <nav class="sidebar-main">
+                    <ul class="nav nav-drawer">
+                        <!--                        <li class="nav-item active nav-item-serach"><a><i style=""></i>搜索</a></li>-->
+                        <li class="nav-item active nav-item-apps"><a><i class="nav-item-media-apps"></i>软件</a></li>
+                        <li class="nav-item active nav-item-media"><a><i class="nav-item-media-img"></i>图片</a></li>
+                        <li class="nav-item active nav-item-files"><a><i class="nav-item-media-folder"></i>文件列表</a>
+                        <li class="nav-item active nav-item-chat"><a><i class="nav-item-media-record"></i>消息记录</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!--左侧导航end-->
+
+        <!--头部信息-->
+        <header class="lyear-layout-header">
+            <nav class="navbar navbar-default">
+                <div class="topbar">
+                    <div class="topbar-left">
+                        <div class="lyear-aside-toggler">
+                            <span class="lyear-toggler-bar"></span>
+                            <span class="lyear-toggler-bar"></span>
+                            <span class="lyear-toggler-bar"></span>
+                        </div>
+                    </div>
+                    <li class="dropdown dropdown-skin">
+                        <input type="text" class="web-name">
+                    </li>
+                    <ul class="topbar-right">
+                        <li class="dropdown dropdown-skin">
+                            <button class="btn btn-success btn-w-md download-files"
+                                    style="display: none; margin-left: 10px"
+                                    onclick="downloadFiles()" type="button">下载文件(0)
+                            </button>
+                        </li>
+                        <li class="dropdown dropdown-skin">
+                            <button class="btn btn-success btn-w-md "
+                                    onclick="showUploadDialog()" type="button">上传文件
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <!--头部信息end-->
+
+        <!--主要视图-->
+        <main class="lyear-layout-content">
+            <div class="container-fluid">
+                <!--文件列表-->
+                <div class="row file-content" style="display: none">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="icard-header">
+                                <h4>文件列表</h4>
+                            </div>
+                            <div class="path-text">
+                                /
+                            </div>
+                            <div class="icard-body">
+                                <div class="filelist">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--文件列表end-->
+
+                <!--媒体列表-->
+                <div class="row media-content">
+
+                </div>
+                <!--媒体列表end-->
+
+                <!--软件列表-->
+                <div class="row app-content">
+
+                </div>
+
+                <div class="row">
+                    <div class="chat-content">
+                        <div class="chat_main">
+                            <div class="line"></div>
+                            <div class="chat_content" id="chat_content">
+
+                            </div>
+                            <div class="line"></div>
+                            <div class="chat_foot">
+                                <label>
+                                    <select class="device_selector">
+                                        <option value="0">所有设备</option>
+                                    </select>
+                                </label>
+                                <textarea class="chat_context_edit" id="chat_context_edit"
+                                          oninput=" this.style.height = '40px';
+        this.style.height = this.scrollHeight + 'px';"></textarea>
+                                <div class="send_massage" id="send_massage">发送</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--软件列表end-->
+            </div>
+
+        </main>
+        <!--主要视图end-->
+    </div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">提示</h4>
+            </div>
+            <div class="modal-body">
+                没有访问权限，请在手机上同意之后刷新页面
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="uploadFileDialog" tabindex="-1" role="dialog" aria-labelledby="uploadFileDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myUploadFileDialogLabel">提示</h4>
+            </div>
+            <div class="modal-body">
+                <!--单文件上传-->
+                <form id="uploadFileForm" action="/uploadFile" method="post" enctype="multipart/form-data"
+                      target="frameName">
+                    <input id='select-file' class="form-control" onclick="$('#displayFile').click();"
+                           placeholder="点击选择文件或者拖拽文件到此处"/>
+                    <input type="file" name="file" id='displayFile' accept="*" style="display: none">
+                </form>
+                <iframe name="frameName" id="frameName" style="display: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--文件上传完成弹窗-->
+<div class="modal fade" id="uploadSuccessDialog" tabindex="-1" role="dialog" aria-labelledby="uploadSuccessDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="uploadSuccessLabel">标题</h4>
+            </div>
+            <div class="modal-body">
+                文件上传成功!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="chatUploadModal" style="display:none;">
+    <div class="upload_tips">松手上传文件</div>
+</div>
+
+<div class="modal" id="notConnectedModal" style="display:none;">
+    <div class="not_connected">连接断开，请启动LANShare后刷新页面</div>
+    <div class="not_connected_img"></div>
+</div>
+
+<div class="modal fade" id="devSelectDialog" tabindex="-1" role="dialog" aria-labelledby="uploadFileDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="">请选择一个设备</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>设备名</th>
+                        <th>IP</th>
+                    </tr>
+                    </thead>
+                    <tbody class="select_send_device">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 右键菜单 -->
+<div class="context-menu">
+</div>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="js/main.min.js"></script>
+<script type="text/javascript" src="js/request.min.js"></script>
+<script type="text/javascript" src="js/bootstrap-notify.min.js"></script>
+<script type="text/javascript" src="js/lightyear.min.js"></script>
+<script type="text/javascript" src="js/WSCmd.js"></script>
+<script type="text/javascript" src="js/lanshareChat.min.js"></script>
+<script type="text/javascript" src="js/lanshare.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MNVideoPlayerLibrary</string>
+    <string name="mnPlayerNoNetHint">The current network is not available, please check your network settings</string>
+    <string name="mnPlayerUrlEmptyHint">The playback URL is empty</string>
+    <string name="mnPlayerPlayFailHint">Video playback failed</string>
+    <string name="mnPlayerMobileNetHint">Please note that the current network status has switched to 3G/4G</string>
+    <string name="permission_acquisition_failed">Permission acquisition failed</string>
+    <string name="loading_error">Loading error\nClick to reload</string>
+    <string name="network_disconnected">Network disconnected\nClick to reload</string>
+    <string name="no_storage_permission">No storage permission\nClick to reload</string>
+    <string name="loading_exception">Loading exception\nClick to reload</string>
+
+</resources>

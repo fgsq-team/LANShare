@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 深色蓝紫色调方案 (柔和版) -->
+    <color name="text_select">#90CAF9</color>        <!-- 选中文本颜色 -->
+    <color name="textNotSelectColor">#BDBDBD</color>    <!-- 未选中文本颜色 -->
+
+    <color name="itemTextColor">#9E9E9E</color>          <!-- 项目文本颜色 -->
+
+    <color name="backgroundColor">#282828</color>    <!-- 背景色 -->
+    <color name="textColorPrimary">#E0E0E0</color>   <!-- 主要文字颜色 -->
+    <color name="textColorSecondary">#BDBDBD</color> <!-- 次要文字颜色 -->
+    <color name="dividerColor">#424242</color>       <!-- 分割线颜色 -->
+
+    <color name="cardBackgroundColor">#2E2E2E</color>     <!-- 卡片背景色 -->
+    <color name="buttonBackgroundColor">#90CAF9</color>   <!-- 按钮背景色 -->
+    <color name="buttonTextColor">#121212</color>         <!-- 按钮文字颜色 -->
+    <color name="chatRightBackgroundColor">#4A4A4A</color>    <!-- 聊天气泡右边 -->
+    <color name="chatLeftBackgroundColor">#4A4A4A</color>    <!-- 聊天气泡左边 -->
+    <color name="textColor">#212121</color>              <!-- 白色 (在夜间模式下为深灰) -->
+    <color name="bottomTextColor">#515151</color>              <!--  底部导航文本颜色-->
+    <color name="bottomBackgroundColor">#202020</color>              <!--  底部导航背景颜色-->
+    <color name="chatBackgroundColor">#282828</color>              <!--  聊天背景-->
+    <color name="iconColor">#444444</color>              <!--  iconColor-->
+    <color name="mediaTextColor">#757575</color>              <!--  iconColor-->
+
+    <color name="colorPrimary">#90CAF9</color>       <!-- 首要颜色 -->
+    <color name="colorPrimaryDark">#202020</color>   <!-- 首要颜色暗色 -->
+    <color name="colorAccent">#FFAB91</color>        <!-- 色彩强调 -->
+
+    <color name="toolbarBackground">#202020</color>  <!-- Toolbar背景色 (柔和深蓝) -->
+
+    <color name="gainsboro">#DCDCDC</color>          <!-- 淡灰色 -->
+    <color name="green">#81C784</color>              <!-- 绿色 -->
+    <color name="limegreen">#AED581</color>          <!-- 橙绿色 -->
+    <color name="bottom_item">#00000000</color>      <!-- 底部项目 -->
+    <color name="rippleColor">#BDBDBD</color>          <!-- 灰色文本 -->
+    <color name="videoTimeTextColor">#FFFFFF</color>              <!-- 视频时间颜色 -->
+
+    <color name="battery0">#EF5350</color>           <!-- 电池0%颜色 -->
+    <color name="battery1">#FFA726</color>           <!-- 电池25%颜色 -->
+    <color name="battery2">#FFEE58</color>           <!-- 电池50%颜色 -->
+    <color name="battery3">#9CCC65</color>           <!-- 电池75%颜色 -->
+    <color name="battery4">#66BB6A</color>           <!-- 电池100%颜色 -->
+    <color name="color_null">#00000000</color>       <!-- 透明色 -->
+
+</resources>

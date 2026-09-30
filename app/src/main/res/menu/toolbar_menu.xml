@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item
+        android:id="@+id/menu_setting"
+        android:orderInCategory="100"
+        android:title="@string/setting"
+
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_about"
+        android:orderInCategory="100"
+        android:title="@string/about"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/menu_delete_message"
+        android:orderInCategory="100"
+        android:title="@string/delete_message"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/menu_web_manager"
+        android:orderInCategory="100"
+        android:title="@string/web_client_management"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_file_sync"
+        android:orderInCategory="100"
+        android:title="@string/media_sharing_amnagement"
+        app:showAsAction="never" />
+<!--
+    <item
+        android:id="@+id/menu_acquire_advanced_version"
+        android:orderInCategory="100"
+        android:title="@string/acquire_advanced_version"
+        app:showAsAction="never" />-->
+
+    <item
+        android:id="@+id/menu_exit"
+        android:orderInCategory="100"
+        android:title="@string/exit"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/menu_sort_file_type"
+        android:orderInCategory="100"
+        android:title="文件排序方式"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_search_file_types"
+        android:orderInCategory="100"
+        android:title="搜索文件分类"
+        android:visible="true"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_update_apps"
+        android:orderInCategory="100"
+        android:title="从其他设备获取软件更新"
+        android:visible="true"
+        app:showAsAction="never" />
+
+    <!-- <item
+         android:id="@+id/menu_camera_send"
+         android:orderInCategory="100"
+         android:title="相机发送"
+         app:showAsAction="never" />
+     <item
+         android:id="@+id/menu_camera_recv"
+         android:orderInCategory="100"
+         android:title="相机接收"
+         app:showAsAction="never" />-->
+
+</menu>
