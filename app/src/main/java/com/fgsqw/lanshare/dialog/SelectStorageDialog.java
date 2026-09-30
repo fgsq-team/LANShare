@@ -30,7 +30,7 @@ public class SelectStorageDialog extends BaseDialog implements SelectStorageDial
     private Context context;
 
     public SelectStorageDialog(@NonNull Context context) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
         this.context = context;
     }
 

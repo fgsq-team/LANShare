@@ -1,13 +1,11 @@
 package com.fgsqw.lanshare.pojo.message;
 
-import androidx.annotation.NonNull;
-
-import com.fgsqw.lanshare.fragment.adapter.ChatAdapter;
+import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 
 /**
  * @Author: xpw
  */
-public class MessageTimeContent extends MessageContent implements Cloneable {
+public class MessageTimeContent extends MessageContent {
     private String bindId;
 
     public MessageTimeContent() {
@@ -16,7 +14,7 @@ public class MessageTimeContent extends MessageContent implements Cloneable {
 
     @Override
     public int getViewType() {
-        return ChatAdapter.TYPE_TIME_MSG;
+        return ChatAdabper.TYPE_TIME_MSG;
     }
 
     public String getBindId() {
@@ -25,11 +23,5 @@ public class MessageTimeContent extends MessageContent implements Cloneable {
 
     public void setBindId(String bindId) {
         this.bindId = bindId;
-    }
-
-    @NonNull
-    @Override
-    public MessageTimeContent clone() {
-        return (MessageTimeContent) super.clone();
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:fitsSystemWindows="true"
@@ -12,7 +13,7 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/toolbarBackground"
+                android:background="@color/colorPrimary"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingLeft="10dp">
@@ -24,13 +25,14 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?android:attr/selectableItemBackground"
+                    app:tint="@color/cool_dark"
                     android:src="@drawable/ic_exit"/>
             <TextView
                     android:id="@+id/web_manager_title"
                     android:layout_marginLeft="20px"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/textColor"
+                    android:textColor="@color/cool_dark"
                     android:textSize="20sp"
                     android:text="@string/web_authorization_list">
             </TextView>

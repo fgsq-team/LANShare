@@ -1,8 +1,6 @@
 package com.fgsqw.lanshare.utils;
 
 
-import com.fgsqw.utils.ByteUtil;
-
 import java.nio.charset.Charset;
 
 //数据解析类

@@ -15,8 +15,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.fragment.child.FragmentMusic;
-import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
+import com.fgsqw.lanshare.pojo.file.MusicInfo;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
@@ -49,7 +49,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final MusicAdapter.ViewHolder holder, int position) {
-        final MessageAudioContent fileSource = fragmentFileList.getMusicList().get(position);
+        final MusicInfo fileSource = fragmentFileList.getMusicList().get(position);
         holder.mName.setText(mUtil.stringSize(fileSource.getName(), 30));
         holder.mInfo.setText(format.format(fileSource.getTime()) + " "
                 + FileUtil.computeSize(fileSource.getLength()));
@@ -101,7 +101,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
     }
 
     /*选中图片效果*/
-    private void checkedImage(MusicAdapter.ViewHolder holder, MessageAudioContent fileSource, int position) {
+    private void checkedImage(MusicAdapter.ViewHolder holder, MusicInfo fileSource, int position) {
 
         if (isSelect(fileSource)) {//如果图片已经选中，就取消选中
             fragmentFileList.dataCenterActivity.removeSendFile(fileSource);
@@ -121,7 +121,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
      *
      * @param fileSource
      */
-    private void selectImage(MessageAudioContent fileSource, int position) {
+    private void selectImage(MusicInfo fileSource, int position) {
         fragmentFileList.getSelectMusicList().add(fileSource);
         if (mSelectListener != null) {
             mSelectListener.OnImageSelect(fileSource, true, position);
@@ -133,8 +133,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
      *
      * @param fileSource
      */
-    private void unSelectImage(MessageAudioContent fileSource, int position) {
-        List<MessageAudioContent> selectList = fragmentFileList.getSelectMusicList();
+    private void unSelectImage(MusicInfo fileSource, int position) {
+        List<MusicInfo> selectList = fragmentFileList.getSelectMusicList();
         if (!selectList.isEmpty()) {
             for (int i = 0; i < selectList.size(); i++) {
                 if (fileSource.getPath().equals(selectList.get(i).getPath())) {
@@ -148,8 +148,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
         }
     }
 
-    private boolean isSelect(MessageAudioContent fileSource) {
-        List<MessageAudioContent> selectlist = fragmentFileList.getSelectMusicList();
+    private boolean isSelect(MusicInfo fileSource) {
+        List<MusicInfo> selectlist = fragmentFileList.getSelectMusicList();
         if (selectlist != null && !selectlist.isEmpty()) {
             for (int i = 0; i < selectlist.size(); i++) {
                 if (fileSource.equals(selectlist.get(i))) {
@@ -162,7 +162,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        List<MessageAudioContent> pathlist = fragmentFileList.getMusicList();
+        List<MusicInfo> pathlist = fragmentFileList.getMusicList();
         return pathlist == null ? 0 : pathlist.size();
     }
 
@@ -202,7 +202,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
 
 
     public interface OnImageSelectListener {
-        void OnImageSelect(MessageFileContent fileSource, boolean isSelect, int position);
+        void OnImageSelect(FileInfo fileSource, boolean isSelect, int position);
     }
 
     public interface OnClickListener {

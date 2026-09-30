@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
@@ -26,13 +26,13 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
     private final LayoutInflater mInflater;
-    private List<MessageApkContent> fileList;
+    private List<ApkInfo> fileList;
     private OnClickListener mListener;
     private final Context context;
     private OnImageSelectListener mSelectListener;
-    public List<MessageApkContent> fileSelects = new LinkedList<>();
+    public List<ApkInfo> fileSelects = new LinkedList<>();
 
-    public ApkUpdateDialogAdapter(Context context, List<MessageApkContent> fileList) {
+    public ApkUpdateDialogAdapter(Context context, List<ApkInfo> fileList) {
         this.fileList = fileList;
         this.context = context;
         this.mInflater = LayoutInflater.from(context);
@@ -48,7 +48,7 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final ApkUpdateDialogAdapter.ViewHolder holder, int position) {
-        final MessageApkContent fileSource = fileList.get(position);
+        final ApkInfo fileSource = fileList.get(position);
         holder.mName.setText(mUtil.stringSize(fileSource.getName(), 30));
         holder.mInfo.setText(FileUtil.computeSize(fileSource.getLength()) + " V" + fileSource.getVersionName());
         holder.selectLayout.setVisibility(View.VISIBLE);
@@ -81,7 +81,7 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
     }
 
     /*选中图片效果*/
-    private void checkedImage(ApkUpdateDialogAdapter.ViewHolder holder, MessageApkContent fileSource, int position) {
+    private void checkedImage(ApkUpdateDialogAdapter.ViewHolder holder, ApkInfo fileSource, int position) {
         if (isSelect(fileSource)) {//如果图片已经选中，就取消选中
             fileSelects.remove(fileSource);
             unSelectImage(fileSource, position);//取消选中图片
@@ -99,7 +99,7 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
      * @comments 选中
      * @date 2024/5/21 9:59
      */
-    private void selectImage(MessageApkContent fileSource, int position) {
+    private void selectImage(ApkInfo fileSource, int position) {
         if (mSelectListener != null) {
             mSelectListener.OnImageSelect(fileSource, true, position);
         }
@@ -110,13 +110,13 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
      * @comments 取消选中
      * @date 2024/5/21 9:59
      */
-    private void unSelectImage(MessageApkContent fileSource, int position) {
+    private void unSelectImage(ApkInfo fileSource, int position) {
         if (mSelectListener != null) {
             mSelectListener.OnImageSelect(fileSource, false, position);
         }
     }
 
-    private boolean isSelect(MessageApkContent fileSource) {
+    private boolean isSelect(ApkInfo fileSource) {
         return fileSelects.contains(fileSource);
     }
 
@@ -139,12 +139,12 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
         return fileList.size();
     }
 
-    public List<MessageApkContent> getFileSelects() {
+    public List<ApkInfo> getFileSelects() {
         return fileSelects;
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void refresh(List<MessageApkContent> fileList) {      //更换列表数据
+    public void refresh(List<ApkInfo> fileList) {      //更换列表数据
         this.fileList = fileList;
         notifyDataSetChanged();
     }
@@ -177,7 +177,7 @@ public class ApkUpdateDialogAdapter extends RecyclerView.Adapter<ApkUpdateDialog
     }
 
     public interface OnImageSelectListener {
-        void OnImageSelect(MessageApkContent fileSource, boolean isSelect, int position);
+        void OnImageSelect(ApkInfo fileSource, boolean isSelect, int position);
     }
 
     public interface OnClickListener {

@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.DataCenterActivity;
@@ -39,8 +37,8 @@ import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.FileSyncData;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
 import com.fgsqw.lanshare.pojo.file.PhotoFolder;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
@@ -69,7 +67,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
     private GridLayoutManager mLayoutManager;
     public List<PhotoFolder> mFolders;
 
-    public final List<MessageMediaContent> mSelectList = new LinkedList<>();
+    public final List<MediaInfo> mSelectList = new LinkedList<>();
 
 
     private final Handler mHideHandler = new Handler();
@@ -77,7 +75,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
 
     public DataCenterActivity dataCenterActivity;
 
-    private List<MessageMediaContent> currentPhotoList;
+    private List<MediaInfo> currentPhotoList;
     private PhotoFolder currentPhotoFolder;
 
     private PrefUtil prefUtil;
@@ -207,7 +205,6 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
                     changeTime();
                 }
             }
-
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -222,7 +219,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
 
         mMediaAdapter.setOnItemClickListener(new MediaAdapter.OnItemClickListener() {
             @Override
-            public void OnItemClick(MessageMediaContent mediaInfo, int position) {
+            public void OnItemClick(MediaInfo mediaInfo, int position) {
                 if (mediaInfo.isVideo()) {
                     VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                 } else {
@@ -231,9 +228,9 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
             }
 
             @Override
-            public void OnLongItenClick(final MessageMediaContent mediaInfo, final int position) {
+            public void OnLongItenClick(final MediaInfo mediaInfo, final int position) {
                 final String path = mediaInfo.getPath();
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(getString(R.string.please_select_operation));
                 String[] items;
                 // 如果能写入(修改/删
@@ -308,7 +305,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
 
             @Override
             public boolean OnLongClickListener(PhotoFolder folder) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(getString(R.string.please_select_operation));
                 // 如果能写入(修改/删)
                 String[] items = new String[]{
@@ -341,6 +338,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
     public void mediaSync(PhotoFolder folder) {
         DeviceSelectDialog dialog = new DeviceSelectDialog(getContext());
         dialog.setTitle(getString(R.string.select_device_to_receive));
+
         dialog.setShowAllDevices(false);
         dialog.setOnDeviceSelect(device -> {
             String folderPath = folder.getFolderPath();
@@ -365,8 +363,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
             fileSyncData.setFolderPath(folderPath);
             fileSyncData.setName(folder.getName());
             fileSyncDBUtil.addFileSyncData(fileSyncData);
-            List<MessageMediaContent> media = mUtil.deepCopyList(folder.getImages());
-            LANService.getInstance().startSyncingMedias(device, media);
+            LANService.getInstance().startSyncingMedias(device, folder.getImages());
             T.s(getString(R.string.sync_function_set_up_successfully));
         });
         dialog.show();
@@ -417,7 +414,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
      */
     private void changeTime() {
         int firstVisibleItem = getFirstVisibleItem();    //获取屏幕第一个item 位置
-        MessageMediaContent mediaInfo = mMediaAdapter.getFirstVisibleImage(firstVisibleItem); //获取图片列表工具类
+        MediaInfo mediaInfo = mMediaAdapter.getFirstVisibleImage(firstVisibleItem); //获取图片列表工具类
         if (mediaInfo != null) {
             String time = DateUtils.getImageTime(mediaInfo.getTime() * 1000);
             timeTv.setText(time);
@@ -432,7 +429,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
     }
 
 
-    private void toPreviewActivity(List<MessageMediaContent> mediaInfos, int position) {
+    private void toPreviewActivity(List<MediaInfo> mediaInfos, int position) {
         if (mediaInfos != null && !mediaInfos.isEmpty()) {
             ReviewImages.openActivity(getActivity(), mediaInfos,
                     mMediaAdapter.getSelectImages(), false, 0, position);
@@ -473,11 +470,11 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
         }
     }
 
-    public List<MessageMediaContent> getSelectList() {
+    public List<MediaInfo> getSelectList() {
         return mSelectList;
     }
 
-    public List<MessageMediaContent> getcurrentPhotoList() {
+    public List<MediaInfo> getcurrentPhotoList() {
         return currentPhotoList;
     }
 

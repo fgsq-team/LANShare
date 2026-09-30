@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class FileUtil {
@@ -82,12 +83,18 @@ public class FileUtil {
     }
 
 
-    public static String classifyFile(String path, String cotegary) {
+    public static String createPath(String path, String cotegary) {
+        File dir;
         if (Config.SAVE_FILES_CATEGORY) {
-            return new File(path, cotegary).toString();
+            dir = new File(path, cotegary);
         } else {
-            return new File(path).toString();
+            dir = new File(path);
         }
+        // 目录不存在时自动创建，避免落盘时提示失败
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
+        }
+        return dir.toString();
     }
 
     public abstract static class Search {
@@ -152,9 +159,23 @@ public class FileUtil {
         return String.format("%.1f %s", size / Math.pow(1024, digitGroups), units[digitGroups]);
     }
 
+    /**
+     * 传输速度格式化（字节/秒）
+     */
+    public static String formatSpeed(long bytesPerSecond) {
+        if (bytesPerSecond <= 0) return "0 B/s";
+        if (bytesPerSecond >= 1048576) return String.format("%.1f MB/s", bytesPerSecond / 1048576.0);
+        if (bytesPerSecond >= 1024) return String.format("%.1f KB/s", bytesPerSecond / 1024.0);
+        return bytesPerSecond + " B/s";
+    }
+
 
     public static void createNullFile(String path) {
         try {
+            File parent = new File(path).getParentFile();
+            if (parent != null && !parent.isDirectory()) {
+                parent.mkdirs();
+            }
             OutputStream fileOut = new FileOutputStream(path);
             fileOut.write(0);
             fileOut.close();

@@ -112,7 +112,6 @@
                         android:layout_marginRight="5dp"
                         android:ellipsize="middle"
                         android:singleLine="true"
-                        android:textColor="@color/mediaTextColor"
                         android:text="@string/test_text"
                         android:textSize="13sp" />
 
@@ -160,7 +159,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:text="@string/time_zero"
-                    android:textColor="@color/textColor"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
 
             </RelativeLayout>

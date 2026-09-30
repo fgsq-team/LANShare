@@ -4,7 +4,8 @@ apply plugin: 'com.android.library'
 group='com.github.maning0303'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace 'com.maning.mnvideoplayerlibrary'
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion

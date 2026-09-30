@@ -1,18 +1,20 @@
 package com.fgsqw.lanshare.pojo.network;
 
 import com.fgsqw.lanshare.pojo.file.PhotoFolder;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MediaResult {
     private List<PhotoFolder> mFolders;
 
-    private List<MessageMediaContent> allMedia;
-    private Map<Integer, MessageMediaContent> allMediaMap;
+    private List<MediaInfo> allMedia;
+    private Map<Integer, MediaInfo> allMediaMap;
 
-    Map<Long, MessageMediaContent> mediaInfoMap;
+    Map<Long, MediaInfo> mediaInfoMap;
 
 
     public List<PhotoFolder> getmFolders() {
@@ -23,27 +25,27 @@ public class MediaResult {
         this.mFolders = mFolders;
     }
 
-    public List<MessageMediaContent> getAllMedia() {
+    public List<MediaInfo> getAllMedia() {
         return allMedia;
     }
 
-    public void setAllMedia(List<MessageMediaContent> allMedia) {
+    public void setAllMedia(List<MediaInfo> allMedia) {
         this.allMedia = allMedia;
     }
 
-    public void setAllMediaMap(Map<Integer, MessageMediaContent> allMediaMap) {
+    public void setAllMediaMap(Map<Integer, MediaInfo> allMediaMap) {
         this.allMediaMap = allMediaMap;
     }
 
-    public Map<Integer, MessageMediaContent> getAllMediaMap() {
+    public Map<Integer, MediaInfo> getAllMediaMap() {
         return allMediaMap;
     }
 
-    public Map<Long, MessageMediaContent> getMediaInfoMap() {
+    public Map<Long, MediaInfo> getMediaInfoMap() {
         return mediaInfoMap;
     }
 
-    public void setMediaInfoMap(Map<Long, MessageMediaContent> mediaInfoMap) {
+    public void setMediaInfoMap(Map<Long, MediaInfo> mediaInfoMap) {
         this.mediaInfoMap = mediaInfoMap;
     }
 }

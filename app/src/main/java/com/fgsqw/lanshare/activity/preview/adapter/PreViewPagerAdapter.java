@@ -13,13 +13,13 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
 import com.fgsqw.lanshare.utils.LLog;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -28,10 +28,10 @@ public class PreViewPagerAdapter extends PagerAdapter {
 
     private final Context mContext;
     private final List<PhotoView> viewList = new ArrayList<>(4);
-    List<MessageMediaContent> mImgList;
+    List<MediaInfo> mImgList;
     private OnItemClickListener mListener;
 
-    public PreViewPagerAdapter(Context context, List<MessageMediaContent> imgList) {
+    public PreViewPagerAdapter(Context context, List<MediaInfo> imgList) {
         this.mContext = context;
         createImageViews();
         mImgList = imgList;
@@ -68,7 +68,7 @@ public class PreViewPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, final int position) {
         final PhotoView currentView = viewList.remove(0);
-        final MessageMediaContent fileUtils = mImgList.get(position);
+        final MediaInfo fileUtils = mImgList.get(position);
         container.addView(currentView);
         currentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Glide.with(mContext).load(fileUtils.getPath())
@@ -122,7 +122,7 @@ public class PreViewPagerAdapter extends PagerAdapter {
     }
 
     public interface OnItemClickListener {
-        void onItemClick(int position, MessageMediaContent mediaInfo);
+        void onItemClick(int position, MediaInfo mediaInfo);
     }
 
     private void adjustOffset(PhotoView view, float offset) {

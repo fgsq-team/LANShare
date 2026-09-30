@@ -3,14 +3,11 @@ package com.fgsqw.lanshare.dialog;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -37,7 +34,7 @@ public class WebDialog extends BaseDialog implements View.OnClickListener {
     private String rightButtonText;
 
     public WebDialog(@NonNull Context context) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
     }
 
     public WebDialog(@NonNull Context context, int themeResId) {
@@ -92,20 +89,6 @@ public class WebDialog extends BaseDialog implements View.OnClickListener {
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setDefaultTextEncodingName(FileUtil.UTF_8.toString());
         webView.loadData(webContent, FileUtil.getMyMIMEType("html"), FileUtil.UTF_8.toString());
-        // 检测系统夜间模式设置
-        int nightModeFlags = getContext().getResources().getConfiguration().uiMode &
-                Configuration.UI_MODE_NIGHT_MASK;
-        boolean isSystemNightMode = nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
-
-// 根据系统设置应用到 WebView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            WebSettings webSettings = webView.getSettings();
-            if (isSystemNightMode) {
-                webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
-            } else {
-                webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
-            }
-        }
     }
 
     @SuppressLint("NonConstantResourceId")

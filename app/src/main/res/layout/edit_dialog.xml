@@ -76,11 +76,9 @@
 
             <LinearLayout
 
-                android:layout_marginLeft="10dp"
                 android:id="@+id/info_layout_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
-                android:layout_marginStart="10dp"
                 android:layout_weight="2"
                 android:background="@drawable/dialog_water_selector"
                 android:gravity="center">

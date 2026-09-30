@@ -12,12 +12,12 @@
     android:padding="5dp">
 
     <CheckBox
-        android:id="@+id/chat_item_check_box"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="10dp" />
+            android:layout_marginTop="5dp"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/chat_item_check_box"
+            android:layout_marginRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
 
     <RelativeLayout
@@ -73,60 +73,59 @@
 
 
             <RelativeLayout
-                android:id="@+id/chat_media_info_layout"
-                android:layout_width="160dp"
-                android:layout_height="110dp"
-                android:layout_centerInParent="true"
-                android:orientation="vertical"
-                android:visibility="visible">
+                    android:id="@+id/chat_media_info_layout"
+                    android:layout_width="160dp"
+                    android:layout_height="110dp"
+                    android:orientation="vertical"
+                    android:visibility="visible" android:layout_centerInParent="true">
 
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/chat_rc_msg_canceled"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/cancelled"
-                        android:textColor="#a8a8a8"
-                        android:textSize="11sp"
-                        android:visibility="gone" />
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/chat_msg_tv_file_size"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#a8a8a8"
-                        android:textSize="12sp" />
+                            android:id="@+id/chat_rc_msg_canceled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cancelled"
+                            android:textColor="#a8a8a8"
+                            android:textSize="11sp"
+                            android:visibility="gone"/>
 
                     <TextView
-                        android:id="@+id/chat_content"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        android:text="@string/test_text"
-                        android:textColor="@color/mediaTextColor"
-                        android:textSize="13sp" />
+                            android:id="@+id/chat_msg_tv_file_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#a8a8a8"
+                            android:textSize="12sp"/>
+
+                    <TextView
+                            android:id="@+id/chat_content"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:ellipsize="middle"
+                            android:singleLine="true"
+                            android:text="@string/test_text"
+                            android:textSize="13sp"/>
+
 
                 </LinearLayout>
 
 
                 <ProgressBar
-                    android:id="@+id/chat_rc_msg_prog"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="140dp"
-                    android:layout_height="15dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:max="100" />
+                        android:id="@+id/chat_rc_msg_prog"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="140dp"
+                        android:layout_height="15dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:max="100"/>
 
 
             </RelativeLayout>
@@ -156,14 +155,13 @@
                     android:background="@drawable/video_time_background" />
 
                 <TextView
-                    android:id="@+id/chat_media_video_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="@string/time_zero"
-                    android:textColor="@color/textColor"
-                    android:textSize="12sp"
-                    android:visibility="visible" />
+                        android:id="@+id/chat_media_video_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/time_zero"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:visibility="visible" android:layout_centerInParent="true"/>
 
             </RelativeLayout>
 

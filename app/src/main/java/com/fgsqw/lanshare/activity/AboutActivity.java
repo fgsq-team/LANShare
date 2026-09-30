@@ -16,17 +16,14 @@ import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.EditTextDialog;
 import com.fgsqw.lanshare.dialog.PrivacyDialog;
-import com.fgsqw.lanshare.dialog.RewardDialog;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
 public class AboutActivity extends BaseActivity implements View.OnClickListener {
-
     RelativeLayout aboutLayout;
     RelativeLayout privacyLayout;
     RelativeLayout groupLayout;
-    RelativeLayout aboutReward;
     RelativeLayout aboutUpdateVersion;
     RelativeLayout aboutOfficialWebsite;
     RelativeLayout aboutUploadLogs;
@@ -48,7 +45,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         aboutLayout = bind(R.id.about_help);
         privacyLayout = bind(R.id.about_privacy);
         groupLayout = bind(R.id.about_group);
-        aboutReward = bind(R.id.about_reward);
         aboutUpdateVersion = bind(R.id.about_update_version);
         aboutOfficialWebsite = bind(R.id.about_official_website);
         aboutUploadLogs = bind(R.id.about_upload_logs);
@@ -60,7 +56,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         privacyLayout.setOnClickListener(this);
         aboutLayout.setOnClickListener(this);
         groupLayout.setOnClickListener(this);
-        aboutReward.setOnClickListener(this);
         aboutUpdateVersion.setOnClickListener(this);
         aboutUploadLogs.setOnClickListener(this);
         aboutOfficialWebsite.setOnClickListener(this);
@@ -153,10 +148,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
             break;
             case R.id.about_official_website: {
                 mUtil.openUrlInBrowser(this, Config.SERVER);
-            }
-            case R.id.about_reward: {
-                RewardDialog rewardDialog = new RewardDialog(this);
-                rewardDialog.show();
             }
             break;
             case R.id.about_logo: {

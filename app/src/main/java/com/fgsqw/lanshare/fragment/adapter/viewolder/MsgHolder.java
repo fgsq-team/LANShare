@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 
-public class MsgHolder extends AbsMsgHolder {
+public class MsgHolder extends RecyclerView.ViewHolder {
 
     public TextView content;
     public TextView user;

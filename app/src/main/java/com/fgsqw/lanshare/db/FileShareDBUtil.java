@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.fgsqw.lanshare.pojo.Token;
-import com.fgsqw.lanshare.pojo.message.MessageDownloadInfoContent;
+import com.fgsqw.lanshare.pojo.file.DownloadInfo;
 import com.fgsqw.lanshare.utils.LLog;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class FileShareDBUtil extends SQLiteOpenHelper {
     }
 
     @SuppressLint("Range")
-    public MessageDownloadInfoContent queryShare(String id) {
+    public DownloadInfo queryShare(String id) {
         SQLiteDatabase db = getWritableDatabase();
         @SuppressLint("Recycle")
         Cursor cursor = db.rawQuery("select * from " + TABLE_NAME + " where id = ?1 and isdel = 0 ", new String[]{id});
@@ -54,8 +54,8 @@ public class FileShareDBUtil extends SQLiteOpenHelper {
                 boolean downloaded = cursor.getInt(cursor.getColumnIndex("downloaded")) == 1;
                 int days = cursor.getInt(cursor.getColumnIndex("days"));
                 long time = cursor.getInt(cursor.getColumnIndex("time"));
-                MessageDownloadInfoContent fileInfo = new MessageDownloadInfoContent();
-                fileInfo.setFileId(id);
+                DownloadInfo fileInfo = new DownloadInfo();
+                fileInfo.setUuid(id);
                 fileInfo.setName(name);
                 fileInfo.setPath(path);
                 fileInfo.setDays(days);

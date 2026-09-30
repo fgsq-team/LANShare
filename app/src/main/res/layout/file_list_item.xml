@@ -4,8 +4,8 @@
     android:layout_height="50dp"
     android:layout_marginTop="2dp"
     android:background="@drawable/focused_background"
-    android:clickable="true"
     android:focusable="true"
+    android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
     android:orientation="vertical">
 
@@ -47,10 +47,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:ellipsize="middle"
-                android:maxEms="30"
                 android:singleLine="true"
+                android:maxEms="30"
                 android:text="0"
-                android:textColor="@color/textColorSecondary"
+                android:textColor="#939393"
                 android:textSize="10sp" />
         </LinearLayout>
 

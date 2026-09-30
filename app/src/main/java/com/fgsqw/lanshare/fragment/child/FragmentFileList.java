@@ -11,14 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
+import androidx.viewpager.widget.ViewPager;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fgsqw.lanshare.App;
@@ -33,9 +32,8 @@ import com.fgsqw.lanshare.dialog.EditTextDialog;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
 import com.fgsqw.lanshare.dialog.SelectStorageDialog;
 import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
-import com.fgsqw.lanshare.pojo.message.MessageUriContent;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
+import com.fgsqw.lanshare.pojo.file.UriFileInfo;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
 
@@ -50,7 +48,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class FragmentFileList extends BaseFragment implements View.OnClickListener {
 
+    private ViewPager vp;
     private View view;
+
     private TextView mPathTv;
     private TextView selectStorageTv;
     private SwipeRefreshLayout mSwipe;
@@ -61,11 +61,11 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
     // 保存上一级item 位置
     private final List<Integer> mSign = new ArrayList<>();
     // 当前文件所有列表
-    private List<MessageFileContent> fileList = new ArrayList<>();
+    private List<FileInfo> fileList = new ArrayList<>();
     // 当前文件列表
-    private final List<MessageFileContent> selectFileList = new LinkedList<>();
+    private final List<FileInfo> selectFileList = new LinkedList<>();
     // 当前文件夹路径
-    private MessageFileContent currentDirectory;
+    private FileInfo currentDirectory;
     public DataCenterActivity dataCenterActivity;
     private boolean showHiddenFiles = false;
     private PrefUtil prefUtil;
@@ -101,12 +101,19 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                 if (!StringUtils.isEmpty(text)) {
                     JSONObject jsonObject = JSONObject.parseObject(text);
                     String path = jsonObject.getString("path");
+//                File file = new File(path);
                     ArrayList<Integer> personList = (ArrayList<Integer>) JSON.parseArray(jsonObject.getString("sign"), Integer.class);
                     mSign.addAll(personList);
-                    MessageFileContent fileInfo = new MessageFileContent();
+//                if (file.exists()) {
+                    FileInfo fileInfo = new FileInfo();
+                    fileInfo.setFile(fileInfo.isFile());
                     fileInfo.setName(fileInfo.getName());
                     fileInfo.setPath(path);
                     initFileList(fileInfo);
+//                } else {
+//                    // 显示根目录
+//                    initFileList(null);
+//                }
                 } else {
                     // 显示根目录
                     initFileList(null);
@@ -136,7 +143,7 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
         mSelectStorage.setOnClickListener(this);
     }
 
-    private void savePath(MessageFileContent fileInfo) {
+    private void savePath(FileInfo fileInfo) {
         if (!Config.LAST_FILE_PATH) {
             return;
         }
@@ -159,10 +166,11 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                         upper();//文件列表返回上一级
                     }
                 } else {
-                    MessageFileContent fileSource = fileList.get(position);
-                    if (fileSource.getFileType() == MessageFileContent.FILE_TYPE_FOLDER) {                 //点击的文件如果是文件夹的话
+                    FileInfo fileSource = fileList.get(position);
+                    if (!fileSource.isFile()) {                 //点击的文件如果是文件夹的话
                         int i = ((LinearLayoutManager) Objects.requireNonNull(mRecyclerView.getLayoutManager()))
                                 .findFirstVisibleItemPosition();
+
                         //获取当前屏幕第一个显示的item
                         mSign.add(i);
                         initFileList(fileSource);
@@ -185,7 +193,7 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
             @Override
             public void OnLongClick(int position) {//列表长按时间
                 if (position != 0) {
-                    MessageFileContent fileSource = fileList.get(position);
+                    FileInfo fileSource = fileList.get(position);
                     dialog(fileSource);
                 }
 
@@ -196,7 +204,7 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
 
     // 文件列表返回上一级
     private void upper() {
-        MessageFolderContent fileSource = new MessageFolderContent();
+        FileInfo fileSource = new FileInfo();
         fileSource.setPath(new File(currentDirectory.getPath()).getParent());
         // 返回上一级
         initFileList(fileSource);
@@ -226,15 +234,15 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
 
 
     @SuppressLint("SetTextI18n")
-    void initFileList(MessageFileContent f) {
+    void initFileList(FileInfo f) {
         // 如果File为null则默认为跟目录
         if (f == null) {
-            f = new MessageFolderContent();
+            f = new FileInfo();
             f.setPath(PermissionsUtils.ROOT_PATH);
         }
         try {
             int fileSortMethod = prefUtil.getInt(PreConfig.FILE_SORT_METHOD, 0);
-            List<MessageFileContent> fileList = FileSearchUtils.getFileList(f, showHiddenFiles, fileSortMethod, dataCenterActivity);
+            List<FileInfo> fileList = FileSearchUtils.getFileList(f, showHiddenFiles, fileSortMethod, dataCenterActivity);
             if (!fileList.isEmpty()) {
                 this.fileList = fileList;
                 mFileAdapter.refresh();
@@ -254,16 +262,16 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
      *
      * @param files 文件列表
      */
-    private void deleteFile(List<MessageFileContent> files) {
+    private void deleteFile(List<FileInfo> files) {
         AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(dataCenterActivity);
         normalDialog.setTitle(R.string.warning);
         normalDialog.setMessage(R.string.file_deletion_is_irreversible);
         normalDialog.setPositiveButton(getString(R.string.confirm),
                 (dialog, which) -> {
-                    for (MessageFileContent fileSource : files) {
-                        if (fileSource instanceof MessageUriContent) {
-                            MessageUriContent uriFileInfo = (MessageUriContent) fileSource;
+                    for (FileInfo fileSource : files) {
+                        if (fileSource instanceof UriFileInfo) {
+                            UriFileInfo uriFileInfo = (UriFileInfo) fileSource;
                             DocumentFile documentFile = DocumentFile.fromTreeUri(getContext(), uriFileInfo.getUri());
                             if (documentFile != null && documentFile.delete()) {
                                 initFileList(currentDirectory);
@@ -295,7 +303,7 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
         SelectStorageDialog deviceSelectDialog = new SelectStorageDialog(dataCenterActivity);
         deviceSelectDialog.setOnStorageSelect(storageInfo -> {
             T.s(storageInfo.getPath());
-            MessageFolderContent fileSource = new MessageFolderContent();
+            FileInfo fileSource = new FileInfo();
             fileSource.setPath(storageInfo.getPath() + "/");
             initFileList(fileSource);
             selectStorageTv.setText(StringUtils.isEmpty(storageInfo.getName()) ? "" : storageInfo.getName());
@@ -313,67 +321,22 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
     }
 
 
-    private void dialog(MessageFileContent fileSource) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+    private void dialog(FileInfo fileSource) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(R.string.please_select_operation);
         String[] items;
-        if (fileSource.getFileType() == MessageFileContent.FILE_TYPE_FILE && fileSource.getLength() == 0) {
+        if (fileSource.isFile() && fileSource.getLength() == 0) {
             T.s((R.string.file_size_is_zero));
             return;
         }
-        if (!(fileSource.getFileType() == MessageFileContent.FILE_TYPE_URI)) {
+        if (!(fileSource instanceof UriFileInfo)) {
             File file = new File(fileSource.getPath());
             if (!file.canRead()) {
                 T.s((R.string.file_cannot_be_read));
                 return;
             }
         }
-        if (fileSource.getFileType() == MessageFileContent.FILE_TYPE_FOLDER) {
-            items = new String[]{
-                    getString(R.string.send),
-                    getString(R.string.open),
-                    getString(R.string.search),
-                    getString(R.string.delete),
-                    getString(R.string.cancel),
-            };
-            // 绑定选项和点击事件
-            builder.setItems(items, (arg0, arg1) -> {
-                switch (arg1) {
-                    case 0: {
-                        dataCenterActivity.sendSingleFile(fileSource);
-                        break;
-                    }
-                    case 1: {
-                        if (fileSource instanceof MessageUriContent) {
-                            MessageUriContent uriFileInfo = (MessageUriContent) fileSource;
-                            if (uriFileInfo.isFile()) {
-                                FileUtil.openFile((Activity) getContext(), uriFileInfo.getUri(), fileSource.getName());
-                            } else {
-                                initFileList(fileSource);
-                            }
-                        } else {
-                            FileUtil.openFile((Activity) getContext(), new File(fileSource.getPath()));
-                        }
-                        break;
-                    }
-                    case 2: {
-                        searchFile(fileSource.getPath());
-                        break;
-                    }
-                    case 3: {
-                        if (!selectFileList.isEmpty()) {
-                            deleteFile(selectFileList);
-                        } else {
-                            deleteFile(Collections.singletonList(fileSource));
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-                arg0.dismiss();
-            });
-        } else {
+        if (fileSource.isFile()) {
             items = new String[]{
                     getString(R.string.send),
                     getString(R.string.open),
@@ -383,6 +346,7 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                     getString(R.string.generate_ipv4_sharing_link),
                     getString(R.string.cancel),
             };
+
             // 绑定选项和点击事件
             builder.setItems(items, (arg0, arg1) -> {
                 switch (arg1) {
@@ -391,7 +355,16 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                         break;
                     }
                     case 1: {
-                        FileUtil.openFile((Activity) getContext(), new File(fileSource.getPath()));
+                        if (fileSource.isFile()) {
+                            if (fileSource instanceof UriFileInfo) {
+                                UriFileInfo uriFileInfo = (UriFileInfo) fileSource;
+                                FileUtil.openFile((Activity) getContext(), uriFileInfo.getUri(), fileSource.getName());
+                            } else {
+                                FileUtil.openFile((Activity) getContext(), new File(fileSource.getPath()));
+                            }
+                        } else {
+                            initFileList(fileSource);
+                        }
                         break;
                     }
                     case 2: {
@@ -420,16 +393,63 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                 }
                 arg0.dismiss();
             });
+        } else {
+            items = new String[]{
+                    getString(R.string.send),
+                    getString(R.string.open),
+                    getString(R.string.search),
+                    getString(R.string.delete),
+                    getString(R.string.cancel),
+            };
+
+            // 绑定选项和点击事件
+            builder.setItems(items, (arg0, arg1) -> {
+                switch (arg1) {
+                    case 0: {
+                        dataCenterActivity.sendSingleFile(fileSource);
+                        break;
+                    }
+                    case 1: {
+                        if (fileSource.isFile()) {
+                            if (fileSource instanceof UriFileInfo) {
+                                UriFileInfo uriFileInfo = (UriFileInfo) fileSource;
+                                FileUtil.openFile((Activity) getContext(), uriFileInfo.getUri(), fileSource.getName());
+                            } else {
+                                FileUtil.openFile((Activity) getContext(), new File(fileSource.getPath()));
+                            }
+                        } else {
+                            initFileList(fileSource);
+                        }
+                        break;
+                    }
+                    case 2: {
+                        searchFile(fileSource.getPath());
+                        break;
+                    }
+                    case 3: {
+                        if (!selectFileList.isEmpty()) {
+                            deleteFile(selectFileList);
+                        } else {
+                            deleteFile(Collections.singletonList(fileSource));
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                arg0.dismiss();
+            });
         }
+
         builder.show();
     }
 
 
-    public List<MessageFileContent> getFileList() {
+    public List<FileInfo> getFileList() {
         return fileList;
     }
 
-    public List<MessageFileContent> getSelectFileList() {
+    public List<FileInfo> getSelectFileList() {
         return selectFileList;
     }
 

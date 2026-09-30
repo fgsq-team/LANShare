@@ -22,7 +22,7 @@ import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.db.FileShareDBUtil;
 import com.fgsqw.lanshare.dialog.WebDialog;
 import com.fgsqw.lanshare.pojo.Device;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
 import com.fgsqw.lanshare.pojo.network.NetInfo;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
@@ -213,7 +213,7 @@ public class mUtil {
      * @comments 生成分享链接
      * @date 2024/4/27 14:27
      */
-    public static void shareFile(boolean isIPv4, MessageFileContent fileSource, Context context) {
+    public static void shareFile(boolean isIPv4, FileInfo fileSource, Context context) {
         FileShareDBUtil fileShareDBUtil = new FileShareDBUtil(context);
         final String[] items = {context.getString(R.string.sure_one_time_download), context.getString(R.string.one_day), context.getString(R.string.three_days)};
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -389,31 +389,4 @@ public class mUtil {
     public static <T> List<T> singletonArrayList(T... arr) {
         return new ArrayList<>(Arrays.asList(arr));
     }
-
-    public static <T extends MessageFileContent> List<T> deepCopyList(List<T> originalList) {
-        List<MessageFileContent> clonedList = new ArrayList<>(originalList.size());
-        for (MessageFileContent obj : originalList) {
-            clonedList.add(obj.clone());
-        }
-        return (List<T>) clonedList;
-    }
-
-    public static void encData(byte[] buffer, int len, int off, long index) {
-        int j = 0;
-        for (int i = off; i < len + off; i++) {
-            int v = (buffer[i] - 1) ^ (int) ((index + j) & 0xFF);
-            buffer[i] = (byte) v;
-            j++;
-        }
-    }
-
-    public static void decData(byte[] buffer, int len, int off, long index) {
-        int j = 0;
-        for (int i = off; i < len + off; i++) {
-            int v = (buffer[i] ^ (int) ((index + j) & 0xFF)) + 1;
-            buffer[i] = (byte) v;
-            j++;
-        }
-    }
-
 }

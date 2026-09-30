@@ -1,12 +1,14 @@
 package com.fgsqw.lanshare.utils;
 
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UriPermission;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -16,7 +18,7 @@ import android.provider.Settings;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-
+import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
@@ -28,6 +30,37 @@ public class PermissionsUtils {
 
     public static final int REQUEST_VISIT = 20;
     public static final int REQUEST_POST_NOTIFICATIONS = 21;
+    // 进入应用页申请系统「获取应用列表」权限的请求码
+    public static final int REQUEST_APP_LIST_PERMISSION = 999;
+    // MIUI/HyperOS「获取应用列表」系统权限
+    public static final String MIUI_GET_INSTALLED_APPS = "com.android.permission.GET_INSTALLED_APPS";
+
+    /**
+     * MIUI 13+/HyperOS 是否支持动态申请「获取应用列表」权限
+     */
+    public static boolean isAppListPermissionSupported(Context context) {
+        try {
+            PermissionInfo permissionInfo = context.getPackageManager()
+                    .getPermissionInfo(MIUI_GET_INSTALLED_APPS, 0);
+            return permissionInfo != null && "com.lbe.security.miui".equals(permissionInfo.packageName);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 是否可读取完整应用列表：非 MIUI（QUERY_ALL_PACKAGES 已足够）或已授予该权限
+     */
+    public static boolean hasAppListPermission(Context context) {
+        if (context == null) {
+            return true;
+        }
+        if (!isAppListPermissionSupported(context)) {
+            return true;
+        }
+        return ContextCompat.checkSelfPermission(context, MIUI_GET_INSTALLED_APPS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
 
     // 根目录
     public static final String ROOT_PATH = Environment.getExternalStorageDirectory().getAbsolutePath();

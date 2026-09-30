@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -30,7 +31,8 @@ import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.AppAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
+import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
 
 import java.util.LinkedList;
@@ -52,13 +54,35 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
     private SwipeRefreshLayout appSwipe;
     private RecyclerView appRecy;
 
-    public final List<MessageApkContent> mSelectlist = new LinkedList<>();
+    public final List<ApkInfo> mSelectlist = new LinkedList<>();
 
     private AppAdapter appAdapter;
 
     public DataCenterActivity dataCenterActivity;
 
     private AppInstallUninstallReceiver uninstallReceiver;
+
+    /** 本次会话是否已发起过系统「获取应用列表」权限申请（被拒后不再循环弹） */
+    private boolean appListPermissionRequested;
+
+    /** 首屏就绪/后台补图标共用的加载回调 */
+    private final FileSearchUtils.AppLoadCallback appLoadCallback = new FileSearchUtils.AppLoadCallback() {
+        @Override
+        public void onListReady() {
+            // 首屏20个图标就绪后立即显示列表，不等全部加载完
+            showAppList();
+        }
+
+        @Override
+        public void onIconsLoaded(int start, int end) {
+            // 后台补齐的图标按区间增量刷新，不用整个列表重刷
+            ThreadUtils.threadUi(() -> {
+                if (appAdapter != null) {
+                    appAdapter.notifyItemRangeChanged(start, end - start);
+                }
+            });
+        }
+    };
 
     @Override
     public void onAttach(Context context) {
@@ -118,8 +142,8 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
     }
 
     @Override
-    public void OnLongItenClick(MessageApkContent apkInfo, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+    public void OnLongItenClick(ApkInfo apkInfo, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.please_select_operation));
         String[] items;
         items = new String[]{
@@ -171,25 +195,78 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
     }
 
     @Override
-    public void OnItemClick(MessageApkContent apkInfo, boolean isSelect, int position) {
+    public void OnItemClick(ApkInfo apkInfo, boolean isSelect, int position) {
 
     }
 
     @SuppressLint("SetTextI18n")
     private void loading(boolean refresh) {
+        if (!refresh && !PermissionsUtils.hasAppListPermission(getContext())) {
+            if (appListPermissionRequested) {
+                // 已申请过被拒：直接加载能读到的部分（MIUI 未授权只能返回受限列表）
+                doLoad(false);
+            } else {
+                // 点进应用页弹出系统「获取应用列表」授权申请（MIUI/HyperOS）
+                appListPermissionRequested = true;
+                requestPermissions(new String[]{PermissionsUtils.MIUI_GET_INSTALLED_APPS},
+                        PermissionsUtils.REQUEST_APP_LIST_PERMISSION);
+            }
+            return;
+        }
+        doLoad(refresh);
+    }
+
+    private void doLoad(boolean refresh) {
+        if (!refresh && AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty()) {
+            // 缓存命中：毫秒级直接展示
+            showAppList();
+            return;
+        }
         tvCount.setText(getString(R.string.loading));
         appSwipe.setRefreshing(true);
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadApp(getContext(), refresh);
-            if (AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty()) {
-                if (appAdapter != null) {
-                    ThreadUtils.threadUi(() -> {
-                        appAdapter.refresh();
-                        tvCount.setText(AnyData.apkFileList.size() + " " + getString(R.string.applications));
-                        appSwipe.setRefreshing(false);
-                    });
-                }
+            if (refresh) {
+                FileSearchUtils.loadApp(getContext(), true, appLoadCallback);
+            } else {
+                // 未就绪：按需扫描；撞上预加载正在进行会复用其结果，不重复扫
+                FileSearchUtils.loadAppIfNeeded(getContext(), appLoadCallback);
             }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == PermissionsUtils.REQUEST_APP_LIST_PERMISSION) {
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (!granted) {
+                T.s(R.string.app_list_permission_denied);
+            }
+            // 授权成功强制重新扫描（未授权期间预加载被跳过，缓存为空或受限）
+            doLoad(granted);
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void showAppList() {
+        ThreadUtils.threadUi(() -> {
+            if (appAdapter == null) {
+                return;
+            }
+            appAdapter.refresh();
+            if (AnyData.apkFileList != null) {
+                tvCount.setText(AnyData.apkFileList.size() + " " + getString(R.string.applications));
+            }
+            appSwipe.setRefreshing(false);
+            // 后台图标分批补齐，1.5s 后兜底重刷可见区，防止先绑定的条目图标留白
+            appRecy.postDelayed(() -> {
+                if (appAdapter != null) {
+                    appAdapter.notifyItemRangeChanged(0, appAdapter.getItemCount());
+                }
+            }, 1500);
         });
     }
 
@@ -236,11 +313,11 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
         }
     }
 
-    public List<MessageApkContent> getApkFileList() {
+    public List<ApkInfo> getApkFileList() {
         return AnyData.apkFileList;
     }
 
-    public List<MessageApkContent> getSelectlist() {
+    public List<ApkInfo> getSelectlist() {
         return mSelectlist;
     }
 

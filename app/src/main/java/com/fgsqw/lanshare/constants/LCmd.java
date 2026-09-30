@@ -2,8 +2,6 @@ package com.fgsqw.lanshare.constants;
 
 public class LCmd {
 
-    public static final int NEW_VERSION_4 = -2;
-
     // 局域网通讯命令
     public static final int UDP_GET_DEVICES = 1001;        // 获取设备
     public static final int UDP_SET_DEVICES = 1002;        // 设置设备(心跳设置)
@@ -17,7 +15,7 @@ public class LCmd {
     public static final int UDP_SEND_MEDIA_PAUSE = 1008;     // (媒体) 暂停
     public static final int UDP_SEND_MEDIA_NEXT = 1009;      // (媒体) 下一曲
     public static final int UDP_SEND_MEDIA_PREVIOUS = 1010;  // (媒体) 上一曲
-    public static final int UDP_SEND_MAP = 1011;  //
+    public static final int UDP_SEND_MAP = 1011;             // 发送GPS位置
 
 
     // 文件服务命令
@@ -30,18 +28,18 @@ public class LCmd {
     public static final int FS_SYNC_MEDIA = 1107;     // 同步媒体
     public static final int FS_UPDATE_APPS = 1108;     // 同步媒体
     public static final int FS_GET_APPS = 1109;     // 同步媒体
+    // 分段并行传输：一条连接只传文件的某一段，接收端按偏移落盘。
+    // 只在未加密 + 对端 DATA_VERSION_4 及以上时使用，否则自动回落到单流 FS_SHARE_FILE。
+    public static final int FS_SHARE_SEG = 1110;    // 分段发送文件
 
 
     // 使用byte命令避免像int命令那样需要两边转换为byte
     public static final byte FS_DATA = 1;            // 数据
     public static final byte FS_END = 2;             // 接收结束
     public static final byte FS_CLOSE = 3;           // 取消
-    public static final byte FS_DATA_RECEIVED = 4;    // 数据接收完毕
+    public static final int FS_DATA_RECEIVED = 4;    // 数据接收完毕
     public static final int FS_NEXT = 5;    // 下一步
     public static final int FS_BREAK = 6;    // 跳出
-
-    public static final int NEW_FS_BREAK = -2;    // 跳出
-
 
     // Service 连接命令
     public static final int SERVICE_IF_RECIVE_FILES = 1201;    // 是否接收文件

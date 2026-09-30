@@ -7,10 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -27,11 +25,10 @@ import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.fragment.adapter.SearchAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
-import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
+import com.fgsqw.lanshare.pojo.file.MusicInfo;
 import com.fgsqw.lanshare.pojo.network.MediaResult;
 import com.fgsqw.lanshare.service.MusicService;
 import com.fgsqw.lanshare.toast.T;
@@ -51,11 +48,11 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
     public static final String TAG = "FragSearch";
     private View view;
     private EditText searchEdit;
-    private final List<MessageFileContent> searchResiltsList = new ArrayList<>();
-    private final List<MessageFileContent> selectFileList = new LinkedList<>();   // 当前文件列表
+    private final List<FileInfo> searchResiltsList = new ArrayList<>();
+    private final List<FileInfo> selectFileList = new LinkedList<>();   // 当前文件列表
     private SearchAdapter searchAdapter;
 
-    public List<MessageFileContent> getSearchResiltsList() {
+    public List<FileInfo> getSearchResiltsList() {
         return searchResiltsList;
     }
 
@@ -155,9 +152,9 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
     }
 
     private void dialog(final int position) {
-        MessageFileContent fileInfo = searchResiltsList.get(position);
+        FileInfo fileInfo = searchResiltsList.get(position);
         File file = new File(fileInfo.getPath());
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.please_select_operation));
         String[] items;
         if (fileInfo.getLength() == 0) {
@@ -165,7 +162,7 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
             return;
         }
         if (file.canRead()) {
-            if (fileInfo.getFileType() == MessageFileContent.FILE_TYPE_APK) {
+            if (fileInfo instanceof ApkInfo) {
                 items = new String[]{
                         getString(R.string.send),
                         getString(R.string.backup),
@@ -187,11 +184,11 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
                             break;
                         }
                         case 2: {
-                            FileUtil.startApp(getContext(), ((MessageApkContent) fileInfo).getPackageName());
+                            FileUtil.startApp(getContext(), ((ApkInfo) fileInfo).getPackageName());
                             break;
                         }
                         case 3: {
-                            FileUtil.uninstallApp(getContext(), ((MessageApkContent) fileInfo).getPackageName());
+                            FileUtil.uninstallApp(getContext(), ((ApkInfo) fileInfo).getPackageName());
                             break;
                         }
                         case 4:
@@ -208,7 +205,7 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
                     }
                     arg0.dismiss();
                 });
-            } else if (fileInfo.getFileType() == MessageFileContent.FILE_TYPE_VIDEO) {
+            } else if (fileInfo instanceof MusicInfo) {
                 items = new String[]{
                         getString(R.string.send),
                         getString(R.string.open),
@@ -307,12 +304,8 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
         search = new FileUtil.Search(str) {
             @Override
             public void onSearchChange(File file) {
-                MessageFileContent fileInfo;
-                if (file.isFile()) {
-                    fileInfo = new MessageFileContent();
-                } else {
-                    fileInfo = new MessageFolderContent();
-                }
+                FileInfo fileInfo = new FileInfo();
+                fileInfo.setFile(file.isFile());
                 fileInfo.setLength(file.length());
                 fileInfo.setPath(file.getPath());
                 fileInfo.setName(file.getName());
@@ -343,9 +336,9 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
                 searchFile(false, Environment.getExternalStorageDirectory(), str);
             }
             if (!extend && Config.SEARCH_FLAG[0]) {
-                List<MessageApkContent> apkFileList = AnyData.apkFileList;
+                List<ApkInfo> apkFileList = AnyData.apkFileList;
                 if (apkFileList != null && !apkFileList.isEmpty()) {
-                    for (MessageApkContent apkInfo : apkFileList) {
+                    for (ApkInfo apkInfo : apkFileList) {
                         if (apkInfo.getName().toLowerCase().contains(str)) {
                             if (searchResiltsList.size() < 100) {
                                 searchResiltsList.add(apkInfo);
@@ -359,9 +352,9 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
             if (!extend && Config.SEARCH_FLAG[1]) {
                 MediaResult mediaResult = AnyData.mediaResult;
                 if (mediaResult != null) {
-                    List<MessageMediaContent> mediaInfos = mediaResult.getAllMedia();
+                    List<MediaInfo> mediaInfos = mediaResult.getAllMedia();
                     if (mediaInfos != null && !mediaInfos.isEmpty()) {
-                        for (MessageMediaContent image : mediaInfos) {
+                        for (MediaInfo image : mediaInfos) {
                             if (image.getName().contains(str)) {
                                 if (searchResiltsList.size() < 100) {
                                     searchResiltsList.add(image);
@@ -374,9 +367,9 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
                 }
             }
             if (!extend && Config.SEARCH_FLAG[2]) {
-                List<MessageAudioContent> musicInfoList = AnyData.musicInfoList;
+                List<MusicInfo> musicInfoList = AnyData.musicInfoList;
                 if (musicInfoList != null && !musicInfoList.isEmpty()) {
-                    for (MessageAudioContent musicInfo : musicInfoList) {
+                    for (MusicInfo musicInfo : musicInfoList) {
                         if (musicInfo.getName().toLowerCase().contains(str)) {
                             if (searchResiltsList.size() < 100) {
                                 searchResiltsList.add(musicInfo);
@@ -411,7 +404,7 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
         }
     }
 
-    public List<MessageFileContent> getSelectFileList() {
+    public List<FileInfo> getSelectFileList() {
         return selectFileList;
     }
 

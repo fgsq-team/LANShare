@@ -23,7 +23,7 @@ public class QrView extends ViewfinderView {
 
     public int laserLinePosition = 0;
     public float[] position = new float[]{0f, 0.5f, 1f};
-    public int[] colors = new int[]{0x0027B14D, 0xff27B14D, 0x0027B14D};
+    public int[] colors = new int[]{0x00004EFF, 0xff004EFF, 0x00004EFF};
     public LinearGradient linearGradient;
     private int ScreenRate;
 
@@ -50,7 +50,7 @@ public class QrView extends ViewfinderView {
         int height = getHeight();
 
         // 绘制4个角
-        paint.setColor(getResources().getColor(R.color.colorPrimary));// 定义画笔的颜色
+        paint.setColor(getResources().getColor(R.color.colorAccent));// 定义画笔的颜色
         canvas.drawRect(frame.left, frame.top, frame.left + ScreenRate, frame.top + CORNER_WIDTH, paint);
         canvas.drawRect(frame.left, frame.top, frame.left + CORNER_WIDTH, frame.top + ScreenRate, paint);
 

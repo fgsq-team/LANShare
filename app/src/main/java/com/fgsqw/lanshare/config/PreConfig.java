@@ -2,8 +2,6 @@ package com.fgsqw.lanshare.config;
 
 // key配置
 public class PreConfig {
-    // 主题模式
-    public static final String THEME_MODE = "theme_mode";
     // 文件储存路径
     public static String FILE_PATH = "filePath";
     // 用户名

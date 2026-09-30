@@ -16,7 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.fragment.child.FragmentFileList;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
@@ -48,7 +48,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final FileAdapter.ViewHolder holder, int position) {
-        final MessageFileContent fileSource = fragmentFileList.getFileList().get(position);
+        final FileInfo fileSource = fragmentFileList.getFileList().get(position);
         holder.mName.setText(mUtil.stringSize(fileSource.getName(), 30));
         if (position != 0) {
             holder.mInfo.setText(format.format(fileSource.getTime()) + " "
@@ -63,7 +63,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
                     .into(holder.mImg);
         } else {
-            Glide.with(context).load(fileSource.getPreviewBitmap())
+            Glide.with(context).load(fileSource.getPreView())
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
                     .into(holder.mImg);
         }
@@ -93,7 +93,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     }
 
     /*选中图片效果*/
-    private void checkedImage(FileAdapter.ViewHolder holder, MessageFileContent fileSource, int position) {
+    private void checkedImage(FileAdapter.ViewHolder holder, FileInfo fileSource, int position) {
 
         if (isSelect(fileSource)) {//如果图片已经选中，就取消选中
             fragmentFileList.dataCenterActivity.removeSendFile(fileSource);
@@ -113,7 +113,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
      *
      * @param fileSource
      */
-    private void selectImage(MessageFileContent fileSource, int position) {
+    private void selectImage(FileInfo fileSource, int position) {
         fragmentFileList.getSelectFileList().add(fileSource);
         if (mSelectListener != null) {
             mSelectListener.OnImageSelect(fileSource, true, position);
@@ -125,8 +125,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
      *
      * @param fileSource
      */
-    private void unSelectImage(MessageFileContent fileSource, int position) {
-        List<MessageFileContent> selectList = fragmentFileList.getSelectFileList();
+    private void unSelectImage(FileInfo fileSource, int position) {
+        List<FileInfo> selectList = fragmentFileList.getSelectFileList();
         if (!selectList.isEmpty()) {
             for (int i = 0; i < selectList.size(); i++) {
                 if (fileSource.getPath().equals(selectList.get(i).getPath())) {
@@ -140,8 +140,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         }
     }
 
-    private boolean isSelect(MessageFileContent fileSource) {
-        List<MessageFileContent> selectlist = fragmentFileList.getSelectFileList();
+    private boolean isSelect(FileInfo fileSource) {
+        List<FileInfo> selectlist = fragmentFileList.getSelectFileList();
         if (selectlist != null && !selectlist.isEmpty()) {
             for (int i = 0; i < selectlist.size(); i++) {
                 if (fileSource.equals(selectlist.get(i))) {
@@ -154,7 +154,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        List<MessageFileContent> pathlist = fragmentFileList.getFileList();
+        List<FileInfo> pathlist = fragmentFileList.getFileList();
         return pathlist == null ? 0 : pathlist.size();
     }
 
@@ -194,7 +194,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
 
     public interface OnImageSelectListener {
-        void OnImageSelect(MessageFileContent fileSource, boolean isSelect, int position);
+        void OnImageSelect(FileInfo fileSource, boolean isSelect, int position);
     }
 
     public interface OnClickListener {

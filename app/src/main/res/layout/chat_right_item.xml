@@ -4,20 +4,20 @@
     android:id="@+id/ll_text_send"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
     android:background="@drawable/focused_background"
     android:clickable="true"
     android:focusable="true"
     android:nextFocusRight="@+id/main_scan_code"
-    android:orientation="horizontal"
     android:padding="5dp">
 
     <CheckBox
-        android:id="@+id/chat_item_check_box"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="10dp" />
+            android:layout_marginTop="5dp"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/chat_item_check_box"
+            android:layout_marginRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -50,9 +50,8 @@
             android:layout_below="@+id/chat_item_tv_user"
             android:layout_marginRight="5dp"
             android:layout_toLeftOf="@id/chat_item_header"
-            android:background="@drawable/chat_right_bg"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:background="@drawable/message_text_send"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"

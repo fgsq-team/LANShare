@@ -24,7 +24,7 @@ public class FileInfoDialog extends BaseDialog {
     private String filePath;
 
     public FileInfoDialog(Context context, String filePath) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
         this.filePath = filePath;
     }
 

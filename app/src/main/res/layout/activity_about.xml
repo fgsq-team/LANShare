@@ -1,119 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:fitsSystemWindows="true"
+
+              android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="90dp">
+            android:layout_width="match_parent"
+            android:layout_height="90dp">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/toolbarBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp">
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp">
 
             <ImageView
-                android:id="@+id/about_exit_img"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:src="@drawable/ic_exit" />
-
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:id="@+id/about_exit_img"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:tint="@color/cool_dark"
+                    android:src="@drawable/ic_exit"/>
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20px"
-                android:text="@string/about"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="20sp" />
+                    android:layout_marginLeft="20px"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cool_dark"
+                    android:textSize="20sp"
+                    android:text="@string/about">
+            </TextView>
         </LinearLayout>
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="120dp">
+            android:layout_width="match_parent"
+            android:layout_height="120dp">
 
         <ImageView
-            android:id="@+id/about_logo"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/focused_background"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@mipmap/ic_launcher_round" />
+                android:id="@+id/about_logo"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/focused_background"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:src="@mipmap/ic_launcher"/>
 
         <TextView
-            android:id="@+id/aboutTextView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/textColorPrimary"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
+                android:id="@+id/aboutTextView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"/>
 
         <TextView
-            android:id="@+id/about_version_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/aboutTextView1"
-            android:layout_centerHorizontal="true"
-            android:text="@string/version"
-            android:textColor="@color/textColorPrimary"
-            android:textSize="16sp" />
+                android:id="@+id/about_version_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/aboutTextView1"
+                android:layout_centerHorizontal="true"
+                android:text="@string/version"
+                android:textColor="#000000"
+                android:textSize="16sp"/>
 
     </RelativeLayout>
-
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center">
-
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/about_build_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp" />
+                android:layout_marginTop="5dp"
+                android:id="@+id/about_build_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+        />
     </LinearLayout>
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/aboutLinearLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical" />
+                android:id="@+id/aboutLinearLayout1"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical"/>
 
         <TextView
-            android:id="@+id/about_copyright"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/aboutLinearLayout1"
-            android:layout_centerHorizontal="true"
-            android:text="@string/copyright"
-            android:textColor="@color/textColorPrimary" />
+                android:id="@+id/about_copyright"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/aboutLinearLayout1"
+                android:layout_centerHorizontal="true"
+                android:text="@string/copyright"/>
 
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/about_copyright"
-            android:layout_alignParentTop="true"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="30dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/about_copyright"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="30dp">
 
             <!--    <RelativeLayout
                     android:id="@+id/about_github"
@@ -145,104 +145,99 @@
 
                 </RelativeLayout>-->
             <RelativeLayout
-                android:id="@+id/about_official_website"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                    android:id="@+id/about_official_website"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/focused_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
 
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/official_website"
-                    android:textColor="@color/textColorPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:text="@string/official_website"/>
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_next"/>
+            </RelativeLayout>
+            <RelativeLayout
+                    android:id="@+id/about_update_version"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/focused_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
+
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:text="@string/check_update"/>
+
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_next"/>
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/about_update_version"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/check_update"
-                    android:textColor="@color/textColorPrimary" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/about_upload_logs"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                    android:id="@+id/about_upload_logs"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:visibility="gone"
+                    android:background="@drawable/focused_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/upload_logs"
-                    android:textColor="@color/textColorPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:text="@string/upload_logs"/>
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_next"/>
             </RelativeLayout>
 
 
             <RelativeLayout
-                android:id="@+id/about_help"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                    android:id="@+id/about_help"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/focused_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
 
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/help"
-                    android:textColor="@color/textColorPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:text="@string/help"/>
 
                 <!-- <View
                          android:layout_width="match_parent"
@@ -251,31 +246,30 @@
                          android:background="#5F5F5F"/>-->
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_next"/>
 
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/about_privacy"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                    android:id="@+id/about_privacy"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/focused_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/privacy"
-                    android:textColor="@color/textColorPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:text="@string/privacy"/>
                 <!--
 
                                 <View
@@ -286,23 +280,23 @@
                 -->
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_next"/>
 
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/about_group"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                    android:id="@+id/about_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/focused_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
                 <!--
                                 <View
                                         android:layout_width="match_parent"
@@ -311,12 +305,11 @@
                                         android:background="#5F5F5F"/>-->
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/join_group"
-                    android:textColor="@color/textColorPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:text="@string/join_group"/>
 
                 <!--    <View
                             android:layout_width="match_parent"
@@ -325,44 +318,15 @@
                             android:background="#5F5F5F"/>-->
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_next"/>
 
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/about_reward"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="打赏支持"
-                    android:textColor="@color/textColorPrimary" />
-
-
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
-
-            </RelativeLayout>
 
         </LinearLayout>
 

@@ -347,14 +347,47 @@ public class NetWorkUtil {
     }
 
     /**
+     * 判断字符串是否为合法的 IPv4 地址（4 段 0-255）。
+     * IPv6 地址含冒号、分段数不为 4，返回 false。
+     */
+    public static boolean isIPv4(String ip) {
+        if (ip == null || ip.isEmpty()) {
+            return false;
+        }
+        String[] parts = ip.split("\\.", -1);
+        if (parts.length != 4) {
+            return false;
+        }
+        try {
+            for (String p : parts) {
+                int n = Integer.parseInt(p);
+                if (n < 0 || n > 255) {
+                    return false;
+                }
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 将String类型的IP转换为int类型
+     * 传入非 IPv4（如 IPv6）时返回 0，不抛 NumberFormatException。
      */
     public static int stringIP2intIP(String ip) {
         String[] ips = ip.split("\\.");
-        return (Integer.parseInt(ips[0]) << 24)
-                | (Integer.parseInt(ips[1]) << 16)
-                | (Integer.parseInt(ips[2]) << 8)
-                | Integer.parseInt(ips[3]);
+        if (ips.length != 4) {
+            return 0;
+        }
+        try {
+            return (Integer.parseInt(ips[0]) << 24)
+                    | (Integer.parseInt(ips[1]) << 16)
+                    | (Integer.parseInt(ips[2]) << 8)
+                    | Integer.parseInt(ips[3]);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public static int getMaskMapLength(String netmask) {
@@ -367,10 +400,17 @@ public class NetWorkUtil {
     }
 
     public static boolean subNet(String ip1, String ip2, String sub_mask) {
+        // 任一地址不是 IPv4 直接返回 false，避免 IPv6 进入掩码/整数解析崩溃
+        if (!isIPv4(ip1) || !isIPv4(ip2)) {
+            return false;
+        }
         return subNet(ip1, ip2, getMaskMapLength(sub_mask));
     }
 
     public static boolean subNet(String ip1, String ip2, int sub_mask) {
+        if (!isIPv4(ip1) || !isIPv4(ip2)) {
+            return false;
+        }
         int mask = 0xFFFFFFFF;
         mask = mask << (ALL_BIT - sub_mask);
         int ipA = stringIP2intIP(ip1) & mask;

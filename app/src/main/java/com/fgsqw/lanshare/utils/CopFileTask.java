@@ -27,7 +27,7 @@ public class CopFileTask extends AsyncTask<Integer, Integer, String> {
         this.srcPath = srcPath;
         this.outPath = outPath;
 
-        progressDialog = new ProgressDialog(context, R.style.AlertDialogTheme);
+        progressDialog = new ProgressDialog(context);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(false);
         progressDialog.setCanceledOnTouchOutside(false);
@@ -35,7 +35,7 @@ public class CopFileTask extends AsyncTask<Integer, Integer, String> {
         progressDialog.setButton("隐藏", (p1, p2) -> {
             progressDialog.cancel();
         });
-        progressDialog.setTitle(context.getString(R.string.is_backing_up));
+        progressDialog.setTitle("正在备份");
     }
 
     @Override

@@ -14,7 +14,7 @@ import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.network.NetInfo;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
-import com.fgsqw.lanshare.utils.QrCodeUtils;
+import com.fgsqw.lanshare.utils.QRcodeUtils;
 import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class DeviceQrCodeActivity extends BaseActivity implements CompoundButton
             }
             NetInfo netInfo = ipv6NetInfoList.get(0);
             String s = Config.KEY + "-1-" + netInfo.getIp() + "-" + Config.FILE_SERVER_PORT;
-            Bitmap qrcode = QrCodeUtils.qrcode(s, 400, 400);
+            Bitmap qrcode = QRcodeUtils.qrcode(s, 400, 400);
             qrCode.setImageBitmap(qrcode);
             tvIpAddress.setText(netInfo.getIp());
 
@@ -83,7 +83,7 @@ public class DeviceQrCodeActivity extends BaseActivity implements CompoundButton
             }
             String s = Config.KEY + "-0-" + String.join(",", devices) + "-" + Config.FILE_SERVER_PORT;
             // 二维码
-            Bitmap qrcode = QrCodeUtils.qrcode(s, 400, 400);
+            Bitmap qrcode = QRcodeUtils.qrcode(s, 400, 400);
             qrCode.setImageBitmap(qrcode);
             tvIpAddress.setText(devices.get(0));
         }

@@ -1,7 +1,5 @@
 package com.fgsqw.lanshare.utils;
 
-import com.fgsqw.lanshare.toast.T;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.zip.ZipEntry;
@@ -9,7 +7,7 @@ import java.util.zip.ZipOutputStream;
 
 public class ZipUtils {
 
-    public static void compressFiles(File file, String fileName, ZipOutputStream zipOutputSteam) {
+    public static void zipFiles(File file, String fileName, ZipOutputStream zipOutputSteam) {
         try {
             if (zipOutputSteam == null)
                 return;
@@ -23,7 +21,7 @@ public class ZipUtils {
             }
             zipOutputSteam.closeEntry();
         } catch (Exception e) {
-            T.s("压缩文件失败");
+            e.printStackTrace();
         }
     }
 

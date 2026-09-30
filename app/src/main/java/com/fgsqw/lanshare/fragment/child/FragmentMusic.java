@@ -23,7 +23,7 @@ import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.MusicAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
-import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
+import com.fgsqw.lanshare.pojo.file.MusicInfo;
 import com.fgsqw.lanshare.service.MusicService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.FileSearchUtils;
@@ -63,8 +63,8 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
     public DataCenterActivity dataCenterActivity;
     public MusicAdapter musicAdapter;
     private MLinearLayoutManager mLayoutManager;
-    private List<MessageAudioContent> musicList = new ArrayList<>();  // 当前文件所有列表
-    private final List<MessageAudioContent> selectMusicList = new LinkedList<>();   // 当前文件列表
+    private List<MusicInfo> musicList = new ArrayList<>();  // 当前文件所有列表
+    private final List<MusicInfo> selectMusicList = new LinkedList<>();   // 当前文件列表
 
     private MusicService musicService;
     private boolean isBound = false;
@@ -126,11 +126,11 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
     };
 
 
-    public List<MessageAudioContent> getMusicList() {
+    public List<MusicInfo> getMusicList() {
         return musicList;
     }
 
-    public List<MessageAudioContent> getSelectMusicList() {
+    public List<MusicInfo> getSelectMusicList() {
         return selectMusicList;
     }
 
@@ -167,7 +167,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
     @Override
     public void handleMessage(Message message) {
         if (message.what == LCmd.FRAGMENT_PLAY_MUSIC) {
-            MessageAudioContent musicInfo = (MessageAudioContent) message.obj;
+            MusicInfo musicInfo = (MusicInfo) message.obj;
             playFromMusicInfo(musicInfo);
         }
     }
@@ -195,15 +195,15 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
         musicAdapter.setOnClickListener(new MusicAdapter.OnClickListener() {
             @Override
             public void OnClick(int position) {//列表点击事件
-                MessageAudioContent fileSource = musicList.get(position);
+                MusicInfo fileSource = musicList.get(position);
 
             }
 
             @Override
             public void OnLongClick(int position) {//列表长按时间
-                MessageAudioContent fileInfo = musicList.get(position);
+                MusicInfo fileInfo = musicList.get(position);
 
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(getString(R.string.please_select_operation));
                 String[] items;
                 if (fileInfo.getLength() == 0) {
@@ -259,7 +259,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
 
             @Override
             public void OnImageClick(int position) {
-                MessageAudioContent fileSource = musicList.get(position);
+                MusicInfo fileSource = musicList.get(position);
                 listtab = position;
                 playFromMusicInfo(fileSource);
             }
@@ -342,7 +342,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
         });
     }
 
-    public void playFromMusicInfo(MessageAudioContent musicInfo) {
+    public void playFromMusicInfo(MusicInfo musicInfo) {
         if (musicInfo == null) {
             if (musicService.isPlaying()) {
                 musicService.pause();
@@ -358,7 +358,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
     public void play() {
         if (!isPlaying) {
             if (!musicList.isEmpty()) {
-                MessageAudioContent musicInfo = musicList.get(0);
+                MusicInfo musicInfo = musicList.get(0);
                 playFromMusicInfo(musicInfo);
             }
         } else {

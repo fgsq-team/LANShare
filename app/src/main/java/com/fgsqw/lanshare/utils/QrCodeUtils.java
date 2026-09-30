@@ -11,7 +11,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QrCodeUtils {
+public class QRcodeUtils {
 
     public static Bitmap qrcode(String content, int width, int height) {
         //HashMap设置二维码参数

@@ -1,105 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp">
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	android:background="#FDFDFD"
+	android:paddingLeft="10dp"
+	android:paddingRight="10dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="100dp"
+		android:gravity="center_horizontal">
 
-        <TextView
-            android:id="@+id/fsTextView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_music_selected" />
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="未选择音乐"
+			android:id="@+id/fsTextView1"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="40dp"
+			android:gravity="center">
 
-            <ImageButton
-                android:id="@+id/music_previous"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/previous" />
+			<ImageButton
+				android:layout_width="wrap_content"
+				style="?android:attr/buttonBarButtonStyle"
+				android:layout_height="wrap_content"
+				android:src="@drawable/previous"
+				android:id="@+id/music_previous"/>
 
-            <ImageButton
-                android:id="@+id/music_play"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/play" />
+			<ImageButton
+				android:layout_width="wrap_content"
+				style="?android:attr/buttonBarButtonStyle"
+				android:layout_height="wrap_content"
+				android:src="@drawable/play"
+				android:id="@+id/music_play"/>
 
-            <ImageButton
-                android:id="@+id/music_next"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/next" />
+			<ImageButton
+				android:layout_width="wrap_content"
+				style="?android:attr/buttonBarButtonStyle"
+				android:layout_height="wrap_content"
+				android:src="@drawable/next"
+				android:id="@+id/music_next"/>
 
-        </LinearLayout>
+		</LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:orientation="vertical">
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="match_parent"
+			android:layout_height="20dp">
 
-            <SeekBar
-                android:id="@+id/fsSeekBar1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+			<SeekBar
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/fsSeekBar1"/>
 
-        </LinearLayout>
+		</LinearLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp">
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingLeft="10dp"
+			android:paddingRight="10dp">
 
-            <TextView
-                android:id="@+id/fsTextView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:text="00:00" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="00:00"
+				android:layout_alignParentLeft="true"
+				android:id="@+id/fsTextView2"/>
 
-            <TextView
-                android:id="@+id/fsTextView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:text="00:00" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="00:00"
+				android:layout_alignParentRight="true"
+				android:id="@+id/fsTextView3"/>
 
-        </RelativeLayout>
+		</RelativeLayout>
 
-    </LinearLayout>
+	</LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+	<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="match_parent">
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/music_view_swip"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/music_view_recy"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scrollbarSize="5dp"
-                android:scrollbarThumbVertical="@color/textColorSecondary"
-                android:scrollbars="vertical" />
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    </LinearLayout>
+		<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+				android:id="@+id/music_view_swip"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent">
+			<androidx.recyclerview.widget.RecyclerView
+					android:id="@+id/music_view_recy"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:scrollbarSize="5dp"
+					android:scrollbarThumbVertical="@color/darkgrey"
+					android:scrollbars="vertical" />
+		</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+	</LinearLayout>
 </LinearLayout>
 

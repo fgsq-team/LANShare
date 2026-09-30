@@ -30,7 +30,7 @@ public class ThreadUtils {
         } else {
             EXECUTOR_SERVICE.submit(task);
             int activeCount = ((ThreadPoolExecutor) EXECUTOR_SERVICE).getActiveCount();
-//            Log.i(TAG, "activeThreadCount:" + activeCount);
+            Log.i(TAG, "activeThreadCount:" + activeCount);
         }
 
     }

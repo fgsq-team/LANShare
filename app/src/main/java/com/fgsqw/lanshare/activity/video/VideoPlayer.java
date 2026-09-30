@@ -12,7 +12,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
 import com.fgsqw.lanshare.toast.T;
 import com.maning.mnvideoplayerlibrary.player.MNViderPlayer;
 
@@ -63,7 +63,7 @@ public class VideoPlayer extends BaseActivity {
 
     }
 
-    public static void toPreviewVideoActivity(Activity activity, MessageFileContent images) {
+    public static void toPreviewVideoActivity(Activity activity, FileInfo images) {
         if (images != null) {
             File name = new File(images.getPath());
             Intent intent = new Intent(activity, VideoPlayer.class);

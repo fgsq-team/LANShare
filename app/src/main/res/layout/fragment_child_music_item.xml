@@ -13,7 +13,7 @@
 		android:layout_width="50dp"
 		android:layout_height="50dp"
 		android:layout_centerVertical="true"
-		android:id="@+id/fileTitleImageView"
+		android:id="@+id/filetitleImageView"
         android:clickable="true"
         android:focusable="true"/>
 
@@ -21,21 +21,21 @@
 		android:layout_width="5dp"
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"
-		android:layout_toRightOf="@+id/fileTitleImageView"
-		android:id="@+id/fileTitleView"/>
+		android:layout_toRightOf="@+id/filetitleImageView"
+		android:id="@+id/filetitleView"/>
 
 	<LinearLayout
 		android:orientation="vertical"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_toRightOf="@+id/fileTitleView"
+		android:layout_toRightOf="@+id/filetitleView"
 		android:layout_centerVertical="true">
 
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="大小"
-			android:id="@+id/titleTextView"/>
+			android:id="@+id/titlrTextView"/>
 
 	</LinearLayout>
 

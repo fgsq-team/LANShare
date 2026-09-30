@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.activity;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +10,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.*;
 import android.view.View;
-
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
@@ -57,7 +54,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     LinearLayout setting_media_sync;
     LinearLayout setting_save_files_path;
     LinearLayout setting_default_select_only_one_device;
-    LinearLayout setting_theme; // 添加主题设置项
 
     Switch setting_not_recv_dialog_switch;
     Switch setting_open_media_switch;
@@ -87,7 +83,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     TextView tv_tcp_port;
     TextView tv_udp_port;
     TextView setting_activity_top_margin_num;
-    TextView tv_theme; // 添加主题显示文本
 
     PrefUtil prefUtil;
     boolean portUpdate = false;
@@ -128,7 +123,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         setting_save_files_category_path = bind(R.id.setting_save_files_category_path);
         setting_media_sync = bind(R.id.setting_media_sync);
         setting_default_select_only_one_device = bind(R.id.setting_default_select_only_one_device);
-        setting_theme = bind(R.id.setting_theme); // 绑定主题设置项
 
         setting_not_recv_dialog_switch = bind(R.id.setting_not_recv_dialog_switch);
         setting_open_media_switch = bind(R.id.setting_open_media_switch);
@@ -157,7 +151,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         tv_message_key = bind(R.id.tv_message_key);
         tv_tcp_port = bind(R.id.tv_tcp_port);
         tv_udp_port = bind(R.id.tv_udp_port);
-        tv_theme = bind(R.id.tv_theme); // 绑定主题显示文本
 
         setting_activity_top_margin_num = bind(R.id.setting_activity_top_margin_num);
 
@@ -186,7 +179,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         setting_save_files_category_path.setOnClickListener(this);
         setting_media_sync.setOnClickListener(this);
         setting_default_select_only_one_device.setOnClickListener(this);
-        setting_theme.setOnClickListener(this); // 设置主题项点击监听
 
         setting_not_recv_dialog_switch.setOnCheckedChangeListener(this);
         setting_open_media_switch.setOnCheckedChangeListener(this);
@@ -225,19 +217,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         } catch (Exception e) {
             LLog.error("error:", e);
         }
-        // 设置当前主题显示文本
-        int themeMode = prefUtil.getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        switch (themeMode) {
-            case AppCompatDelegate.MODE_NIGHT_YES:
-                tv_theme.setText(R.string.dark_theme);
-                break;
-            case AppCompatDelegate.MODE_NIGHT_NO:
-                tv_theme.setText(R.string.light_theme);
-                break;
-            default:
-                tv_theme.setText(R.string.follow_system);
-                break;
-        }
         setting_not_recv_dialog_switch.setChecked(prefUtil.getBoolean(PreConfig.NOT_RECV_DIALOG, true));
         setting_open_media_switch.setChecked(prefUtil.getBoolean(PreConfig.POEN_MEDIA_PLAYER, true));
         setting_media_select_model_switch.setChecked(prefUtil.getBoolean(PreConfig.MEDIA_SELECT_MODEL, false));
@@ -258,7 +237,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         setting_save_files_path_switch.setChecked(prefUtil.getBoolean(PreConfig.S_LAST_FILE_PATH, false));
         setting_save_files_category_path_switch.setChecked(prefUtil.getBoolean(PreConfig.SAVE_FILES_CATEGORY, false));
         setting_media_sync_switch.setChecked(prefUtil.getBoolean(PreConfig.MEDIA_SYNC, false));
-        setting_default_select_only_one_device_switch.setChecked(prefUtil.getBoolean(PreConfig.DEFAULT_SELECT_ONLY_ONE_DEVICE, true));
+        setting_default_select_only_one_device_switch.setChecked(prefUtil.getBoolean(PreConfig.DEFAULT_SELECT_ONLY_ONE_DEVICE, false));
         tv_tcp_port.setText(String.valueOf(prefUtil.getInt(PreConfig.TCP_PORT, Config.DEFAULT_FILE_SERVER_PORT)));
         tv_udp_port.setText(String.valueOf(prefUtil.getInt(PreConfig.UDP_PORT, Config.DEFAULT_UDP_PORT)));
         setting_activity_top_margin_seekbar.setProgress(prefUtil.getInt(PreConfig.ACTIVITY_TOP_MARGIN, 0));
@@ -271,10 +250,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         switch (v.getId()) {
             case R.id.setting_exit_img: {
                 finish();
-            }
-            case R.id.setting_theme: {
-                showThemeSelectDialog();
-                break;
             }
             case R.id.setting_dev_name: {
                 EditTextDialog editTextDialog = new EditTextDialog(this, false, getString(R.string.set_dev_name), prefUtil.getString(PreConfig.USER_NAME));
@@ -617,47 +592,5 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         if (seekBar.getId() == R.id.setting_activity_top_margin_seekbar) {
             prefUtil.saveInt(PreConfig.ACTIVITY_TOP_MARGIN, seekBar.getProgress());
         }
-    }
-
-    /**
-     * 显示主题选择对话框
-     */
-    private void showThemeSelectDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
-        builder.setTitle(R.string.theme_setting);
-        String[] themes = {getString(R.string.light_theme), getString(R.string.dark_theme), getString(R.string.follow_system)};
-        int selectedTheme = prefUtil.getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        int selectedIndex;
-        switch (selectedTheme) {
-            case AppCompatDelegate.MODE_NIGHT_YES:
-                selectedIndex = 1;
-                break;
-            case AppCompatDelegate.MODE_NIGHT_NO:
-                selectedIndex = 0;
-                break;
-            default:
-                selectedIndex = 2;
-                break;
-        }
-        builder.setSingleChoiceItems(themes, selectedIndex, (dialog, which) -> {
-            int themeMode;
-            switch (which) {
-                case 0: // 浅色主题
-                    themeMode = AppCompatDelegate.MODE_NIGHT_NO;
-                    break;
-                case 1: // 深色主题
-                    themeMode = AppCompatDelegate.MODE_NIGHT_YES;
-                    break;
-                default: // 跟随系统
-                    themeMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
-                    break;
-            }
-            prefUtil.saveInt(PreConfig.THEME_MODE, themeMode);
-            AppCompatDelegate.setDefaultNightMode(themeMode);
-            tv_theme.setText(themes[which]);
-            dialog.dismiss();
-        });
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.show();
     }
 }

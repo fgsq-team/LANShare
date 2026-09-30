@@ -30,7 +30,7 @@ public class InfoDialog extends BaseDialog implements View.OnClickListener {
     private String rightButtonText;
 
     public InfoDialog(@NonNull Context context) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
     }
 
     public InfoDialog(@NonNull Context context, int themeResId) {

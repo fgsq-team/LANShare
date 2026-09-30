@@ -26,19 +26,12 @@ import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.Token;
 import com.fgsqw.lanshare.pojo.file.*;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
 import com.fgsqw.lanshare.pojo.message.MessageContent;
-import com.fgsqw.lanshare.pojo.message.MessageDownloadInfoContent;
 import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
-import com.fgsqw.lanshare.pojo.message.MessageStreamContent;
 import com.fgsqw.lanshare.pojo.network.MediaResult;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
-import com.fgsqw.stream.SingleUploadInputStream;
-import com.fgsqw.websocket.WebSocketServer;
 
 
 import java.io.File;
@@ -48,7 +41,6 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.Semaphore;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipOutputStream;
@@ -89,14 +81,14 @@ public class LHttpServer {
                     continue;
                 }
                 String subPath = f.getPath().substring(beginIndex);
-                ZipUtils.compressFiles(f, subPath, zipOutputStream);
+                ZipUtils.zipFiles(f, subPath, zipOutputStream);
             }
         } else {
             if (!file.canRead()) {
                 return;
             }
             String subPath = file.getPath().substring(beginIndex);
-            ZipUtils.compressFiles(file, subPath, zipOutputStream);
+            ZipUtils.zipFiles(file, subPath, zipOutputStream);
         }
 
     }
@@ -206,12 +198,12 @@ public class LHttpServer {
                 return;
             }
             for (String path : paths) {
-                if (HttpServer.pathMatches(path, request.getRequestPath())) {
+                if (httpServer.pathMatches(path, request.getRequestUrl())) {
                     String token;
-                    if (request.getRequestMethod().equalsIgnoreCase(HttpConstant.METHOD_POST)) {
+                    if (request.getRequestMethod().equalsIgnoreCase(HttpConstant.POST_METHOD)) {
                         token = request.getHeaderValue("token");
                     } else {
-                        token = request.getQueryParam("token");
+                        token = request.getPathParam("token");
                     }
                     if (token == null) {
                         throw new L302Exception(App.getResString(R.string.web_access_denied), "/");
@@ -236,8 +228,8 @@ public class LHttpServer {
 
         // 文件分享
         httpServer.addPath("/sharefile/*", (request, response) -> {
-            String uuid = request.getQueryParam("uuid");
-            MessageDownloadInfoContent fileInfo = fileShareDBUtil.queryShare(uuid);
+            String uuid = request.getPathParam("uuid");
+            DownloadInfo fileInfo = fileShareDBUtil.queryShare(uuid);
             if (fileInfo == null) {
                 throw new L404Exception();
             }
@@ -262,23 +254,19 @@ public class LHttpServer {
 
         // 文件上传
         httpServer.addPath("/chatUploadFile", (request, response) -> {
-            String address = request.getQueryParam("address");
+            String address = request.getPathParam("address");
             Device device = lanService.getOnLineDevices().get(address);
             if (device == null) {
                 response.write500();
                 return;
             }
-            // 初始许可为0
-            Semaphore semaphore = new Semaphore(0);
-            SingleUploadInputStream uploadInputStream = request.getSingleUploadInputStream();
-            MessageStreamContent streamInfo = new MessageStreamContent(uploadInputStream);
+            Request.SingleUploadInputStream uploadInputStream = request.getSingleUploadInputStream();
+            StreamInfo streamInfo = new StreamInfo(uploadInputStream);
             streamInfo.setName(uploadInputStream.getFileName());
             streamInfo.setLength(uploadInputStream.getFileSize());
-            streamInfo.setSemaphore(semaphore);
             Device from = new Device();
             from.setDevName(request.getClientIP());
             lanService.fileSendSync(from, device, Collections.singletonList(streamInfo));
-            semaphore.acquire();
             response.writeString("文件上传成功，大小: " + FileUtil.computeSize(uploadInputStream.getFileSize()));
         });
 
@@ -288,7 +276,7 @@ public class LHttpServer {
             if (!file.exists()) {
                 file.mkdirs();
             }
-            Request.UploadResult uploadResult = request.transferUploadFile(file.getPath());
+            Request.UploadResult uploadResult = request.readUploadBody2Stream(file.getPath());
             String fileName = uploadResult.getFileName();
             Long fileSize = uploadResult.getFileSize();
             String filePath = uploadResult.getFilePath();
@@ -379,11 +367,11 @@ public class LHttpServer {
 
         // app列表
         httpServer.addPath("/apps", (request, response) -> {
-            List<MessageApkContent> apkFileList = AnyData.apkFileList;
+            List<ApkInfo> apkFileList = AnyData.apkFileList;
             if (apkFileList != null) {
                 JSONObject resault = new JSONObject();
                 JSONArray array = new JSONArray();
-                for (MessageApkContent apkInfo : apkFileList) {
+                for (ApkInfo apkInfo : apkFileList) {
                     JSONObject apk = new JSONObject();
                     apk.put("name", apkInfo.getName());
                     apk.put("packageName", apkInfo.getPackageName());
@@ -397,17 +385,17 @@ public class LHttpServer {
 
         // app图标
         httpServer.addPath("/appicon", (request, response) -> {
-            String packageName = request.getQueryParam("packageName");
+            String packageName = request.getPathParam("packageName");
             byte[] bytes = apkIconDBUtil.queryIconByPackageName(packageName);
             response.writeBytes(bytes, HttpConstant.STREAM_CONTEXT_IMAGE);
         });
 
         // 相册图片
         httpServer.addPath("/imageload/*", (request, response) -> {
-            String index = request.getQueryParam("index");
+            String index = request.getPathParam("index");
             MediaResult mediaResult = AnyData.mediaResult;
-            Map<Integer, MessageMediaContent> allMediaMap = mediaResult.getAllMediaMap();
-            MessageMediaContent mediaInfo = allMediaMap.get(Integer.valueOf(index));
+            Map<Integer, MediaInfo> allMediaMap = mediaResult.getAllMediaMap();
+            MediaInfo mediaInfo = allMediaMap.get(Integer.valueOf(index));
             if (mediaInfo != null) {
                 Bitmap imageThumbnail;
                 if (mediaInfo.isVideo()) {
@@ -415,7 +403,7 @@ public class LHttpServer {
                 } else {
                     imageThumbnail = ImageUtils.getImageThumbnail(mediaInfo.getPath(), 200, 200);
                 }
-                imageThumbnail.compress(Bitmap.CompressFormat.PNG, 100, response.getBodyOutputStream(HttpConstant.STREAM_CONTEXT_IMAGE));
+                imageThumbnail.compress(Bitmap.CompressFormat.PNG, 100, response.getOutputStream(HttpConstant.STREAM_CONTEXT_IMAGE));
             } else {
                 response.write404();
             }
@@ -423,7 +411,7 @@ public class LHttpServer {
 
         // 获取图片
         httpServer.addPath("/images/*", (request, response) -> {
-            String path = request.getRequestPath();
+            String path = request.getRequestUrl();
             String filePath = "web";
             filePath += path;
             InputStream open = lanService.getAssets().open(filePath);
@@ -455,30 +443,29 @@ public class LHttpServer {
             }
             boolean showHiddenFiles = App.getPrefUtil().getBoolean(PreConfig.SHOW_HIDDEN_FILES, false);
             try {
-                MessageFileContent fs = new MessageFileContent();
+                FileInfo fs = new FileInfo();
                 fs.setPath(file.getPath());
                 int fileSortMethod = App.getPrefUtil().getInt(PreConfig.FILE_SORT_METHOD, 0);
-                List<MessageFileContent> fileList = FileSearchUtils.getFileList(fs, showHiddenFiles, fileSortMethod, lanService);
+                List<FileInfo> fileList = FileSearchUtils.getFileList(fs, showHiddenFiles, fileSortMethod, lanService);
                 JSONObject object = new JSONObject();
                 object.put("path", file.getAbsolutePath());
                 JSONArray jsonArray = new JSONArray();
                 if (!fileList.isEmpty()) {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    for (MessageFileContent fileSource : fileList) {
+                    for (FileInfo fileSource : fileList) {
                         String name = fileSource.getName();
                         if (showHiddenFiles) {
                             if (name.startsWith(".")) {
                                 continue;
                             }
                         }
-                        boolean isDirectory = fileSource instanceof MessageFolderContent;
                         JSONObject item = new JSONObject();
                         item.put("name", name);
                         item.put("length", fileSource.getLength());
                         item.put("path", fileSource.getPath());
-                        item.put("isFile", !isDirectory);
+                        item.put("isFile", fileSource.isFile());
                         item.put("time", dateFormat.format(fileSource.getTime()));
-                        item.put("isDirectory", isDirectory);
+                        item.put("isDirectory", !fileSource.isFile());
                         jsonArray.add(item);
                     }
                 }
@@ -492,7 +479,7 @@ public class LHttpServer {
 
         // 下载压缩后的文件
         httpServer.addPath("/downloadZipFile", (request, response) -> {
-            String tempFile = request.getQueryParam("tempFile");
+            String tempFile = request.getPathParam("tempFile");
             File file = new File(lanService.getExternalCacheDir().getPath() + "/" + tempFile);
             if (file.exists()) {
                 response.writeFile(file);
@@ -535,19 +522,19 @@ public class LHttpServer {
                 if (isDirectory) {
                     int index = data.getIntValue("index");
                     PhotoFolder photoFolder = photoFolders.get(index);
-                    List<MessageMediaContent> images = photoFolder.getImages();
-                    for (MessageMediaContent image : images) {
+                    List<MediaInfo> images = photoFolder.getImages();
+                    for (MediaInfo image : images) {
                         File file = new File(image.getPath());
-                        ZipUtils.compressFiles(file, photoFolder.getName() + "/" + file.getName(), zipOutputStream);
+                        ZipUtils.zipFiles(file, photoFolder.getName() + "/" + file.getName(), zipOutputStream);
                     }
                 } else {
                     int index = data.getIntValue("index");
                     int subIndex = data.getIntValue("subIndex");
                     PhotoFolder photoFolder = photoFolders.get(index);
-                    List<MessageMediaContent> images = photoFolder.getImages();
-                    MessageMediaContent image = images.get(subIndex);
+                    List<MediaInfo> images = photoFolder.getImages();
+                    MediaInfo image = images.get(subIndex);
                     File file = new File(image.getPath());
-                    ZipUtils.compressFiles(file, photoFolder.getName() + "/" + file.getName(), zipOutputStream);
+                    ZipUtils.zipFiles(file, photoFolder.getName() + "/" + file.getName(), zipOutputStream);
                 }
             }
             zipOutputStream.finish();
@@ -569,9 +556,9 @@ public class LHttpServer {
                 if (folderIndex == -1) {
                     for (int i = 0; i < mediaResult.getmFolders().size(); i++) {
                         PhotoFolder photoFolder = mediaResult.getmFolders().get(i);
-                        List<MessageMediaContent> images = photoFolder.getImages();
+                        List<MediaInfo> images = photoFolder.getImages();
                         if (images != null && !images.isEmpty()) {
-                            MessageMediaContent mediaInfo = photoFolder.getImages().get(0);
+                            MediaInfo mediaInfo = photoFolder.getImages().get(0);
                             if (mediaInfo != null) {
                                 JSONObject folder = new JSONObject();
                                 folder.put("name", photoFolder.getName() + "(" + photoFolder.getImages().size() + ")");
@@ -587,9 +574,9 @@ public class LHttpServer {
                     }
                 } else {
                     PhotoFolder photoFolder = mediaResult.getmFolders().get(folderIndex);
-                    List<MessageMediaContent> images = photoFolder.getImages();
+                    List<MediaInfo> images = photoFolder.getImages();
                     for (int i = 0; i < images.size(); i++) {
-                        MessageMediaContent mediaInfo = images.get(i);
+                        MediaInfo mediaInfo = images.get(i);
                         JSONObject folder = new JSONObject();
                         folder.put("name", mediaInfo.getName());
                         folder.put("path", mediaInfo.getPath());
@@ -611,7 +598,7 @@ public class LHttpServer {
 
         // apk文件下载
         httpServer.addPath("/apkfile/*", (request, response) -> {
-            String packageName = request.getQueryParam("packageName");
+            String packageName = request.getPathParam("packageName");
             String path = apkIconDBUtil.queryPathByPackageName(packageName);
             if (path == null) {
                 response.write404();
@@ -627,7 +614,7 @@ public class LHttpServer {
 
         // 文件下载
         httpServer.addPath("/file/*", (request, response) -> {
-            String path = request.getQueryParam("path");
+            String path = request.getPathParam("path");
             File file = new File(path);
             if (file.exists()) {
                 response.writeFile(file);
@@ -638,7 +625,7 @@ public class LHttpServer {
 
         // drawable下载图片映射
         httpServer.addPath("/drawable", (request, response) -> {
-            String name = request.getQueryParam("name");
+            String name = request.getPathParam("name");
             Resources r = lanService.getResources();
             int resource = ImageUtils.getResource(name);
             String resourceName = ImageUtils.getResourceName(resource);
@@ -649,15 +636,17 @@ public class LHttpServer {
 
         // LANShare webSocket 通讯服务
         httpServer.addPath("/wss", (request, response) -> {
-            String headerValue = request.getHeaderValue("Sec-WebSocket-Key");
-            WebSocketServer webSocketServer = new WebSocketServer(headerValue, request.getSocket());
+            WebSocketServer webSocketServer = new WebSocketServer(request, response);
             webSocketServers.add(webSocketServer);
-            String token = request.getQueryParam("token");
+            String token = request.getPathParam("token");
             Token t = tokenDBUtil.queryByToken(token);
             Device webDevice = new Device();
             String ip = request.getClientIP();
             int port = request.getSocket().getPort();
             webDevice.setDevIP(ip);
+            // 浏览器可能通过 IPv6 地址访问（ip 含冒号），必须同步设置标志，
+            // 否则 Device.isIPv4 默认 true，后续 getDevice/subNet 解析 IPv6 会闪退。
+            webDevice.setIPv4(!ip.contains(":"));
             webDevice.setDevPort(port);
             webDevice.setDevName(t.getName());
             webDevice.setDevMode(Device.WEB);
@@ -665,10 +654,10 @@ public class LHttpServer {
             webDevice.setWebSocketServer(webSocketServer);
             String address = webDevice.getDevIP() + ":" + webDevice.getDevPort();
 
-            lanService.onLineWebDevices.put(address, webDevice);
-//            lanService.addDevice(
-//                    webDevice
-//            );
+            lanService.onLineWebDevices.put(address,webDevice);
+            lanService.addDevice(
+                    webDevice
+            );
 
 //            LHttpServer.sendDeviceList();
             try {
@@ -717,7 +706,7 @@ public class LHttpServer {
 
         // 主页
         httpServer.addPath("/css/*", (request, response) -> {
-            String path = request.getRequestPath();
+            String path = request.getRequestUrl();
             String filePath = "web";
             filePath += path;
             InputStream open = lanService.getAssets().open(filePath);
@@ -730,7 +719,7 @@ public class LHttpServer {
         });
 
         httpServer.addPath("/js/*", (request, response) -> {
-            String path = request.getRequestPath();
+            String path = request.getRequestUrl();
             String filePath = "web";
             filePath += path;
             InputStream open = lanService.getAssets().open(filePath);
@@ -768,7 +757,7 @@ public class LHttpServer {
         return httpServer;
     }
 
-    public void startHttpServer() throws Exception {
+    public void startHttpServer() throws IOException {
         httpServer.start();
     }
 

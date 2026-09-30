@@ -2,16 +2,15 @@ package com.fgsqw.lanshare.base;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.fgsqw.lanshare.R;
-
 public class BaseDialog extends Dialog {
     public BaseDialog(@NonNull Context context) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
     }
 
     public BaseDialog(@NonNull Context context, int themeResId) {
@@ -25,5 +24,6 @@ public class BaseDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 }
