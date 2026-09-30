@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/bottom_nar_layout"
     android:layout_width="match_parent"
+    android:id="@+id/bottom_nar_layout"
     android:layout_height="60dp"
-    android:background="@color/bottomBackgroundColor"
     android:gravity="center_vertical"
-
     android:orientation="horizontal">
 
     <LinearLayout
@@ -18,8 +16,8 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        android:gravity="center"
         android:nextFocusUp="@+id/chat_et_content"
+        android:gravity="center"
         android:orientation="vertical">
 
 
@@ -34,7 +32,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/record"
-            android:textColor="@color/bottomTextColor"
             android:textSize="10sp"
             tools:ignore="SmallSp" />
 
@@ -50,8 +47,8 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        android:gravity="center"
         android:nextFocusUp="@+id/chat_et_content"
+        android:gravity="center"
         android:orientation="vertical">
 
         <ImageView
@@ -64,7 +61,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send"
-            android:textColor="@color/bottomTextColor"
             android:textSize="10sp"
             tools:ignore="SmallSp" />
 
@@ -79,9 +75,9 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        android:gravity="center"
-        android:nextFocusRight="@+id/main_scan_code"
         android:nextFocusUp="@+id/chat_et_content"
+        android:nextFocusRight="@+id/main_scan_code"
+        android:gravity="center"
         android:orientation="vertical">
 
         <ImageView
@@ -95,7 +91,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/file"
-            android:textColor="@color/bottomTextColor"
             android:textSize="10sp"
             tools:ignore="SmallSp" />
 

@@ -1,8 +1,6 @@
 package com.fgsqw.lanshare.utils;
 
 
-import com.fgsqw.utils.ByteUtil;
-
 import java.nio.charset.Charset;
 
 //数据包装类
@@ -13,8 +11,8 @@ public class DataEnc {
     private int byteLen = 0;
 
     private int cmd;
-    private int count = 0;
-    private int length = 0;
+    private int count;
+    private int length;
     private boolean canEncData = false;
 
     public DataEnc() {

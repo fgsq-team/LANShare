@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LANShare</string>
+    <string name="app_name">局域网互传</string>
     <string name="default_ip">Default IP</string>
     <string name="record">Record</string>
     <string name="send">Send</string>
@@ -196,6 +196,7 @@
     <string name="need_notification_permission">Synchronized notifications require notification permission; please
         manually authorize this permission
     </string>
+    <string name="app_list_permission_denied">App list permission denied; only partial apps are shown</string>
     <string name="storage_permission_request_successful">Storage permission request successful</string>
     <string name="storage_permission_request_failed">Storage permission request failed</string>
     <string name="broadcast_service_reception_exception">Broadcast service reception exception; please check if the
@@ -321,20 +322,5 @@
     <string name="audio">Audio</string>
     <string name="close">Close</string>
     <string name="upload_logs">Upload logs</string>
-    <string name="select_need_update_apps">Select apps that need to be updated</string>
-
-    <string name="theme_setting">Theme Setting</string>
-    <string name="theme_setting_detail">Theme Setting Details</string>
-    <string name="light_theme">Light Theme</string>
-    <string name="dark_theme">Dark Theme</string>
-    <string name="follow_system">Follow System</string>
-    <string name="is_backing_up">Backing Up</string>
-    <string name="set_global_top_margin">Set Global Top Margin</string>
-    <string name="default_select_device_when_sending_files">Default select this device when sending files to single device</string>
-    <string name="default_select_device_when_single_device">Default select this device for file sending when only one device in device list</string>
-    <string name="no_music_selected">No music selected</string>
-    <string name="no_new_media_to_sync">No new media to sync</string>
-    <string name="cancel_file_transfer_success">Cancel file transfer success</string>
-    <string name="file_send_failed">File send failed</string>
 
 </resources>

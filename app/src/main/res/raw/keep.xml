@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_image_un_select,@drawable/ic_phone,@drawable/ic_win,@drawable/rc_file_blue_icon,@drawable/rc_file_icon_file" />

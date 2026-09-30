@@ -37,7 +37,7 @@ public class FragmentFiles extends BaseFragment implements ViewPager.OnPageChang
     FragmentAppList fragmentAppList;
     FragmentFileList fragmentFileList;
     FragmentMediaList fragmentMediaList;
-//    FragmentTest fragmentTest;
+    FragmentTest fragmentTest;
     FragmentSearch fragmentSearch;
     FragmentMusic fragmentMusic;
 
@@ -65,6 +65,7 @@ public class FragmentFiles extends BaseFragment implements ViewPager.OnPageChang
         fragments.add(fragmentFileList);
         fragmentSearch = new FragmentSearch();
         fragments.add(fragmentSearch);
+
        /* fragTest = new FragTest();
         fragments.add(fragTest);*/
     }
@@ -88,7 +89,7 @@ public class FragmentFiles extends BaseFragment implements ViewPager.OnPageChang
     public void initView() {
         tabFiles = view.findViewById(R.id.tab_files);
         viewPager = view.findViewById(R.id.pag_files);
-        dataCenterActivity.setShowUpdateApps(currentPosition == 0);
+        dataCenterActivity.setShowUdateApps(currentPosition == 0);
     }
 
     public void initFragment() {
@@ -119,7 +120,7 @@ public class FragmentFiles extends BaseFragment implements ViewPager.OnPageChang
     @Override
     public void onPageSelected(int position) {
         currentPosition = position;
-        dataCenterActivity.setShowUpdateApps(position == 0);
+        dataCenterActivity.setShowUdateApps(position == 0);
         dataCenterActivity.setSortFileTypeMenuVisible(position == 3);
         dataCenterActivity.setSearchFileTypesVisible(position == 4);
     }

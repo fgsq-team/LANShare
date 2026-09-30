@@ -6,6 +6,7 @@
     android:baselineAligned="false"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:background="@drawable/focused_background"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
@@ -39,6 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/name"
+            android:textColor="#000000"
             android:textSize="15sp" />
 
         <TextView
@@ -46,8 +48,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/size"
+            android:textColor="#939393"
             android:textSize="13sp"
-            android:textColor="@color/textColorSecondary"
             tools:ignore="SmallSp" />
 
 

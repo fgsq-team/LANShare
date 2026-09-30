@@ -1,12 +1,8 @@
 package com.fgsqw.lanshare;
 
 import android.app.Application;
-import android.os.Build;
-
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.fgsqw.lanshare.config.Config;
-import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.utils.LLog;
 import com.fgsqw.lanshare.utils.PrefUtil;
 import com.fgsqw.lanshare.utils.mUtil;
@@ -50,8 +46,6 @@ public class App extends Application {
         }
         LLog.debug("App Create");
         prefUtil = new PrefUtil(this);
-        int themeMode = prefUtil.getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        AppCompatDelegate.setDefaultNightMode(themeMode);
         app = this;
     }
 

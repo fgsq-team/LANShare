@@ -9,7 +9,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 
-public class TimeMsgHolder extends AbsMsgHolder {
+public class TimeMsgHolder extends MsgHolder {
 
     public TextView tvTime;
 
@@ -22,4 +22,27 @@ public class TimeMsgHolder extends AbsMsgHolder {
         tvTime = itemView.findViewById(R.id.chat_tv_time);
     }
 
+    public void setTextIsSelectable(boolean selectable) {
+        // empty function
+    }
+
+    public void setContentText(String text) {
+        // empty function
+    }
+
+    public void setHeaderRes(Context context, RequestOptions options, int h) {
+        // empty function
+    }
+
+    public void setUserText(String text) {
+        // empty function
+    }
+
+    public void setCheckVisibility(boolean check) {
+        // empty function
+    }
+
+    public void setCheck(boolean check) {
+        // empty function
+    }
 }

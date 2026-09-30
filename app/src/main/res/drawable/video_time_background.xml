@@ -3,8 +3,8 @@
     <item>
         <shape>
             <gradient
-                android:startColor="@color/videoTimeTextColor"
-                android:endColor="@color/videoTimeTextColor"
+                android:startColor="@color/black"
+                android:endColor="@color/black"
                 android:angle="0.5" />
             <corners
                 android:radius="5dp" />

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.fgsqw.lanshare">
+          xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature
             android:name="android.hardware.camera"
@@ -10,7 +9,8 @@
     <!-- 通知权限 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <!-- app列表获取权限 -->
+    <!-- app列表获取权限（MIUI/HyperOS 系统授权弹窗用，官方权限名为 com.android 前缀） -->
+    <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS"/>
     <uses-permission android:name="android.permission.GET_INSTALLED_APPS"/>
     <uses-permission
             android:name="android.permission.QUERY_ALL_PACKAGES"
@@ -90,11 +90,12 @@
             android:name="com.fgsqw.lanshare.App"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
+            android:largeHeap="true"
             android:preserveLegacyExternalStorage="true"
             android:requestLegacyExternalStorage="true"
-            android:roundIcon="@mipmap/ic_launcher_round_1"
+            android:roundIcon="@mipmap/ic_launcher"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme"
+            android:theme="@style/AppThemeLightNoActionBar"
             android:usesCleartextTraffic="true"
             tools:targetApi="m">
         <activity

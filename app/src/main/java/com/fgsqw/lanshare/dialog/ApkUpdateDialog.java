@@ -1,22 +1,37 @@
 package com.fgsqw.lanshare.dialog;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-
+import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseDialog;
+import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.adapter.ApkUpdateDialogAdapter;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
+import com.fgsqw.lanshare.dialog.adapter.DeviceDialogAdapter;
+import com.fgsqw.lanshare.fragment.data.AnyData;
+import com.fgsqw.lanshare.pojo.Device;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
+import com.fgsqw.lanshare.service.LANService;
+import com.fgsqw.lanshare.utils.PrefUtil;
+import com.fgsqw.lanshare.utils.ThreadUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ApkUpdateDialog extends BaseDialog implements ApkUpdateDialogAdapter.OnClickListener,
         CompoundButton.OnCheckedChangeListener, View.OnClickListener {
@@ -26,10 +41,10 @@ public class ApkUpdateDialog extends BaseDialog implements ApkUpdateDialogAdapte
     private LinearLayout appUpdateLayoutCancel;
     private LinearLayout appUpdateLayoutConfirm;
     private OnUpdate onUpdate = null;
-    private List<MessageApkContent> fileList;
+    private List<ApkInfo> fileList;
 
-    public ApkUpdateDialog(@NonNull Context context,List<MessageApkContent> fileList) {
-        super(context, R.style.AlertDialogTheme);
+    public ApkUpdateDialog(@NonNull Context context,List<ApkInfo> fileList) {
+        super(context);
         this.fileList = fileList;
     }
 
@@ -106,6 +121,6 @@ public class ApkUpdateDialog extends BaseDialog implements ApkUpdateDialogAdapte
     }
 
     public interface OnUpdate {
-        void update(List<MessageApkContent> apkInfos);
+        void update(List<ApkInfo> apkInfos);
     }
 }

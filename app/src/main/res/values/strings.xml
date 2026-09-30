@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LANShare</string>
+    <string name="app_name">局域网互传</string>
     <string name="default_ip">默认IP</string>
     <string name="record">记录</string>
     <string name="send">发送</string>
@@ -161,6 +161,7 @@
     <string name="need_overlay_permission">安卓10以上需要申请悬浮窗权限才能开机自启</string>
     <string name="need_do_not_disturb_permission">控制静音操作需要勿扰权限，需要手动授权此权限</string>
     <string name="need_notification_permission">同步通知需要获取通知权限，需要手动授权此权限</string>
+    <string name="app_list_permission_denied">已拒绝获取应用列表权限，仅能显示部分应用</string>
     <string name="storage_permission_request_successful">存储权限申请成功</string>
     <string name="storage_permission_request_failed">存储权限申请失败</string>
     <string name="broadcast_service_reception_exception">广播服务接收异常,请检查参数是否正确</string>
@@ -260,17 +261,6 @@
     <string name="close">关闭</string>
     <string name="upload_logs">上传日志</string>
     <string name="select_need_update_apps">选择需要更新的应用</string>
-    <string name="theme_setting">设置主题</string>
-    <string name="theme_setting_detail">设置主题详情</string>
-    <string name="light_theme">光明</string>
-    <string name="dark_theme">暗黑</string>
-    <string name="follow_system">跟随系统</string>
-    <string name="is_backing_up">正在备份</string>
-    <string name="set_global_top_margin">设置全局顶部外边距</string>
-    <string name="default_select_device_when_sending_files">单个设备发送文件时默认选中此设备</string>
-    <string name="default_select_device_when_single_device">设备列表中只有一个设备时默认选中此设备发送文件</string>
-    <string name="no_music_selected">未选择音乐</string>
-    <string name="no_new_media_to_sync">没有新的媒体文件需要同步</string>
-    <string name="cancel_file_transfer_success">取消传输文件成功</string>
-    <string name="file_send_failed">发送文件失败</string>
+
+
 </resources>

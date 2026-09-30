@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -9,12 +8,12 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,9 +34,12 @@ import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.db.TokenDBUtil;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
-import com.fgsqw.lanshare.fragment.adapter.ChatAdapter;
+import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 import com.fgsqw.lanshare.fragment.adapter.viewolder.FileMsgHolder;
+import com.fgsqw.lanshare.fragment.adapter.viewolder.GPSMsgHolder;
 import com.fgsqw.lanshare.pojo.Device;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
 import com.fgsqw.lanshare.pojo.message.*;
 import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.service.LANService;
@@ -47,7 +49,6 @@ import com.fgsqw.lanshare.utils.*;
 import com.fgsqw.lanshare.db.MesssageDButil;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -57,9 +58,9 @@ import java.util.*;
  */
 public class FragmentChat extends BaseFragment implements View.OnClickListener,
         View.OnLongClickListener,
-        ChatAdapter.OnItemClickListener,
-        ChatAdapter.OnItemLongClickListener,
-        ChatAdapter.OnCheckedChangeListener {
+        ChatAdabper.OnItemClickListener,
+        ChatAdabper.OnItemLongClickListener,
+        ChatAdabper.OnCheckedChangeListener {
 
     public final static String TAG = "FragChat";
     public DataCenterActivity dataCenterActivity;
@@ -76,7 +77,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     // 消息列表视图
     private RecyclerView recyclerView;
     // 消息列表适配器
-    private ChatAdapter chatAdapter;
+    private ChatAdabper chatAdabper;
     // 消息列表布局管理器
     private LinearLayoutManager layoutManager;
     // 消息列表
@@ -91,8 +92,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     private TokenDBUtil tokenDBUtil;
 
     private boolean isFragmentVisible = false;
-    int pageSize = 20;
-    int pageCount = 0;
+
 
     @Override
     public void onResume() {
@@ -127,7 +127,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     public void handleMessage(Message msg) {
         if (msg.what == LCmd.SERVICE_IF_RECIVE_FILES) {
             /* 是否接收文件弹窗 */
-            showIsReceiveDialog(msg);
+            showIsRecyDialog(msg);
         } else if (msg.what == LCmd.SERVICE_GET_APPS) {
             /* 新增一些数据 */
             showGetAppDialog(msg);
@@ -205,31 +205,34 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
 
     public void updateLocalItemFolderCount(Message message) {
         MessageFolderContent folderContent = (MessageFolderContent) message.obj;
-        int dataPosition = chatAdapter.getDataPosition(folderContent);
+        int dataPosition = chatAdabper.getDataPosition(folderContent);
         FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
         if (viewHolder != null) {
             viewHolder.content.setText(folderContent.getContent());
         } else {
-            chatAdapter.notifyItemChanged(dataPosition);
+            chatAdabper.notifyItemChanged(dataPosition);
         }
     }
 
     public void updateLocalItemProgress(Message message) {
         MessageFileContent fileContent = (MessageFileContent) message.obj;
         // 获取数据在列表中的下标
-        int dataPosition = chatAdapter.getDataPosition(fileContent);
+        int dataPosition = chatAdabper.getDataPosition(fileContent);
         // 获取视图并更新视图数据
         FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
+        android.util.Log.d("SPD", "onProgress pos=" + dataPosition + " vh=" + (viewHolder != null)
+                + " p=" + fileContent.getProgress() + " id=" + fileContent.getId());
         if (viewHolder != null) {
             if (viewHolder.progressBar.getVisibility() == View.GONE) {
                 viewHolder.progressBar.setVisibility(View.VISIBLE);
                 viewHolder.stateTv.setVisibility(View.GONE);
-                viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.itemTextColor));
+                viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.item_text));
                 fileContent.setStatus(MessageContent.IN);
             }
             viewHolder.progressBar.setProgress(fileContent.getProgress());
+            viewHolder.updateSpeed(fileContent);
         } else {
-            chatAdapter.notifyItemChanged(dataPosition);
+            chatAdabper.notifyItemChanged(dataPosition);
         }
     }
 
@@ -238,11 +241,11 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
      * @comments 显示确认接收消息弹窗
      * @date 2024/5/22 11:01
      */
-    public void showIsReceiveDialog(Message msg) {
+    public void showIsRecyDialog(Message msg) {
         RecvFileCallback recvFileCallback = (RecvFileCallback) msg.obj;
-        Device device = recvFileCallback.getFileTransfer().getFromDevice();
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme)
-                .setIcon(R.mipmap.ic_launcher_round)
+        Device device = recvFileCallback.getDevice();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+                .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(false)
                 .setTitle(getString(R.string.accept_files))
                 .setMessage(String.format(getString(R.string.accept_file_from_x), device.getDevName(), msg.arg1))
@@ -264,9 +267,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     public void showGetAppDialog(Message msg) {
         Object[] dataObject = (Object[]) msg.obj;
         Device device = (Device) dataObject[0];
-        List<MessageFileContent> fileInfos = (List<MessageFileContent>) dataObject[1];
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme)
-                .setIcon(R.mipmap.ic_launcher_round)
+        List<FileInfo> fileInfos = (List<FileInfo>) dataObject[1];
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+                .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(false)
                 .setTitle("APP更新请求")
                 .setMessage(String.format("是否同意%s的获取的%d个APP更新请求", device.getDevName(), fileInfos.size()))
@@ -288,7 +291,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
             view = inflater.inflate(R.layout.fragment_chat, container, false);
             initView();
             initList();
-            loadData();
+            initData();
         }
         mInputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         ViewGroup parent = (ViewGroup) view.getParent();
@@ -297,37 +300,6 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         }
         return view;
     }
-
-    public class TopScrollListener extends RecyclerView.OnScrollListener {
-        private boolean isTop = false;
-
-        @Override
-        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            boolean atTop = isAtTop(recyclerView);
-            // 只有当状态从非顶部变为顶部时才触发事件
-            if (!isTop && atTop) {
-                isTop = true;
-                Log.d(TAG, "已滚动到顶部" + (pageCount));
-                loadData();
-            } else if (isTop && !atTop) {
-                isTop = false;
-            }
-        }
-
-        private boolean isAtTop(RecyclerView recyclerView) {
-            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-            if (layoutManager != null) {
-                int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
-                if (firstVisiblePosition == 0) {
-                    View firstVisibleView = layoutManager.getChildAt(0);
-                    return firstVisibleView != null && firstVisibleView.getTop() == 0;
-                }
-            }
-            return false;
-        }
-    }
-
 
     public void initView() {
         recyclerView = view.findViewById(R.id.chat_recy);
@@ -339,20 +311,17 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         btnSned.setOnClickListener(this);
         btnSned.setOnLongClickListener(this);
         devSelectLTv.setOnClickListener(this);
-
-        recyclerView.addOnScrollListener(new TopScrollListener());
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
     public void initList() {
         layoutManager = new LinearLayoutManager(getContext());
-        chatAdapter = new ChatAdapter(this);
-        chatAdapter.setOnItemClickListener(this);
-        chatAdapter.setOnItemLongClickListener(this);
-        chatAdapter.setOnCheckedChangeListener(this);
+        chatAdabper = new ChatAdabper(this);
+        chatAdabper.setOnItemClickListener(this);
+        chatAdabper.setOnItemLongClickListener(this);
+        chatAdabper.setOnCheckedChangeListener(this);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(chatAdapter);
+        recyclerView.setAdapter(chatAdabper);
         recyclerView.setOnTouchListener((view, motionEvent) -> {
             hideSoftInput();
             editContent.clearFocus();
@@ -374,19 +343,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
      * @comments 初始化消息
      * @date 2024/5/22 11:01
      */
-    @SuppressLint("NotifyDataSetChanged")
-    public void loadData() {
-        int oldItemCount = chatAdapter.getItemCount();
-        List<MessageContent> messageContents = messsageDButil.queryMessage(pageSize, pageCount++);
-//        List<MessageContent> messageContents = messsageDButil.queryMessage();
-        // 将新数据插入到列表开头
-        messageContentList.addAll(0, messageContents);
-        chatAdapter.notifyDataSetChanged();
-        // 保持滚动位置
-        if (oldItemCount > 0 && !messageContents.isEmpty()) {
-            // 让RecyclerView保持在原来的滚动位置
-            layoutManager.scrollToPositionWithOffset(messageContents.size(), 0);
-        }
+    public void initData() {
+        List<MessageContent> messageContents = messsageDButil.queryMessage();
+        addListMessage(messageContents);
     }
 
     @Override
@@ -406,10 +365,12 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     @Override
     public void onItemClick(MessageContent messageContent, int position) {
         boolean POEN_MEDIA_PLAYER = prefUtil.getBoolean(PreConfig.POEN_MEDIA_PLAYER, true);
-        /*if (messageContent instanceof MessageGPSContent) {
-            MessageGPSContent messageGPSContent = (MessageGPSContent) messageContent;
-            MapUtils.openMap(getContext(), messageGPSContent);
-        } else */if (messageContent instanceof MessageStreamContent) {
+        if (messageContent instanceof MessageGPSContent) {
+            // GPS 位置消息：点击跳转系统地图
+            GPSMsgHolder.openMap(getContext(), (MessageGPSContent) messageContent);
+            return;
+        }
+        if (messageContent instanceof MessageStreamContent) {
             T.s((R.string.web_page_file_sharing_view_not_supported));
         } else if (messageContent instanceof MessageFileContent) {
             MessageFileContent fileContent = (MessageFileContent) messageContent;
@@ -417,14 +378,14 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
             if (fileContent.getStatus() == MessageContent.SUCCESS) {
                 if (POEN_MEDIA_PLAYER && messageContent instanceof MessageMediaContent) {
                     MessageMediaContent mediaContent = (MessageMediaContent) fileContent;
-                    MessageMediaContent mediaInfo = new MessageMediaContent();
+                    MediaInfo mediaInfo = new MediaInfo();
                     mediaInfo.setPath(mediaContent.getPath());
                     mediaInfo.setLength(mediaContent.getLength());
                     mediaInfo.setName(mediaContent.getContent());
                     if (mediaContent.isVideo()) {
                         VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                     } else {
-                        List<MessageMediaContent> mediaInfos = Collections.singletonList(mediaInfo);
+                        List<MediaInfo> mediaInfos = Collections.singletonList(mediaInfo);
                         ReviewImages.openActivity(getActivity(), mediaInfos, mediaInfos, false, 0, 1);
                     }
                 } else {
@@ -476,17 +437,18 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 } else {
                     if (messageContent instanceof MessageMediaContent) {
                         MessageMediaContent mediaContent = (MessageMediaContent) messageContent;
-                        MessageMediaContent fileSource = new MessageMediaContent();
-                        fileSource.setName(mediaContent.getName());
+                        MediaInfo fileSource = new MediaInfo();
+                        fileSource.setName(mediaContent.getContent());
                         fileSource.setPath(mediaContent.getPath());
                         fileSource.setLength(mediaContent.getLength());
                         dataCenterActivity.sendSingleFile(fileSource);
                     } else if (messageContent instanceof MessageFolderContent) {
                         MessageFolderContent folderContent = (MessageFolderContent) messageContent;
-                        MessageFolderContent fileSource = new MessageFolderContent();
-                        fileSource.setName(folderContent.getName());
+                        FileInfo fileSource = new FileInfo();
+                        fileSource.setName(folderContent.getContent());
                         fileSource.setPath(folderContent.getPath());
                         fileSource.setIsPreView(false);
+                        fileSource.setFile(false);
                         fileSource.setLength(folderContent.getLength());
                         dataCenterActivity.sendSingleFile(fileSource);
                     } else if (messageContent instanceof MessageFileContent) {
@@ -495,21 +457,22 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                             T.s("不支持外部分享文件重新发送");
                             return false;
                         }
-                        MessageFileContent fileSource = new MessageFileContent();
-                        fileSource.setName(fileContent.getName());
+                        FileInfo fileSource = new FileInfo();
+                        fileSource.setName(fileContent.getContent());
                         fileSource.setPath(fileContent.getPath());
                         fileSource.setIsPreView(false);
+                        fileSource.setFile(true);
                         fileSource.setLength(fileContent.getLength());
                         dataCenterActivity.sendSingleFile(fileSource);
                     }
 
                 }
             } else if (item.getItemId() == R.id.menu_multiple_select_del) {
-                chatAdapter.setCheckMode(true);
+                chatAdabper.setCheckMode(true);
                 dataCenterActivity.setDeleteMode(true);
             } else if (item.getItemId() == 777) {
                 messageContent.setTextSelection(!messageContent.isTextSelection());
-                chatAdapter.refresh();
+                chatAdabper.refresh();
             }
             return false;
         });
@@ -530,10 +493,8 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         }
         MessageFileContent fileContent = (MessageFileContent) messageContent;
         // 获取数据在列表中的下标
-        int dataPosition = chatAdapter.getDataPosition(messageContent);
-        if (dataPosition == -1) return;
-        if (fileContent.getViewType() == ChatAdapter.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdapter.TYPE_FILE_MSG_RIGHT
-                || fileContent.getViewType() == ChatAdapter.TYPE_MEDIA_MSG_LEFT || fileContent.getViewType() == ChatAdapter.TYPE_MEDIA_MSG_RIGHT) {
+        int dataPosition = chatAdabper.getDataPosition(messageContent);
+        if (fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdabper.TYPE_FILE_MSG_RIGHT) {
             // 获取视图并更新视图数据
             FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
             if (viewHolder != null) {
@@ -541,29 +502,25 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 if (fileContent.existStatus(MessageContent.IN)) {
                     viewHolder.progressBar.setVisibility(View.VISIBLE);
                     viewHolder.stateTv.setVisibility(View.GONE);
-                    viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.itemTextColor));
+                    viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.item_text));
                 } else {
                     viewHolder.progressBar.setVisibility(View.GONE);
                     viewHolder.stateTv.setVisibility(View.VISIBLE);
                     viewHolder.stateTv.setText(fileContent.getStateMessage());
                     if (fileContent.existStatus(MessageContent.SUCCESS)) {
-                        viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.itemTextColor));
+                        viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.item_text));
                     } else if (fileContent.existStatus(MessageContent.ERROR)) {
                         viewHolder.stateTv.setTextColor(Color.RED);
                     }
                 }
-            } /*else {
-                chatAdapter.notifyItemChanged(dataPosition);
-            }*/
-        } /*else {
-            chatAdapter.notifyItemChanged(dataPosition);
-        }*/
-        if (dataPosition != -1) {
-            chatAdapter.notifyItemChanged(dataPosition);
+                viewHolder.updateSpeed(fileContent);
+            } else {
+                chatAdabper.notifyItemChanged(dataPosition);
+            }
+        } else {
+            chatAdabper.notifyItemChanged(dataPosition);
         }
     }
-
-    int i = 0;
 
     public void addMessage(MessageContent messageContent, boolean save) {
         checkAndAddChatTime(messageContent.getId(), save);
@@ -572,8 +529,8 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         if (Config.SAVE_MESSAGE && save) {
             messsageDButil.addMessage(messageContent);
         }
-        chatAdapter.refresh();
-        recyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+        chatAdabper.refresh();
+        recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
         // 发送通知
         if (Config.MESSAGE_NOTIFICAION && !isFragmentVisible()) {
             NotificationUtils.showNotification(dataCenterActivity, messageContent.getUserName(), messageContent.getContent());
@@ -583,8 +540,8 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     @SuppressLint("NotifyDataSetChanged")
     public void addListMessage(List<MessageContent> messageContent) {
         messageContentList.addAll(messageContent);
-        chatAdapter.notifyDataSetChanged();
-        recyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+        chatAdabper.notifyDataSetChanged();
+        recyclerView.scrollToPosition(chatAdabper.getItemCount() - 1);
     }
 
     public void deleteBindTime(String bindId) {
@@ -607,17 +564,11 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         }
         if (messageContent instanceof MessageFileContent) {
             MessageFileContent fileContent = (MessageFileContent) messageContent;
-            ThreadUtils.runThread(() -> {
-                try {
-                    fileContent.cancelFileTransfer();
-                } catch (IOException e) {
-                    LLog.error("取消传输异常: ", e);
-                }
-            });
+            fileContent.setNextStep(false);
         }
         List<MessageContent> times = new ArrayList<>();
         for (MessageContent content : messageContentList) {
-            if (content.getViewType() == ChatAdapter.TYPE_TIME_MSG) {
+            if (content.getViewType() == ChatAdabper.TYPE_TIME_MSG) {
                 MessageTimeContent timeContent = (MessageTimeContent) content;
                 if (Objects.equals(messageContent.getId(), timeContent.getBindId())) {
                     times.add(content);
@@ -629,14 +580,14 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         // 移除数据
         messageContentList.remove(messageContent);
         // 更新列表
-        chatAdapter.refresh();
+        chatAdabper.refresh();
     }
 
 
     @Override
     public boolean onBack() {
-        if (chatAdapter.isCheckMode()) {
-            chatAdapter.setCheckMode(false);
+        if (chatAdabper.isCheckMode()) {
+            chatAdabper.setCheckMode(false);
             dataCenterActivity.setDeleteMode(false);
             return true;
         }
@@ -760,7 +711,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         messsageDButil.delMessage(next.getId());
                         iterator.remove();
                         for (MessageContent messageContent : list) {
-                            if (messageContent.getViewType() == ChatAdapter.TYPE_TIME_MSG) {
+                            if (messageContent.getViewType() == ChatAdabper.TYPE_TIME_MSG) {
                                 MessageTimeContent timeContent = (MessageTimeContent) messageContent;
                                 if (Objects.equals(next.getId(), timeContent.getBindId())) {
                                     times.add(timeContent);
@@ -774,7 +725,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                     messsageDButil.delMessage(next.getId());
                     iterator.remove();
                     for (MessageContent messageContent : list) {
-                        if (messageContent.getViewType() == ChatAdapter.TYPE_TIME_MSG) {
+                        if (messageContent.getViewType() == ChatAdabper.TYPE_TIME_MSG) {
                             MessageTimeContent timeContent = (MessageTimeContent) messageContent;
                             if (Objects.equals(next.getId(), timeContent.getBindId())) {
                                 times.add(timeContent);
@@ -787,7 +738,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         }
         messageContentList.removeAll(times);
         deleteList(messageContentList);
-        chatAdapter.refresh();
+        chatAdabper.refresh();
     }
 
     /**
@@ -804,7 +755,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 messsageDButil.delMessage(next.getId());
                 iterator.remove();
                 for (MessageContent messageContent : list) {
-                    if (messageContent.getViewType() == ChatAdapter.TYPE_TIME_MSG) {
+                    if (messageContent.getViewType() == ChatAdabper.TYPE_TIME_MSG) {
                         MessageTimeContent timeContent = (MessageTimeContent) messageContent;
                         if (Objects.equals(next.getId(), timeContent.getBindId())) {
                             times.add(timeContent);
@@ -816,7 +767,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         }
         messageContentList.removeAll(times);
         deleteList(messageContentList);
-        chatAdapter.refresh();
+        chatAdabper.refresh();
     }
 
     /**
@@ -833,7 +784,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 messsageDButil.delMessage(next.getId());
                 iterator.remove();
                 for (MessageContent messageContent : list) {
-                    if (messageContent.getViewType() == ChatAdapter.TYPE_TIME_MSG) {
+                    if (messageContent.getViewType() == ChatAdabper.TYPE_TIME_MSG) {
                         MessageTimeContent timeContent = (MessageTimeContent) messageContent;
                         if (Objects.equals(next.getId(), timeContent.getBindId())) {
                             times.add(timeContent);
@@ -845,16 +796,16 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         }
         messageContentList.removeAll(times);
         deleteList(messageContentList);
-        chatAdapter.refresh();
+        chatAdabper.refresh();
     }
 
     /**
      * 删除所有消息
      */
     public void deleteAllMessage() {
-        messsageDButil.deleteAllMessage();
+        messsageDButil.delListMessage(messageContentList);
         messageContentList.clear();
-        chatAdapter.refresh();
+        chatAdabper.refresh();
     }
 
     public void setEditContent(String editContent) {
@@ -862,7 +813,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     }
 
     public void messageDelete() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.please_select_operation));
         String[] items = new String[]{getString(R.string.clear_all_messages), getString(R.string.clear_all_text_messages), getString(R.string.clear_all_file_messages), getString(R.string.clear_all_deleted_file_messages)};
 
@@ -894,7 +845,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     }
 
     public void deleteSelectedMessages() {
-        chatAdapter.setCheckMode(false);
+        chatAdabper.setCheckMode(false);
         dataCenterActivity.setDeleteMode(false);
         List<MessageContent> list = new ArrayList<>(messageContentList);
         list.retainAll(checkedMessageList);
@@ -909,7 +860,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
             }
             messsageDButil.delMessage(messageContent.getId());
         }
-        chatAdapter.refresh();
+        chatAdabper.refresh();
         checkedMessageList.clear();
     }
 

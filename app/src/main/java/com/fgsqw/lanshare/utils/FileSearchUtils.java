@@ -15,26 +15,17 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
-
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.db.ApkIconDBUtil;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.file.*;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
-import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
-import com.fgsqw.lanshare.pojo.message.MessageUriContent;
 import com.fgsqw.lanshare.pojo.network.MediaResult;
 import com.fgsqw.lanshare.toast.T;
 import com.hjq.permissions.OnPermissionCallback;
@@ -43,6 +34,7 @@ import com.hjq.permissions.XXPermissions;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
 import static android.graphics.BitmapFactory.decodeResource;
@@ -77,7 +69,7 @@ public class FileSearchUtils {
                     MediaStore.Images.Media.SIZE + " > 0",
                     null,
                     MediaStore.Images.Media.DATE_ADDED);
-            List<MessageMediaContent> mediaInfos = new ArrayList<>();
+            List<MediaInfo> mediaInfos = new ArrayList<>();
             //读取扫描到的图片
             if (mCursor != null) {
                 while (mCursor.moveToNext()) {
@@ -95,10 +87,11 @@ public class FileSearchUtils {
                     long size = mCursor.getLong(index++);
                     //过滤未下载完成或者不存在的文件
                     if (size <= 0) continue;
-                    MessageMediaContent mediaInfo = new MessageMediaContent();
+                    MediaInfo mediaInfo = new MediaInfo();
                     mediaInfo.setName(name);
                     mediaInfo.setPath(path);
                     mediaInfo.setTime(time);
+                    mediaInfo.setFile(true);
                     mediaInfo.setLength(size);
                     mediaInfo.setGif("image/gif".equals(mimeType));
                     mediaInfos.add(mediaInfo);
@@ -118,7 +111,7 @@ public class FileSearchUtils {
     /**
      * 获取视频
      */
-    public static List<MessageMediaContent> loadVideoForSDCard(final Context context) {
+    public static List<MediaInfo> loadVideoForSDCard(final Context context) {
         long start = System.currentTimeMillis();
         //扫描图片
         Uri mImageUri;
@@ -136,7 +129,7 @@ public class FileSearchUtils {
                 MediaStore.Images.Media.SIZE + " > 0",
                 null,
                 MediaStore.Images.Media.DATE_ADDED);
-        List<MessageMediaContent> mediaInfos = new ArrayList<>();
+        List<MediaInfo> mediaInfos = new ArrayList<>();
         //读取扫描到的视频
         if (mCursor != null) {
             while (mCursor.moveToNext()) {
@@ -155,13 +148,14 @@ public class FileSearchUtils {
                     continue;
                 }
                 long size = mCursor.getLong(index++);
-                MessageMediaContent mediaInfo = new MessageMediaContent();
+                MediaInfo mediaInfo = new MediaInfo();
                 mediaInfo.setName(name);
                 mediaInfo.setMediaId(mediaId);
                 mediaInfo.setPath(path);
                 mediaInfo.setTime(time);
                 mediaInfo.setLength(size);
                 mediaInfo.setGif(false);
+                mediaInfo.setFile(true);
                 mediaInfo.setVideo(true);
                 mediaInfo.setVideoTime(/*getVideoDuration(path)*/timeParse(duration));
                 mediaInfos.add(mediaInfo);
@@ -175,7 +169,8 @@ public class FileSearchUtils {
 
 
     public static void loadMusicForSDCard(final Context context, boolean refresh) {
-        Lock lock = StringLockManager.getStringLock("loadApp");
+        // 注意：这里原先误用了 loadApp 的锁，导致音乐扫描会把应用列表扫描堵住 1~2 秒
+        Lock lock = StringLockManager.getStringLock("loadMusic");
         lock.lock();
         try {
             long start = System.currentTimeMillis();
@@ -196,7 +191,7 @@ public class FileSearchUtils {
                     MediaStore.Images.Media.SIZE + " > 0",
                     null,
                     null);
-            List<MessageAudioContent> mediaInfos = new ArrayList<>();
+            List<MusicInfo> mediaInfos = new ArrayList<>();
             //读取扫描到的视频
             if (mCursor != null) {
                 while (mCursor.moveToNext()) {
@@ -217,13 +212,14 @@ public class FileSearchUtils {
                     if (!"downloading".equals(getExtensionName(path)) && checkImgExists(path)) {
                         long length = new File(path).length();
                         if (length <= 0) continue;
-                        MessageAudioContent mediaInfo = new MessageAudioContent();
+                        MusicInfo mediaInfo = new MusicInfo();
                         mediaInfo.setName(name);
                         mediaInfo.setMediaId(mediaId);
                         mediaInfo.setPath(path);
                         mediaInfo.setTime(time);
                         mediaInfo.setLength(length);
-                        mediaInfo.setAudioTime(timeParse(duration));
+                        mediaInfo.setFile(true);
+                        mediaInfo.setMusicTime(timeParse(duration));
 //                        mediaInfo.setMusicTime(getAudioPlayTime(path));
                         mediaInfos.add(mediaInfo);
                     }
@@ -242,55 +238,157 @@ public class FileSearchUtils {
 
 
     /**
+     * 加载apk列表回调
+     */
+    public interface AppLoadCallback {
+        /** 列表元数据和首屏图标已就绪，可以显示列表 */
+        void onListReady();
+
+        /** [start, end) 区间的图标已在后台补齐 */
+        void onIconsLoaded(int start, int end);
+    }
+
+    /**
+     * 首屏先加载的图标数量，先塞满一屏，其余图标后台懒加载
+     */
+    private static final int FIRST_BATCH_ICON_COUNT = 20;
+
+    /**
+     * 懒加载任务代数，列表重新加载后旧的后台任务自动失效
+     */
+    private static final AtomicInteger APK_LOAD_GENERATION = new AtomicInteger();
+
+    /**
      * 加载apk列表
      */
     public static void loadApp(Context context, boolean refresh) {
+        loadApp(context, refresh, null, false);
+    }
+
+    /**
+     * 入口展示专用：列表已有直接回调；撞上预加载刚扫完也直接复用结果，避免重复扫描
+     */
+    public static void loadAppIfNeeded(Context context, AppLoadCallback callback) {
+        loadApp(context, true, callback, true);
+    }
+
+    /**
+     * 加载apk列表：快速构建元数据并只同步加载首屏20个图标，
+     * 剩余图标丢到后台懒加载，APP再多列表也能秒开
+     */
+    public static void loadApp(Context context, boolean refresh, AppLoadCallback callback) {
+        loadApp(context, refresh, callback, false);
+    }
+
+    /** 最近一次扫描完成时间，供 loadAppIfNeeded 判定结果是否还新鲜 */
+    private static volatile long lastAppScanEndMs;
+
+    private static void loadApp(Context context, boolean refresh, AppLoadCallback callback, boolean reuseIfFresh) {
         Lock lock = StringLockManager.getStringLock("loadApp");
         lock.lock();
         try {
             if (!refresh) {
                 return;
             }
-            ApkIconDBUtil apkIconDBUtil = new ApkIconDBUtil(context);
-            List<PackageInfo> packages;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packages = context.getPackageManager().getInstalledPackages(PackageManager.PackageInfoFlags.of(0));
-            } else {
-                packages = context.getPackageManager().getInstalledPackages(0);
+            // 排队等锁期间预加载已扫完：直接用现成结果，不再重复扫描
+            if (reuseIfFresh && AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty()
+                    && System.currentTimeMillis() - lastAppScanEndMs < 5000) {
+                if (callback != null) {
+                    callback.onListReady();
+                }
+                return;
             }
-            List<MessageApkContent> apkInfoList = new ArrayList<>();
+            // 递增代数，让上一轮还没跑完的后台懒加载立刻停止
+            final int generation = APK_LOAD_GENERATION.incrementAndGet();
+            ApkIconDBUtil apkIconDBUtil = new ApkIconDBUtil(context);
+            List<PackageInfo> packages = context.getPackageManager().getInstalledPackages(0);
+            List<ApkInfo> apkInfoList = new ArrayList<>(packages.size());
             PrefUtil prefUtil = App.getPrefUtil();
             boolean flag = prefUtil.getBoolean(PreConfig.DISPLAY_SYSTEM_APP, false);
             for (PackageInfo packageInfo : packages) {
                 if (flag || (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    MessageApkContent apkInfo = new MessageApkContent();
-                    String packageName = packageInfo.packageName;
-                    long length = new File(packageInfo.applicationInfo.sourceDir).length();
-                    apkInfo.setName(packageInfo.applicationInfo.loadLabel(context.getPackageManager()) + ".apk");
-                    apkInfo.setLength(length);
-                    apkInfo.setPath(packageInfo.applicationInfo.sourceDir);
-                    apkInfo.setPackageName(packageName);
-                    apkInfo.setVersionCode(packageInfo.versionCode);
-                    apkInfo.setVersionName(packageInfo.versionName);
-                    byte[] png = apkIconDBUtil.queryIconByPackageName(packageName);
-                    if (png == null) {
-                        Drawable drawable = packageInfo.applicationInfo.loadIcon(context.getPackageManager());
-                        Bitmap bitmap = ImageUtils.drawableToBitmap(drawable);
-                        png = ImageUtils.bitmap2PngBytes(bitmap);
-                        apkIconDBUtil.addIcon(packageName, apkInfo.getPath(), png);
-                    }
-                    apkInfo.setIcon(png);
-                    apkInfoList.add(apkInfo);
+                    apkInfoList.add(buildApkInfo(context, packageInfo));
                 }
             }
             // 忽略大小写排序软件
             Collections.sort(apkInfoList, (a, b) ->
                     String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName())
             );
+            // 只同步加载首屏图标，让列表能先显示出来
+            int firstBatch = Math.min(FIRST_BATCH_ICON_COUNT, apkInfoList.size());
+            for (int i = 0; i < firstBatch; i++) {
+                loadIconForApkInfo(context, apkIconDBUtil, apkInfoList.get(i));
+            }
             AnyData.apkFileList = apkInfoList;
+            lastAppScanEndMs = System.currentTimeMillis();
+            if (callback != null) {
+                callback.onListReady();
+            }
+            // 剩余图标后台懒加载，每补齐一小批回调刷新对应位置
+            if (firstBatch < apkInfoList.size()) {
+                final Context appContext = context.getApplicationContext();
+                final ApkIconDBUtil iconDB = apkIconDBUtil;
+                final List<ApkInfo> list = apkInfoList;
+                final int from = firstBatch;
+                ThreadUtils.runThread(() -> {
+                    final int batchSize = 8;
+                    int pos = from;
+                    while (pos < list.size()) {
+                        if (APK_LOAD_GENERATION.get() != generation) {
+                            return;
+                        }
+                        int end = Math.min(pos + batchSize, list.size());
+                        for (int i = pos; i < end; i++) {
+                            loadIconForApkInfo(appContext, iconDB, list.get(i));
+                        }
+                        if (APK_LOAD_GENERATION.get() != generation) {
+                            return;
+                        }
+                        if (callback != null) {
+                            callback.onIconsLoaded(pos, end);
+                        }
+                        pos = end;
+                    }
+                });
+            }
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * 构建APP元数据，图标延后加载
+     */
+    private static ApkInfo buildApkInfo(Context context, PackageInfo packageInfo) {
+        ApkInfo apkInfo = new ApkInfo();
+        String packageName = packageInfo.packageName;
+        long length = new File(packageInfo.applicationInfo.sourceDir).length();
+        apkInfo.setName(packageInfo.applicationInfo.loadLabel(context.getPackageManager()) + ".apk");
+        apkInfo.setLength(length);
+        apkInfo.setPath(packageInfo.applicationInfo.sourceDir);
+        apkInfo.setPackageName(packageName);
+        apkInfo.setVersionCode(packageInfo.versionCode);
+        apkInfo.setVersionName(packageInfo.versionName);
+        return apkInfo;
+    }
+
+    /**
+     * 加载单个APP图标：优先读数据库缓存，没有则解码APK图标并入库
+     */
+    private static void loadIconForApkInfo(Context context, ApkIconDBUtil apkIconDBUtil, ApkInfo apkInfo) {
+        String packageName = apkInfo.getPackageName();
+        byte[] png = apkIconDBUtil.queryIconByPackageName(packageName);
+        if (png == null) {
+            try {
+                Drawable drawable = context.getPackageManager().getApplicationIcon(packageName);
+                Bitmap bitmap = ImageUtils.drawableToBitmap(drawable);
+                png = ImageUtils.bitmap2PngBytes(bitmap);
+                apkIconDBUtil.addIcon(packageName, apkInfo.getPath(), png);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        apkInfo.setIcon(png);
     }
 
 
@@ -313,7 +411,7 @@ public class FileSearchUtils {
      * @param fileInfolist 扫描储存list
      * @return 总文件大小
      */
-    public static long scanPathFileSize(File path, List<MessageFileContent> fileInfolist) {
+    public static long scanPathFileSize(File path, List<FileInfo> fileInfolist) {
         long totalSize = 0;
         if (path.exists() && path.canRead()) {
             if (path.isDirectory()) {
@@ -324,52 +422,19 @@ public class FileSearchUtils {
                     }
                 }
             } else if (path.isFile() && path.length() > 0) {
-                MessageFileContent content = new MessageFileContent();
-                content.setName(path.getName());
-                content.setPath(path.getPath());
-                content.setLength(path.length());
-                fileInfolist.add(content);
-                totalSize += content.getLength();
+                FileInfo fileInfo = new FileInfo();
+                fileInfo.setName(path.getName());
+                fileInfo.setPath(path.getPath());
+                fileInfo.setLength(path.length());
+                fileInfolist.add(fileInfo);
+                totalSize += fileInfo.getLength();
             }
         }
         return totalSize;
     }
 
-    /**
-     * 递归创建 FileItem 对象
-     * @param file 文件或文件夹
-     * @param relativePath 相对路径
-     */
-    public static void createFileItem(File file, String relativePath, MessageFolderContent fileItem, List<MessageFileContent> fileItems) {
-        if (file.isDirectory()) {
-            MessageFolderContent item = new MessageFolderContent();
-            // 文件名使用相对路径
-            item.setName(relativePath.isEmpty() ? file.getName() : relativePath);
-            item.setPath(file.getAbsolutePath());
-            // 文件夹类型为 0
-            // 递归处理子文件和文件夹
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File child : files) {
-                    // 构建子项的相对路径
-                    String childRelativePath = relativePath.isEmpty() ?
-                            child.getName() : relativePath + File.separator + child.getName();
-                    createFileItem(child, childRelativePath, fileItem, fileItems);
-                }
-            }
-        } else {
-            MessageFileContent item = new MessageFileContent();
-            // 文件名使用相对路径
-            item.setName(relativePath.isEmpty() ? file.getName() : relativePath);
-            item.setPath(file.getAbsolutePath());
-            // 文件类型为 1
-            item.setLength(file.length());
-            fileItems.add(item);
-            fileItem.setLength(fileItem.getLength() + item.getLength());
-        }
-    }
 
-    public static long scanUriPathFileSize(DocumentFile documentFile, String path, List<MessageFileContent> fileInfolist) {
+    public static long scanUriPathFileSize(DocumentFile documentFile, String path, List<FileInfo> fileInfolist) {
         long totalSize = 0;
         if (documentFile.exists() && documentFile.canRead()) {
             if (documentFile.isDirectory()) {
@@ -378,7 +443,7 @@ public class FileSearchUtils {
                     totalSize += scanUriPathFileSize(file, path + "/" + documentFile.getName(), fileInfolist);
                 }
             } else if (documentFile.isFile() && documentFile.length() > 0) {
-                MessageUriContent fileInfo = new MessageUriContent(documentFile.getUri());
+                UriFileInfo fileInfo = new UriFileInfo(documentFile.getUri());
                 fileInfo.setName(documentFile.getName());
                 fileInfo.setLength(documentFile.length());
                 fileInfo.setPath(path + "/" + documentFile.getName());
@@ -414,12 +479,12 @@ public class FileSearchUtils {
     /**
      * 把图片按文件夹拆分，第一个文件夹保存所有的图片
      */
-    private static MediaResult splitFolder(Context context, List<MessageMediaContent> photoList, List<MessageMediaContent> videoList) {
+    private static MediaResult splitFolder(Context context, List<MediaInfo> photoList, List<MediaInfo> videoList) {
         MediaResult mediaResult = new MediaResult();
         List<PhotoFolder> folders = new ArrayList<>();
-        List<MessageMediaContent> allMedia = new ArrayList<>();
-        Map<Long, MessageMediaContent> mediaInfoMap = new HashMap<>();
-        Map<Integer, MessageMediaContent> allMediaMap = new HashMap<>();
+        List<MediaInfo> allMedia = new ArrayList<>();
+        Map<Long, MediaInfo> mediaInfoMap = new HashMap<>();
+        Map<Integer, MediaInfo> allMediaMap = new HashMap<>();
         allMedia.addAll(photoList);
         allMedia.addAll(videoList);
 
@@ -432,7 +497,7 @@ public class FileSearchUtils {
         folders.add(allVideos);
         int index = 0;
         if (!allMedia.isEmpty()) {
-            for (MessageMediaContent mediaInfo : allMedia) {
+            for (MediaInfo mediaInfo : allMedia) {
                 mediaInfoMap.put(mediaInfo.getMediaId(), mediaInfo);
                 mediaInfo.setIndex(index);
                 allMediaMap.put(index++, mediaInfo);
@@ -445,7 +510,7 @@ public class FileSearchUtils {
             }
         }
         if (!videoList.isEmpty()) {
-            for (MessageMediaContent mediaInfo : videoList) {
+            for (MediaInfo mediaInfo : videoList) {
                 mediaInfoMap.put(mediaInfo.getMediaId(), mediaInfo);
                 mediaInfo.setIndex(index);
                 allMediaMap.put(index++, mediaInfo);
@@ -476,15 +541,15 @@ public class FileSearchUtils {
         return null;
     }
 
-    public static List<MessageFileContent> getFileList(MessageFileContent f, boolean showHiddenFiles, int sortMethod, Context context) {
+    public static List<FileInfo> getFileList(FileInfo f, boolean showHiddenFiles, int sortMethod, Context context) {
         // 如果File为null则默认为跟目录
         if (f == null) {
-            f = new MessageFolderContent();
+            f = new FileInfo();
             f.setPath(PermissionsUtils.ROOT_PATH);
         }
-        Comparator<MessageFileContent> comparator;
+        Comparator<FileInfo> comparator;
         if (sortMethod == 0) {
-            comparator = MessageFileContent::compareTo;
+            comparator = FileInfo::compareTo;
         } else if (sortMethod == 1) {
             comparator = (o1, o2) -> Long.compare(o1.getLength(), o2.getLength());
         } else if (sortMethod == 2) {
@@ -496,11 +561,11 @@ public class FileSearchUtils {
         } else if (sortMethod == 5) {
             comparator = (o1, o2) -> Double.compare(Math.signum(o2.getTime() - o1.getTime()), 0);
         } else {
-            comparator = MessageFileContent::compareTo;
+            comparator = FileInfo::compareTo;
         }
         Resources res = context.getResources();
-        List<MessageFileContent> fileList = new ArrayList<>();
-        List<MessageFileContent> dirList = new ArrayList<>();
+        List<FileInfo> fileList = new ArrayList<>();
+        List<FileInfo> dirList = new ArrayList<>();
         if (VersionUtils.isAfterAndroid13() && PermissionsUtils.isAndroidData(f.getPath())) {
             boolean isGet = XXPermissions.isGranted(context, Permission.MANAGE_EXTERNAL_STORAGE);
             //已有权限则返回
@@ -518,7 +583,6 @@ public class FileSearchUtils {
                             public void onGranted(List<String> permissions, boolean all) {
 //                                T.s("成功");
                             }
-
                             @Override
                             public void onDenied(List<String> permissions, boolean never) {
                                 T.s((R.string.please_authorize_file_access_permission_or_else_software));
@@ -532,13 +596,13 @@ public class FileSearchUtils {
                 if (file.exists()) {
                     String name = file.getName();
                     Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
-                    MessageFolderContent fileSource = new MessageFolderContent();
+                    FileInfo fileSource = new FileInfo();
                     fileSource.setName(mUtil.stringSize(name, 20));
                     fileSource.setPath(file.getPath());
-                    fileSource.setPreviewBitmap(bmp);
+                    fileSource.setPreView(bmp);
                     fileSource.setIsPreView(false);
                     fileSource.setTime(file.lastModified());
-//                    fileSource.setFile(false);
+                    fileSource.setFile(false);
                     dirList.add(fileSource);
                 }
             }
@@ -572,19 +636,19 @@ public class FileSearchUtils {
                             }
                         }
                         Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
-                        MessageUriContent uriFileInfo = new MessageUriContent(documentFile.getUri());
+                        UriFileInfo uriFileInfo = new UriFileInfo(documentFile.getUri());
                         uriFileInfo.setName(mUtil.stringSize(name, 20));
                         uriFileInfo.setPath(f.getPath() + "/" + name);
-                        uriFileInfo.setPreviewBitmap(bmp);
+                        uriFileInfo.setPreView(bmp);
                         uriFileInfo.setIsPreView(false);
                         uriFileInfo.setTime(documentFile.lastModified());
                         uriFileInfo.setFile(false);
                         dirList.add(uriFileInfo);
                     } else if (documentFile.isFile()) {
-                        MessageUriContent uriFileInfo = new MessageUriContent(documentFile.getUri());
+                        UriFileInfo uriFileInfo = new UriFileInfo(documentFile.getUri());
                         uriFileInfo.setName(name);
                         uriFileInfo.setPath(f.getPath() + "/" + name);
-                        uriFileInfo.setPreviewBitmap(decodeResource(res, R.drawable.ic_file_file));
+                        uriFileInfo.setPreView(decodeResource(res, R.drawable.ic_file_file));
                         uriFileInfo.setIsPreView(false);
                         uriFileInfo.setTime(documentFile.lastModified());
                         uriFileInfo.setLength(documentFile.length());
@@ -594,7 +658,7 @@ public class FileSearchUtils {
                 }
             }
 
-        } else if (f instanceof MessageFolderContent) {  // 如果是文件夹
+        } else if (!f.isFile()) {  // 如果是文件夹
             File fe = new File(f.getPath());
             if (fe.canRead()) {  // 如果能读取
                 // 保存当前路径
@@ -610,13 +674,13 @@ public class FileSearchUtils {
                             }
                         }
                         Bitmap bmp = decodeResource(res, R.drawable.ic_folder);
-                        MessageFolderContent fileSource = new MessageFolderContent();
+                        FileInfo fileSource = new FileInfo();
                         fileSource.setName(mUtil.stringSize(name, 20));
                         fileSource.setPath(file.getPath());
-                        fileSource.setPreviewBitmap(bmp);
+                        fileSource.setPreView(bmp);
                         fileSource.setIsPreView(false);
                         fileSource.setTime(file.lastModified());
-//                        fileSource.setFile(false);
+                        fileSource.setFile(false);
                         dirList.add(fileSource);
                         // 如果是文件
                     } else if (file.isFile()) {
@@ -653,14 +717,14 @@ public class FileSearchUtils {
                         } else {
                             bmp = decodeResource(res, R.drawable.ic_file_file);
                         }
-                        MessageFileContent fileSource = new MessageFileContent();
+                        FileInfo fileSource = new FileInfo();
                         fileSource.setName(name);
                         fileSource.setPath(file.getPath());
-                        fileSource.setPreviewBitmap(bmp);
+                        fileSource.setPreView(bmp);
                         fileSource.setIsPreView(isPreView);
                         fileSource.setTime(file.lastModified());
                         fileSource.setLength(file.length());
-//                        fileSource.setFile(true);
+                        fileSource.setFile(true);
                         fileList.add(fileSource);
                     }
                 }
@@ -674,12 +738,12 @@ public class FileSearchUtils {
         Collections.sort(dirList, comparator);
         dirList.addAll(fileList);
         // 添加返回上一级在顶部
-        MessageFileContent fileSource = new MessageFileContent();
+        FileInfo fileSource = new FileInfo();
         fileSource.setName("...");
-        fileSource.setPreviewBitmap(decodeResource(res, R.drawable.ic_folder_upload));
+        fileSource.setPreView(decodeResource(res, R.drawable.ic_folder_upload));
         fileSource.setIsPreView(false);
         fileSource.setPath(f.getPath());
-        dirList.add(0, fileSource);
+        dirList.add(0,fileSource);
         return dirList;
     }
 

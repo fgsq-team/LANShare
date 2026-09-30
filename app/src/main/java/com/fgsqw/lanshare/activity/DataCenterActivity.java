@@ -4,11 +4,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.*;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
-import android.net.IpConfiguration;
-import android.net.LinkProperties;
-import android.net.Network;
-import android.net.NetworkCapabilities;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.*;
 import android.view.*;
@@ -18,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.alibaba.fastjson.JSON;
@@ -38,9 +34,9 @@ import com.fgsqw.lanshare.fragment.FragmentChat;
 import com.fgsqw.lanshare.fragment.FragmentFiles;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.Device;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageUriContent;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
+import com.fgsqw.lanshare.pojo.file.UriFileInfo;
 import com.fgsqw.lanshare.pojo.network.NetInfo;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.service.MusicService;
@@ -54,7 +50,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -92,12 +87,12 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private LinearLayout bottomDeleteMessage;
     private ImageView bottomDeleteMessageImage;
     private final List<BaseFragment> fragmentList = new ArrayList<>();
-    private static BaseFragment currentFragment;
+    private BaseFragment currentFragment;
     // 文件
     private FragmentFiles fragmentFiles;
     // 消息
     private FragmentChat fragmentChat;
-    public List<MessageFileContent> fileSelects = new LinkedList<>();
+    public List<FileInfo> fileSelects = new LinkedList<>();
 
     @SuppressLint("HandlerLeak")
     private final Handler handler = new Handler() {
@@ -108,14 +103,14 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     };
 
     private String ip;
-    private int checkCount = 0;
+    private int ckeckCount = 0;
     private int whichFragmentIndex = -1;
     private boolean showSortFileMenu = false;
     private boolean showSearchFileTypes = false;
-    private boolean showUpdateApps = false;
-    private boolean showSortFileMenu_backup = false;
-    private boolean showSearchFileTypes_backup = false;
-    private boolean showUpdateApps_backup = false;
+    private boolean showUdateApps = false;
+    private boolean showSortFileMenu_buckup = false;
+    private boolean showSearchFileTypes_buckup = false;
+    private boolean showUdateApps_buckup = false;
 
     /**
      * @author fgsq
@@ -127,14 +122,18 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             Object[] objs = (Object[]) message.obj;
             Device device = (Device) objs[0];
             JSONArray jsonArray = (JSONArray) objs[1];
-            List<MessageApkContent> apkInfos = new ArrayList<>();
-            List<MessageApkContent> apkFileList = AnyData.apkFileList;
+            List<ApkInfo> apkInfos = new ArrayList<>();
+            List<ApkInfo> apkFileList = AnyData.apkFileList;
+            if (apkFileList == null) {
+                // MIUI 未授权应用列表权限时预加载被跳过，这里兜底防空指针
+                apkFileList = new ArrayList<>();
+            }
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 String packageName = jsonObject.getString("packageName");
-                for (MessageApkContent apkInfo : apkFileList) {
+                for (ApkInfo apkInfo : apkFileList) {
                     if (packageName.equals(apkInfo.getPackageName())) {
-                        MessageApkContent clone = new MessageApkContent();
+                        ApkInfo clone = new ApkInfo();
                         clone.setVersionCode(apkInfo.getVersionCode());
                         clone.setVersionName(apkInfo.getVersionName());
                         clone.setName(apkInfo.getName());
@@ -166,17 +165,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     @SuppressLint("InlinedApi")
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        //设置底部导航颜色
-        setBottomNavigationBarColor();
         initView();
         // 初始化碎片
         initFragment();
@@ -206,6 +198,14 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         mUtil.checkUpdate(false, false, this);
     }
 
+    private void initFragment() {
+        fragmentChat = new FragmentChat();
+        fragmentList.add(fragmentChat);
+        fragmentFiles = new FragmentFiles();
+        fragmentList.add(fragmentFiles);
+        switchFragment(0);
+    }
+
     public void updateIP(String ip) {
         mainIp.setText(ip);
         this.ip = ip;
@@ -219,7 +219,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     private void processExtraData() {
         Intent intent = getIntent();
-        List<MessageFileContent> externalShareFiles = getExternalShareFiles(intent);
+        List<FileInfo> externalShareFiles = getExternalShareFiles(intent);
         if (!externalShareFiles.isEmpty()) {
             sendFiles(externalShareFiles);
         }
@@ -234,7 +234,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
     public void showExitDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setIcon(R.mipmap.ic_launcher_round)
+                .setIcon(R.mipmap.ic_launcher)
                 .setCancelable(false)
                 .setTitle(getString(R.string.port_changes_notice))
                 .setMessage(R.string.port_changes_require_a_software_restart)
@@ -262,13 +262,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
        /* if (tcpPort != Config.FILE_SERVER_PORT || udpPort != Config.UDP_PORT) {
             showExitDialog();
         }*/
-    }
-
-    // 设置底部导航颜色
-    public void setBottomNavigationBarColor() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setNavigationBarColor(getResources().getColor(R.color.bottomBackgroundColor));
-        }
     }
 
     public void initView() {
@@ -312,47 +305,17 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    private void initFragment() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        // 通过FragmentManager查找已存在的Fragment实例
-        FragmentChat existingFragmentChat = (FragmentChat) fragmentManager.findFragmentByTag("FragmentChat");
-        if (existingFragmentChat != null) {
-            fragmentChat = existingFragmentChat;
-        } else {
-            fragmentChat = new FragmentChat();
-        }
-        // 检查fragmentList是否已包含fragmentChat，避免重复添加
-        if (!fragmentList.contains(fragmentChat)) {
-            fragmentList.add(fragmentChat);
-        }
-        FragmentFiles existingFragmentFiles = (FragmentFiles) fragmentManager.findFragmentByTag("FragmentFiles");
-        int whichFragment = 0;
-        if (existingFragmentFiles != null) {
-            fragmentFiles = existingFragmentFiles;
-            whichFragment = fragmentFiles.isHidden() ? 0 : 1;
-        } else {
-            fragmentFiles = new FragmentFiles();
-        }
-        // 检查fragmentList是否已包含fragmentFiles，避免重复添加
-        if (!fragmentList.contains(fragmentFiles)) {
-            fragmentList.add(fragmentFiles);
-        }
-        switchFragment(whichFragment);
-    }
-
-
     private void switchFragment(int whichFragment) {
         if (whichFragmentIndex == whichFragment) {
             return;
         }
-        whichFragmentIndex = whichFragment;
         if (whichFragment == 0) {
             tvRecord.setTextColor(getResources().getColor(R.color.text_select));
-            tvFiles.setTextColor(getResources().getColor(R.color.textNotSelectColor));
+            tvFiles.setTextColor(getResources().getColor(R.color.text_not_select));
             imgRecord.setImageResource(R.drawable.ic_select_record);
             imgFiles.setImageResource(R.drawable.ic_file);
         } else {
-            tvRecord.setTextColor(getResources().getColor(R.color.textNotSelectColor));
+            tvRecord.setTextColor(getResources().getColor(R.color.text_not_select));
             tvFiles.setTextColor(getResources().getColor(R.color.text_select));
             imgRecord.setImageResource(R.drawable.ic_record);
             imgFiles.setImageResource(R.drawable.ic_select_file);
@@ -366,42 +329,22 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         int frameLayoutId = R.id.fl_container;
 
         if (fragment != null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-            // 检查是否已经添加了该fragment
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             if (fragment.isAdded()) {
-                // 如果当前fragment不为空且不同于要显示的fragment，则隐藏当前fragment
-                if (currentFragment != null && currentFragment != fragment) {
-                    if (currentFragment.isAdded() && !currentFragment.isHidden()) {
-                        transaction.hide(currentFragment);
-                    }
-                }
-                // 显示目标fragment
-                if (fragment.isHidden()) {
+                if (currentFragment != null) {
+                    transaction.hide(currentFragment).show(fragment);
+                } else {
                     transaction.show(fragment);
                 }
             } else {
-                // 如果fragment未添加到FragmentManager中
-                // 隐藏当前fragment（如果存在）
-                if (currentFragment != null && currentFragment.isAdded()) {
-                    transaction.hide(currentFragment);
-                }
-                // 添加新fragment，并指定tag便于查找
-                String tag = null;
-                if (fragment instanceof FragmentChat) {
-                    tag = "FragmentChat";
-                } else if (fragment instanceof FragmentFiles) {
-                    tag = "FragmentFiles";
-                }
-                if (tag != null) {
-                    transaction.add(frameLayoutId, fragment, tag);
+                if (currentFragment != null) {
+                    transaction.hide(currentFragment).add(frameLayoutId, fragment);
                 } else {
                     transaction.add(frameLayoutId, fragment);
                 }
             }
             currentFragment = (BaseFragment) fragment;
-            transaction.commitAllowingStateLoss();
+            transaction.commit();
         }
     }
 
@@ -422,8 +365,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             case R.id.bottom_files: {
                 fragmentFiles.clearSelect();
                 fileSelects.clear();
-                setSelectedCount(fileSelects.size());
-                T.s(R.string.selected_data_has_been_cleared);
+                setSelectCount(fileSelects.size());
+                T.s((R.string.selected_data_has_been_cleared));
                 break;
             }
             case R.id.bottom_send: {
@@ -444,27 +387,27 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bottom_record: {
-                checkCount++;
-                if (checkCount == 3) {
+                ckeckCount++;
+                if (ckeckCount == 3) {
                     T.s("再点击两次唤出菜单");
-                } else if (checkCount == 5) {
-                    checkCount = 0;
+                } else if (ckeckCount == 5) {
+                    ckeckCount = 0;
                     PopupMenu popupMenu = new PopupMenu(this, v);
                     popupMenu.getMenuInflater().inflate(R.menu.toolbar_menu, popupMenu.getMenu());
                     popupMenu.setOnMenuItemClickListener(this::onMenuItemClick);
                     popupMenu.show();
                 }
                 switchFragment(0);
-                showSortFileMenu_backup = showSearchFileTypes;
-                showSearchFileTypes_backup = showSortFileMenu;
-                showUpdateApps_backup = showUpdateApps;
+                showSortFileMenu_buckup = showSearchFileTypes;
+                showSearchFileTypes_buckup = showSortFileMenu;
+                showUdateApps_buckup = showUdateApps;
                 showSearchFileTypes = false;
                 showSortFileMenu = false;
-                showUpdateApps = false;
+                showUdateApps = false;
                 break;
             }
             case R.id.bottom_send: {
-                checkCount = 0;
+                ckeckCount = 0;
                 if (fileSelects.isEmpty()) {
                     T.s(R.string.please_select_file);
                     return;
@@ -473,11 +416,11 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 break;
             }
             case R.id.bottom_files: {
-                checkCount = 0;
+                ckeckCount = 0;
                 switchFragment(1);
-                showSearchFileTypes = showSortFileMenu_backup;
-                showSortFileMenu = showSearchFileTypes_backup;
-                showUpdateApps = showUpdateApps_backup;
+                showSearchFileTypes = showSortFileMenu_buckup;
+                showSortFileMenu = showSearchFileTypes_buckup;
+                showUdateApps = showUdateApps_buckup;
                 break;
             }
             case R.id.main_scan_code: {
@@ -500,12 +443,12 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 String ipAddress = mainIp.getText().toString();
                 tvIpAddress.setText(ipAddress);
 
-                Bitmap qrcode = QrCodeUtils.qrcode(ipAddress, 800, 800);
+                Bitmap qrcode = QRcodeUtils.qrcode(ipAddress, 800, 800);
                 qrCode.setImageBitmap(qrcode);
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setView(view)
                         .create();
-//                alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
                 alertDialog.show();
                 qrCode.setOnLongClickListener(this);
@@ -516,13 +459,13 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                             T.s((R.string.failed_to_get_device_ipv6));
                             return;
                         }
-                        ip = "http://[" + ipv6NetInfoList.get(0).getIp() + "]:" + Config.FILE_SERVER_PORT;
-                        Bitmap qrcode1 = QrCodeUtils.qrcode(ip, 800, 800);
+                        ip = "http://[" + ipv6NetInfoList.get(0).getIp() + "]:5856";
+                        Bitmap qrcode1 = QRcodeUtils.qrcode(ip, 800, 800);
                         qrCode.setImageBitmap(qrcode1);
                         tvIpAddress.setText(ip);
                     } else {
                         ip = mainIp.getText().toString();
-                        Bitmap qrcode1 = QrCodeUtils.qrcode(ip, 800, 800);
+                        Bitmap qrcode1 = QRcodeUtils.qrcode(ip, 800, 800);
                         qrCode.setImageBitmap(qrcode1);
                     }
                     tvIpAddress.setText(ip);
@@ -559,20 +502,17 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
      * @comments 发送单个文件
      * @date 2024/5/18 11:40
      */
-    public void sendSingleFile(MessageFileContent fileInfo) {
+    public void sendSingleFile(FileInfo fileInfo) {
         sendFiles(mUtil.singletonArrayList(fileInfo));
     }
 
-    public void showSelectDeviceDialog(List<MessageFileContent> fileSelects) {
-        fileSelects = mUtil.deepCopyList(fileSelects);
+    public void showSelectDeviceDialog(List<FileInfo> fileSelects) {
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
-        List<MessageFileContent> finalFileSelects = fileSelects;
         dialog.setOnDeviceSelect(device -> {
-            LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(finalFileSelects));
+            LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(fileSelects));
             fragmentFiles.clearSelect();
-            finalFileSelects.clear();
-            DataCenterActivity.this.fileSelects.clear();
-            setSelectedCount(finalFileSelects.size());
+            fileSelects.clear();
+            setSelectCount(fileSelects.size());
         });
         dialog.show();
     }
@@ -582,8 +522,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
      * @comments 发送多个文件
      * @date 2024/5/18 11:40
      */
-    public void sendFiles(List<MessageFileContent> fileSelects) {
-        fileSelects = mUtil.deepCopyList(fileSelects);
+    public void sendFiles(List<FileInfo> fileSelects) {
         if (Config.DEFAULT_SELECT_ONLY_ONE_DEVICE) {
             // 只有一个设备时默认选择这个=设备发送文件
             Map<String, Device> onLineDevices = LANService.getInstance().getOnLineDevices();
@@ -594,24 +533,21 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(fileSelects));
                 fragmentFiles.clearSelect();
                 fileSelects.clear();
-                DataCenterActivity.this.fileSelects.clear();
-                setSelectedCount(fileSelects.size());
+                setSelectCount(fileSelects.size());
                 return;
             }
         }
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
-        List<MessageFileContent> finalFileSelects = fileSelects;
         dialog.setOnDeviceSelect(device -> {
-            LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(finalFileSelects));
+            LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(fileSelects));
             fragmentFiles.clearSelect();
-            finalFileSelects.clear();
-            DataCenterActivity.this.fileSelects.clear();
-            setSelectedCount(finalFileSelects.size());
+            fileSelects.clear();
+            setSelectCount(fileSelects.size());
         });
         dialog.show();
     }
 
-    public void setSelectedCount(int count) {
+    public void setSelectCount(int count) {
         String str;
         if (count <= 0) {
             str = getString(R.string.file);
@@ -624,21 +560,21 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     @SuppressLint("SetTextI18n")
-    public boolean addASendFile(MessageFileContent fileInfo) {
+    public boolean addASendFile(FileInfo fileInfo) {
         if (fileSelects.size() >= 1000) return false;
         fileSelects.add(fileInfo);
-        setSelectedCount(fileSelects.size());
+        setSelectCount(fileSelects.size());
         return true;
     }
 
-    public void removeSendFile(MessageFileContent fileInfo) {
+    public void removeSendFile(FileInfo fileInfo) {
         fileSelects.remove(fileInfo);
-        setSelectedCount(fileSelects.size());
+        setSelectCount(fileSelects.size());
     }
 
     public void removeSendALL(List infos) {
         fileSelects.removeAll(infos);
-        setSelectedCount(fileSelects.size());
+        setSelectCount(fileSelects.size());
     }
 
     public void removeSendALL() {
@@ -685,8 +621,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
      *
      * @return
      */
-    public List<MessageFileContent> getExternalShareFiles(Intent intent) {
-        List<MessageFileContent> uris = new ArrayList<>();
+    public List<FileInfo> getExternalShareFiles(Intent intent) {
+        List<FileInfo> uris = new ArrayList<>();
         if (intent == null || intent.getAction() == null) {
             return uris;
         }
@@ -695,50 +631,25 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             if (uri == null) {
                 return uris;
             }
-            MessageUriContent uriFileInfo = new MessageUriContent(uri);
+            UriFileInfo uriFileInfo = new UriFileInfo(uri);
+            uriFileInfo.setFile(true);
             uris.add(uriFileInfo);
         } else if (intent.getAction().equals(Intent.ACTION_SEND)) { // 单选文件发送
-            Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri uri = intent.getParcelableExtra(intent.EXTRA_STREAM);
             if (uri == null) {
                 uri = intent.getData();
             }
             if (uri != null) {
-                MessageUriContent uriFileInfo = new MessageUriContent(uri);
+                UriFileInfo uriFileInfo = new UriFileInfo(uri);
+                uriFileInfo.setFile(true);
                 uris.add(uriFileInfo);
-            } else {
-               /* String aPackage = intent.getPackage();
-                System.out.println("aPackage = " + aPackage);
-                Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    // 获取 android.intent.extra.TEXT 数据
-                    String text = bundle.getString(Intent.EXTRA_TEXT);
-                    if (text != null) {
-                        // 分离地址和链接
-                        String[] parts = text.split(" ");
-                        String locationName = "";
-                        String mapLink = "";
-                        if (parts.length == 1) {
-                            locationName = "";
-                            mapLink = parts[0];      // 高德地图链接
-                        } else if (parts.length == 2) {
-                            locationName = parts[0]; // 位置名称
-                            mapLink = parts[1];      // 高德地图链接
-                        }
-                        MapInfo mapInfo = new MapInfo();
-                        mapInfo.setName(locationName);
-                        mapInfo.setPath(mapLink);
-                        // 打印或使用解析后的数据
-                        Log.d("MapData", "位置名称: " + locationName);
-                        Log.d("MapData", "地图链接: " + mapLink);
-                        uris.add(mapInfo);
-                    }
-                }*/
             }
         } else if (intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) { // 多选文件发送
             List<Uri> files = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
             if (files != null && !files.isEmpty()) {
                 for (Uri file : files) {
-                    MessageUriContent uriFileInfo = new MessageUriContent(file);
+                    UriFileInfo uriFileInfo = new UriFileInfo(file);
+                    uriFileInfo.setFile(true);
                     uris.add(uriFileInfo);
                 }
             }
@@ -829,7 +740,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                                 T.s((R.string.ip_is_not_in_local_network));
                             }
                             Socket socket = LANService.getInstance().makeSocket(inetAddress, port);
-                            DataEnc dataEnc = LANService.getInstance().makeDataEnc(device, null, 1024);
+                            DataEnc dataEnc = LANService.getInstance().makeDataEnc(device, 1024);
                             dataEnc.setCmd(LCmd.FS_ADD_DEVICE);
                             dataEnc.putBool(isIPV6);
                             InputStream inputStream = socket.getInputStream();
@@ -910,7 +821,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         MenuItem item1 = menu.findItem(R.id.menu_search_file_types);
         item1.setVisible(showSearchFileTypes);
         MenuItem item2 = menu.findItem(R.id.menu_update_apps);
-        item2.setVisible(showUpdateApps);
+        item2.setVisible(showUdateApps);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -936,7 +847,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private void setSearchFileTypes() {
         // 创建构造器
         AlertDialog.Builder builder = new AlertDialog.Builder(DataCenterActivity.this);
-        builder.setIcon(R.mipmap.ic_launcher_round);
+        builder.setIcon(R.mipmap.ic_launcher);
         builder.setTitle("搜索文件分类");
         // 设置内容,
         final String[] cities = {
@@ -967,7 +878,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private void setShowSortFileMenu() {
         // 创建构造器
         AlertDialog.Builder builder = new AlertDialog.Builder(DataCenterActivity.this);
-        builder.setIcon(R.mipmap.ic_launcher_round);
+        builder.setIcon(R.mipmap.ic_launcher);
         builder.setTitle("选择排序方式");
         // 设置内容,
         final String[] cities = {
@@ -994,8 +905,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         showSortFileMenu = visible;
     }
 
-    public void setShowUpdateApps(boolean visible) {
-        showUpdateApps = visible;
+    public void setShowUdateApps(boolean visible) {
+        showUdateApps = visible;
     }
 
     public void setSearchFileTypesVisible(boolean visible) {
@@ -1043,9 +954,6 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             case R.id.menu_file_sync:
                 startActivity(new Intent(this, FileSyncManagerActivity.class));
                 break;
-//            case R.id.menu_acquire_advanced_version:
-//                T.s("敬请期待。。。。");
-//                break;打赏时候可以备注昵称,后期会将打赏名单放入网页
 
            /* case R.id.menu_camera_send:
                 startActivity(new Intent(this, MainActivity.class));
@@ -1064,7 +972,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
      */
     public void preloadData() {
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadApp(DataCenterActivity.this, true);
+            // MIUI 未授权「获取应用列表」时不预扫描，把系统授权弹窗留到进入应用页时弹
+            if (PermissionsUtils.hasAppListPermission(DataCenterActivity.this)) {
+                FileSearchUtils.loadApp(DataCenterActivity.this, true);
+            }
         });
         ThreadUtils.runThread(() -> {
             FileSearchUtils.loadImageForSDCard(DataCenterActivity.this, true);

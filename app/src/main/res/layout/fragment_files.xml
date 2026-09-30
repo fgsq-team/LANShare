@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor"
+    android:background="#FCFCFC"
     android:orientation="vertical">
 
     <View
@@ -26,10 +26,9 @@
             android:id="@+id/tab_files"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@color/backgroundColor"
+            android:background="#FFFFFF"
             app:tabGravity="fill"
-            app:tabTextColor="@color/textColorPrimary"
-            app:tabIndicatorColor="@color/textColorPrimary"
+            app:tabIndicatorColor="#000000"
             app:tabSelectedTextColor="#FF4081" />
     </androidx.cardview.widget.CardView>
 

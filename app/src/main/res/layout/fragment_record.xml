@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="@string/not_file"
-        android:textColor="@color/itemTextColor"
+        android:textColor="@color/item_text"
         android:textSize="20sp" />
 
 

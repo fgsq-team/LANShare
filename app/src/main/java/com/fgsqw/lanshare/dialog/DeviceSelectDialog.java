@@ -33,7 +33,7 @@ public class DeviceSelectDialog extends BaseDialog implements DeviceDialogAdapte
     private String title;
 
     public DeviceSelectDialog(@NonNull Context context) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
     }
 
     @Override

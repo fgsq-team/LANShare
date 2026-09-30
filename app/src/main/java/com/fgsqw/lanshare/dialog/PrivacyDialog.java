@@ -1,9 +1,11 @@
 package com.fgsqw.lanshare.dialog;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.web.PrivacyWebActivity;
 import com.fgsqw.lanshare.base.BaseDialog;
+import com.fgsqw.lanshare.toast.T;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +35,7 @@ public class PrivacyDialog extends BaseDialog implements View.OnClickListener {
     private OnClickListener onClickListener;
 
     public PrivacyDialog(@NonNull Context context) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
     }
 
     public PrivacyDialog(@NonNull Context context, int themeResId) {
@@ -52,7 +55,7 @@ public class PrivacyDialog extends BaseDialog implements View.OnClickListener {
         privacyLayoutAgree.requestFocus();
         TextView privacyText = findViewById(R.id.privacy_text);
         privacyText.setText(setTextView(getContext().getString(R.string.user_greement), getContext().getString(R.string.user_greement_hint), privacyText));
-        privacyText.setHighlightColor(getContext().getResources().getColor(R.color.textColor));
+        privacyText.setHighlightColor(getContext().getResources().getColor(R.color.white));
         privacyLayoutAgree.setOnClickListener(this);
         privacyLayoutDisagree.setOnClickListener(this);
     }

@@ -2,9 +2,7 @@ package com.fgsqw.lanshare.pojo;
 
 import androidx.annotation.Nullable;
 
-
-import com.alibaba.fastjson.JSONObject;
-import com.fgsqw.websocket.WebSocketServer;
+import com.fgsqw.WebSocketServer;
 
 import java.io.Serializable;
 
@@ -228,34 +226,4 @@ public class Device implements Serializable {
     public void setChargeStatus(byte chargeStatus) {
         this.chargeStatus = chargeStatus;
     }
-
-    public JSONObject toJsonObject() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("devName", devName);
-        jsonObject.put("devIP", devIP);
-        jsonObject.put("devNetMask", devNetMask);
-        jsonObject.put("devBrotIP", devBrotIP);
-        jsonObject.put("uniqueUUid", uniqueUUid);
-        jsonObject.put("devPort", devPort);
-        jsonObject.put("devMode", devMode);
-        jsonObject.put("dataVersion", dataVersion);
-        jsonObject.put("isIPv4", isIPv4);
-        jsonObject.put("batteryLevel", batteryLevel);
-        jsonObject.put("chargeStatus", chargeStatus);
-        return jsonObject;
-    }
-
-    public void fromJsonString(JSONObject jsonObject) {
-        devName = jsonObject.getString("devName");
-        devIP = jsonObject.getString("devIP");
-        devNetMask = jsonObject.getString("devNetMask");
-        devBrotIP = jsonObject.getString("devBrotIP");
-        uniqueUUid = jsonObject.getString("uniqueUUid");
-        devPort = jsonObject.getInteger("devPort");
-        devMode = jsonObject.getInteger("devMode");
-        dataVersion = jsonObject.getInteger("dataVersion");
-        batteryLevel = jsonObject.getInteger("batteryLevel");
-        chargeStatus = jsonObject.getByte("chargeStatus");
-    }
-
 }

@@ -2,8 +2,6 @@ package com.fgsqw.lanshare.config;
 
 import android.os.Environment;
 
-import androidx.appcompat.app.AppCompatDelegate;
-
 import com.alibaba.fastjson.JSONArray;
 import com.fgsqw.lanshare.utils.AESUtils;
 import com.fgsqw.lanshare.utils.PrefUtil;
@@ -24,10 +22,23 @@ public class Config {
     public static final String DEFAULT_MESSAGE_KEY = "e4be1373272c69e0932651d97187b746c6725b17bbe84ad0b0fe2d4e81fc1d6c0c633d8ebd7f0fea65a57a9d5529d214";
     // 消息加密密钥(已解密)
     public static String MESSAGE_KEY;
-    // 魔法数字(fgsq)
+    // 魔法数字
     public static final int MAGIC_NUM = 0x66677371;
     // 数据版本/协议版本
-    public static final int DATA_VERSION = LVersion.DATA_VERSION_4;
+    public static final int DATA_VERSION = LVersion.DATA_VERSION_5;
+
+    /**
+     * 分段并行传输：把一个文件切成几段、每段一条独立连接同时发。
+     * 设为 1 即完全关闭，永远走原来的单流路径。
+     * 单条 TCP 流的吞吐在无线局域网上有上限，用更多流去叠加带宽：
+     * 实测同一条 WLAN 链路上 4 段聚合 52.5MB/s、8 段聚合 66~70MB/s（每流 8MB/s），
+     * 说明每流调度是限制之一；16 段是继续抬聚合上限的实验值。
+     * 注意：段数越多接收端缓冲越多（每段约 6MB），配合 manifest 的 largeHeap；
+     * 且文件须 ≥ PARALLEL_MIN_SIZE × 段数 才可并行（否则回落单流）。
+     */
+    public static final int PARALLEL_SEGS = 16;
+    // 小于这个大小不切段：连接握手和线程开销大于收益
+    public static final long PARALLEL_MIN_SIZE = 8 * 1024 * 1024;
     // UDP端口
     public static int UDP_PORT = 4573;
     // 隐私协议版本

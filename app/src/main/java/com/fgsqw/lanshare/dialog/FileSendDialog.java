@@ -34,7 +34,7 @@ public class FileSendDialog extends BaseDialog implements DeviceDialogAdapter.On
     private DeviceDialogAdapter adapter;
 
     public FileSendDialog(@NonNull Context context, int count) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
         this.count = count;
     }
 

@@ -16,7 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
-
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,8 +27,8 @@ import android.widget.TextView;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.activity.preview.adapter.PreViewPagerAdapter;
 import com.fgsqw.lanshare.base.BaseActivity;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
 import com.fgsqw.lanshare.widget.PreViewViewPager;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
 import com.fgsqw.lanshare.utils.mUtil;
 
 import java.util.List;
@@ -46,11 +46,11 @@ public class ReviewImages extends BaseActivity {
     //tempImages和tempSelectImages用于图片列表数据的页面传输。
     //之所以不要Intent传输这两个图片列表，因为要保证两位页面操作的是同一个列表数据，同时可以避免数据量大时，
     // 用Intent传输发生的错误问题。
-    private static List<MessageMediaContent> tempFileUtils;
-    private static List<MessageMediaContent> tempSelectFileUtils;
+    private static List<MediaInfo> tempFileUtils;
+    private static List<MediaInfo> tempSelectFileUtils;
 
-    private List<MessageMediaContent> mFileUtils;
-    private List<MessageMediaContent> mSelectFileUtils;
+    private List<MediaInfo> mFileUtils;
+    private List<MediaInfo> mSelectFileUtils;
     private boolean isShowBar = true;
 //    private boolean isConfirm = false;
     // private boolean isSingle;
@@ -59,8 +59,8 @@ public class ReviewImages extends BaseActivity {
     private BitmapDrawable mSelectDrawable;
     private BitmapDrawable mUnSelectDrawable;
 
-    public static void openActivity(Activity activity, List<MessageMediaContent> fileUtils,
-                                    List<MessageMediaContent> selectFileUtils, boolean isSingle,
+    public static void openActivity(Activity activity, List<MediaInfo> fileUtils,
+                                    List<MediaInfo> selectFileUtils, boolean isSingle,
                                     int maxSelectCount, int position) {
         tempFileUtils = fileUtils;
         tempSelectFileUtils = selectFileUtils;

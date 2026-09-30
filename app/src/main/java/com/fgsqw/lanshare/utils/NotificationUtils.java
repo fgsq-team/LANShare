@@ -41,7 +41,7 @@ public class NotificationUtils {
         //版本兼容
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             notification = new Notification.Builder(context)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setSmallIcon(R.mipmap.ic_launcher)
                     .setTicker(content)
                     .setContentTitle(title)
                     .setContentText(content)
@@ -57,7 +57,7 @@ public class NotificationUtils {
                     .setContentTitle(title)
                     .setContentText(content)
                     .setContentIntent(pi)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setSmallIcon(R.mipmap.ic_launcher)
                     .setWhen(System.currentTimeMillis())
                     .build();
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -77,7 +77,7 @@ public class NotificationUtils {
             notificationManager.createNotificationChannel(mChannel);
             notification = new Notification.Builder(context, CHANNEL_ID)
                     .setAutoCancel(true)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setSmallIcon(R.mipmap.ic_launcher)
                     .setTicker(content)
                     .setContentTitle(title)
                     .setContentText(content)
@@ -103,7 +103,7 @@ public class NotificationUtils {
 
         // 创建通知
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(content)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)

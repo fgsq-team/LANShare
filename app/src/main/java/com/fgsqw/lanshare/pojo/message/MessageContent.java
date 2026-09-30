@@ -1,14 +1,13 @@
 package com.fgsqw.lanshare.pojo.message;
 
-import androidx.annotation.NonNull;
-
-import com.fgsqw.lanshare.fragment.adapter.ChatAdapter;
+import com.fgsqw.lanshare.R;
+import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 
 import java.io.Serializable;
 import java.util.Date;
 
 
-public class MessageContent implements Serializable, Cloneable {
+public class MessageContent implements Serializable {
 
     public static final int IN = 0x2;                   // 进行中
     public static final int SUCCESS = 0x4;              // 成功
@@ -65,7 +64,7 @@ public class MessageContent implements Serializable, Cloneable {
     }
 
     public int getViewType() {
-        return isLeft ? ChatAdapter.TYPE_MSG_LEFT : ChatAdapter.TYPE_MSG_RIGHT;
+        return isLeft ? ChatAdabper.TYPE_MSG_LEFT : ChatAdabper.TYPE_MSG_RIGHT;
     }
 
 
@@ -158,16 +157,6 @@ public class MessageContent implements Serializable, Cloneable {
             }
         }
         return false;
-    }
-
-    @NonNull
-    @Override
-    public MessageContent clone() {
-        try {
-            return (MessageContent) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
     }
 
 

@@ -42,7 +42,7 @@ public class JpegStreamView extends AppCompatImageView {
         streamThread = new Thread(() -> {
             try {
                 DataDec dataDec = new DataDec(1024 * 1024 * 2);
-                Socket socket = new Socket("", 8880);
+                Socket socket = new Socket("240e:438:1a26:7c2:d8a1:e1ff:feb5:9fe0", 8880);
                 InputStream input = socket.getInputStream();
                 while (run) {
                     dataDec.reset();

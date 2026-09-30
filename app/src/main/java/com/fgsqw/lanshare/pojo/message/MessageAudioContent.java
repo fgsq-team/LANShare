@@ -7,10 +7,6 @@ import java.io.Serializable;
 public class MessageAudioContent extends MessageFileContent implements Serializable, Cloneable {
     private long mediaId = -1;
     private String musicTime;
-    @Override
-    public int getFileType() {
-        return FILE_TYPE_AUDIO;
-    }
 
     public void setMediaId(long mediaId) {
         this.mediaId = mediaId;
@@ -30,7 +26,7 @@ public class MessageAudioContent extends MessageFileContent implements Serializa
 
     @NonNull
     @Override
-    public MessageAudioContent clone() {
+    public MessageAudioContent clone() throws CloneNotSupportedException {
         return (MessageAudioContent) super.clone();
     }
 }

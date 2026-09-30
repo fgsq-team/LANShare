@@ -188,7 +188,7 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
         } /*else if (devMode == Device.WEB) {
             dId = R.drawable.ic_internet;
         }*/ else {
-            dId = R.mipmap.ic_launcher_round;
+            dId = R.drawable.ic_launcher;
         }
         return dId;
     }

@@ -8,14 +8,10 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.widget.JpegStreamView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 
 public class TestActivity extends BaseActivity {
-    private static final Logger logger = LoggerFactory.getLogger(BaseActivity.class);
-
     JpegStreamView jpegStreamView;
 
     @Override

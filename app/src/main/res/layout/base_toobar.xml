@@ -1,80 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_toolbar"
-    android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:background="@color/toolbarBackground"
-    android:fitsSystemWindows="true">
+<androidx.appcompat.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:fitsSystemWindows="true"
+        android:background="@color/colorPrimary">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
         <LinearLayout
-            android:id="@+id/main_ip_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            tools:ignore="RelativeOverlap">
+                android:id="@+id/main_ip_layout"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
 
-            <TextView
-                android:id="@+id/main_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="19sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
             <TextView
-                android:id="@+id/main_ip"
-                android:layout_width="210dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="middle"
-                android:singleLine="true"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="16sp" />
-        </LinearLayout>
+                    android:id="@+id/main_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/black"
+                    android:textSize="19sp"
+                    android:textStyle="bold"/>
 
+            <TextView
+                    android:id="@+id/main_ip"
+                    android:layout_width="210dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:singleLine="true"/>
+        </LinearLayout>
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_toStartOf="@+id/main_scan_code"
-            android:layout_toLeftOf="@+id/main_scan_code">
+                android:layout_marginRight="5dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/main_scan_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
             <Switch
-                android:id="@+id/main_web_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
+                    android:id="@+id/main_web_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+            </Switch>
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/main_scan_code"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="right"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:gravity="center">
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:id="@+id/main_scan_code"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="right"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:gravity="center">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_scan"
-                tools:ignore="RtlHardcoded" />
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:tint="@color/cool_dark"
+                    android:src="@drawable/ic_scan"
+                    tools:ignore="RtlHardcoded"/>
         </LinearLayout>
 
 

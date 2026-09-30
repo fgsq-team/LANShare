@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.fragment.child.FragmentAppList;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
@@ -45,7 +45,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final MessageApkContent apkInfo = fragmentAppList.getApkFileList().get(position);
+        final ApkInfo apkInfo = fragmentAppList.getApkFileList().get(position);
         Glide.with(mContext)
                 .load(apkInfo.getIcon())
                 .centerCrop()
@@ -63,8 +63,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
 
     }
 
-    private boolean isSelect(MessageApkContent apkInfo) {
-        List<MessageApkContent> selectlist = fragmentAppList.getSelectlist();
+    private boolean isSelect(ApkInfo apkInfo) {
+        List<ApkInfo> selectlist = fragmentAppList.getSelectlist();
         if (selectlist != null && !selectlist.isEmpty()) {
             for (int i = 0; i < selectlist.size(); i++) {
                 if (apkInfo.getPath().equals(selectlist.get(i).getPath())) {
@@ -76,7 +76,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     /*选中图片效果*/
-    private void checkedImage(ViewHolder holder, MessageApkContent apkInfo, int position) {
+    private void checkedImage(ViewHolder holder, ApkInfo apkInfo, int position) {
         if (isSelect(apkInfo)) {//如果图片已经选中，就取消选中
             fragmentAppList.dataCenterActivity.removeSendFile(apkInfo);
             unSelectImage(apkInfo, position);//取消选中图片
@@ -94,7 +94,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     /**
      * 选中软件
      */
-    private void selectImage(MessageApkContent apkInfo, int position) {
+    private void selectImage(ApkInfo apkInfo, int position) {
         fragmentAppList.getSelectlist().add(apkInfo);
         if (mItemClickListener != null) {
             mItemClickListener.OnItemClick(apkInfo, true, position);
@@ -105,7 +105,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     /**
      * 取消选中软件
      */
-    private void unSelectImage(MessageApkContent apkInfo, int position) {
+    private void unSelectImage(ApkInfo apkInfo, int position) {
         if (fragmentAppList.getSelectlist() != null && !fragmentAppList.getSelectlist().isEmpty()) {
             for (int i = 0; i < fragmentAppList.getSelectlist().size(); i++) {
                 if (apkInfo.getPath().equals(fragmentAppList.getSelectlist().get(i).getPath())) {
@@ -130,7 +130,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    public MessageApkContent getFirstVisibleImage(int firstVisibleItem) {
+    public ApkInfo getFirstVisibleImage(int firstVisibleItem) {
         if (fragmentAppList.getApkFileList() != null && !fragmentAppList.getApkFileList().isEmpty()) {
             return fragmentAppList.getApkFileList().get(firstVisibleItem);
         }
@@ -160,10 +160,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @SuppressLint("NotifyDataSetChanged")
-    public void setSelecteByApkinfo(List<MessageApkContent> selected) {
+    public void setSelecteByApkinfo(List<ApkInfo> selected) {
         if (selected != null) {
-            for (MessageApkContent select : selected) {
-                for (MessageApkContent apkInfo : fragmentAppList.getApkFileList()) {
+            for (ApkInfo select : selected) {
+                for (ApkInfo apkInfo : fragmentAppList.getApkFileList()) {
                     if (select.equals(apkInfo)) {
                         if (!fragmentAppList.getSelectlist().contains(apkInfo)) {
                             if (fragmentAppList.dataCenterActivity.addASendFile(apkInfo)) {
@@ -182,7 +182,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
         this.mItemClickListener = listener;
     }
 
-    public void remove(MessageApkContent apkInfo, int position) {
+    public void remove(ApkInfo apkInfo, int position) {
         fragmentAppList.getSelectlist().remove(apkInfo);
         fragmentAppList.getApkFileList().remove(apkInfo);
         notifyItemRemoved(position); // 提醒item删除指定数据，这里有RecyclerView的动画效果
@@ -207,7 +207,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     }
 
     public interface OnItemClickListener {
-        void OnLongItenClick(MessageApkContent apkInfo, int position);
-        void OnItemClick(MessageApkContent apkInfo, boolean isSelect, int position);//选择取消选择软件
+        void OnLongItenClick(ApkInfo apkInfo, int position);
+        void OnItemClick(ApkInfo apkInfo, boolean isSelect, int position);//选择取消选择软件
     }
 }

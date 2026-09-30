@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.fgsqw.lanshare.fragment.adapter.ChatAdapter;
+import com.fgsqw.lanshare.fragment.adapter.ChatAdabper;
 
 public class MessageGPSContent extends MessageContent implements Cloneable {
 
@@ -83,7 +83,7 @@ public class MessageGPSContent extends MessageContent implements Cloneable {
     }
 
     public int getViewType() {
-        return isLeft() ? ChatAdapter.TYPE_GPS_MSG_LEFT : ChatAdapter.TYPE_GPS_MSG_RIGHT;
+        return isLeft() ? ChatAdabper.TYPE_GPS_MSG_LEFT : ChatAdabper.TYPE_GPS_MSG_RIGHT;
     }
 
     @NonNull
@@ -100,7 +100,7 @@ public class MessageGPSContent extends MessageContent implements Cloneable {
 
     @NonNull
     @Override
-    public MessageGPSContent clone() {
+    public MessageGPSContent clone() throws CloneNotSupportedException {
         return (MessageGPSContent) super.clone();
     }
 }

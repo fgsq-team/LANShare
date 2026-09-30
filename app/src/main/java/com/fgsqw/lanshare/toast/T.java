@@ -15,15 +15,6 @@ public class T {
         }
     }
 
-    public static void s(int resId, Object ... param) {
-        App application = App.getInstance();
-        if (application != null) {
-            String string = application.getString(resId);
-            String str = String.format(string, param);
-            ThreadUtils.threadUi(() -> Toast.makeText(application, str, Toast.LENGTH_SHORT).show());
-        }
-    }
-
     public static void ss(int resId) {
         App application = App.getInstance();
         if (application != null) {

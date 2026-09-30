@@ -1,7 +1,7 @@
 package com.fgsqw.lanshare.service;
 
+import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.service.version.four.FileTransfer;
 
 import java.io.OutputStream;
 import java.io.InputStream;
@@ -9,14 +9,16 @@ import java.net.Socket;
 import java.util.List;
 
 public abstract class RecvFileCallback {
-    FileTransfer fileTransfer;
+    Device device;
+    List<MessageFileContent> fileContentList;
     Socket client;
     InputStream input;
     OutputStream out;
     boolean encData;
 
-    public RecvFileCallback(FileTransfer fileTransfer, List<MessageFileContent> fileContentList, Socket client, InputStream input, OutputStream out, boolean encData) {
-        this.fileTransfer = fileTransfer;
+    public RecvFileCallback(Device device, List<MessageFileContent> fileContentList, Socket client, InputStream input, OutputStream out, boolean encData) {
+        this.device = device;
+        this.fileContentList = fileContentList;
         this.client = client;
         this.input = input;
         this.out = out;
@@ -25,12 +27,20 @@ public abstract class RecvFileCallback {
 
     public abstract void receviceFile(boolean isAgree);
 
-    public FileTransfer getFileTransfer() {
-        return fileTransfer;
+    public Device getDevice() {
+        return device;
     }
 
-    public void setFileTransfer(FileTransfer fileTransfer) {
-        this.fileTransfer = fileTransfer;
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
+    public List<MessageFileContent> getFileContentList() {
+        return fileContentList;
+    }
+
+    public void setFileContentList(List<MessageFileContent> fileContentList) {
+        this.fileContentList = fileContentList;
     }
 
     public Socket getClient() {

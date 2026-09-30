@@ -1,19 +1,25 @@
 package com.fgsqw.lanshare.pojo.message;
 
-import androidx.annotation.NonNull;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class MessageFolderContent extends MessageFileContent implements Serializable , Cloneable{
+public class MessageFolderContent extends MessageFileContent implements Serializable {
 
     // 文件数量
     private int fileCount;
     // 传输完成数量
     private int completeCount;
 
+    private String basePath;
 
-    private List<MessageFileContent> children;
+    private List<FileInfo> fileInfoList;
+
+/*    @Override
+    public String getContent() {
+        return fileCount + "/" + completeCount;
+    }*/
 
     public int getFileCount() {
         return fileCount;
@@ -31,22 +37,19 @@ public class MessageFolderContent extends MessageFileContent implements Serializ
         this.completeCount = completeCount;
     }
 
-    public List<MessageFileContent> getChildren() {
-        return children;
+    public String getBasePath() {
+        return basePath;
     }
 
-    public void setChildren(List<MessageFileContent> children) {
-        this.children = children;
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
     }
 
-    @Override
-    public int getFileType() {
-        return FILE_TYPE_FOLDER;
+    public List<FileInfo> getFileInfoList() {
+        return fileInfoList;
     }
 
-    @NonNull
-    @Override
-    public MessageFolderContent clone() {
-        return (MessageFolderContent) super.clone();
+    public void setFileInfoList(List<FileInfo> fileInfoList) {
+        this.fileInfoList = fileInfoList;
     }
 }

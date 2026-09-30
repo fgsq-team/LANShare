@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.utils;
 
 import com.fgsqw.lanshare.config.Config;
-import com.fgsqw.utils.ByteUtil;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

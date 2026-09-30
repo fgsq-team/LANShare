@@ -14,9 +14,9 @@
 
         </shape>
     </item>
-    <item android:drawable="@color/rippleColor" android:state_focused="true" />
+    <item android:drawable="@color/text_grey" android:state_focused="true" />
     <!-- 默认显示的颜色效果 -->
-    <item android:drawable="@color/textColor">
+    <item android:drawable="@color/white">
 
     </item>
 

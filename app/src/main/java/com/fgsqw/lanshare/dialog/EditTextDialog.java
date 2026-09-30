@@ -38,7 +38,7 @@ public class EditTextDialog extends BaseDialog implements View.OnClickListener {
     public static final String ACCEPTED_NUM = "0123456789";
 
     public EditTextDialog(@NonNull Context context, boolean canEmpty, String title, String str) {
-        super(context, R.style.AlertDialogTheme);
+        super(context);
         this.canEmpty = canEmpty;
         this.str = str;
         this.title = title;

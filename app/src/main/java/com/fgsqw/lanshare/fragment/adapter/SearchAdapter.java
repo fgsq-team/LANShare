@@ -2,10 +2,8 @@ package com.fgsqw.lanshare.fragment.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +16,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.fragment.child.FragmentSearch;
-import com.fgsqw.lanshare.pojo.message.MessageApkContent;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
+import com.fgsqw.lanshare.pojo.file.ApkInfo;
+import com.fgsqw.lanshare.pojo.file.FileInfo;
+import com.fgsqw.lanshare.pojo.file.MediaInfo;
+import com.fgsqw.lanshare.pojo.file.MusicInfo;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.mUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -55,24 +55,25 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final SearchAdapter.ViewHolder holder, int position) {
-        final MessageFileContent fileInfo = fragmentSearch.getSearchResiltsList().get(position);
+        final FileInfo fileInfo = fragmentSearch.getSearchResiltsList().get(position);
         holder.mName.setText(mUtil.stringSize(fileInfo.getName(), 30));
 //        holder.selectLayout.setVisibility(View.GONE);
-        int fileType = fileInfo.getFileType();
-        if (fileType == MessageFileContent.FILE_TYPE_APK) {
-            Glide.with(context).load(((MessageApkContent)fileInfo).getIcon())
+
+        if (fileInfo instanceof ApkInfo) {
+            ApkInfo apkInfo = (ApkInfo) fileInfo;
+            Glide.with(context).load(apkInfo.getIcon())
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC))
                     .into(holder.mImg);
             holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
-        } else if (fileType == MessageFileContent.FILE_TYPE_AUDIO) {
+        } else if (fileInfo instanceof MusicInfo) {
             Glide.with(context)
                     .load(R.drawable.ic_music)
                     .centerCrop()
                     .placeholder(R.drawable.ic_null)
                     .into(holder.mImg);
             holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
-        } else if (fileType == MessageFileContent.FILE_TYPE_IMAGE || fileType == MessageFileContent.FILE_TYPE_VIDEO) {
-            MessageMediaContent mediaInfo = (MessageMediaContent) fileInfo;
+        } else if (fileInfo instanceof MediaInfo) {
+            MediaInfo mediaInfo = (MediaInfo) fileInfo;
             Glide.with(context)
                     .load(mediaInfo.getPath())
                     .centerCrop()
@@ -82,14 +83,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         } else {
             // 文件
             Glide.with(context)
-                    .load(fileType == MessageFileContent.FILE_TYPE_FOLDER ? R.drawable.ic_folder : R.drawable.ic_file_file)
+                    .load(fileInfo.isFile() ? R.drawable.ic_file_file : R.drawable.ic_folder)
                     .centerCrop()
                     .placeholder(R.drawable.ic_null)
                     .into(holder.mImg);
-            if (fileType == MessageFileContent.FILE_TYPE_FOLDER) {
-                holder.mInfo.setText(fileInfo.getPath());
-            } else {
+            if (fileInfo.isFile()) {
                 holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()) + " " + fileInfo.getPath());
+            } else {
+                holder.mInfo.setText(fileInfo.getPath());
             }
         }
 
@@ -130,7 +131,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
 
     /*选中图片效果*/
-    private void checkedImage(SearchAdapter.ViewHolder holder, MessageFileContent fileInfo, int position) {
+    private void checkedImage(SearchAdapter.ViewHolder holder, FileInfo fileInfo, int position) {
         if (isSelect(fileInfo)) {//如果图片已经选中，就取消选中
             fragmentSearch.dataCenterActivity.removeSendFile(fileInfo);
             unSelectImage(fileInfo, position);//取消选中图片
@@ -148,7 +149,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
      *
      * @param fileSource
      */
-    private void selectImage(MessageFileContent fileSource, int position) {
+    private void selectImage(FileInfo fileSource, int position) {
         fragmentSearch.getSelectFileList().add(fileSource);
         if (mSelectListener != null) {
             mSelectListener.OnImageSelect(fileSource, true, position);
@@ -160,8 +161,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
      *
      * @param fileSource
      */
-    private void unSelectImage(MessageFileContent fileSource, int position) {
-        List<MessageFileContent> selectList = fragmentSearch.getSelectFileList();
+    private void unSelectImage(FileInfo fileSource, int position) {
+        List<FileInfo> selectList = fragmentSearch.getSelectFileList();
         if (!selectList.isEmpty()) {
             for (int i = 0; i < selectList.size(); i++) {
                 if (fileSource.getPath().equals(selectList.get(i).getPath())) {
@@ -175,8 +176,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         }
     }
 
-    private boolean isSelect(MessageFileContent fileSource) {
-        List<MessageFileContent> selectlist = fragmentSearch.getSelectFileList();
+    private boolean isSelect(FileInfo fileSource) {
+        List<FileInfo> selectlist = fragmentSearch.getSelectFileList();
         if (selectlist != null && !selectlist.isEmpty()) {
             for (int i = 0; i < selectlist.size(); i++) {
                 if (fileSource.equals(selectlist.get(i))) {
@@ -189,7 +190,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        List<MessageFileContent> pathlist = fragmentSearch.getSearchResiltsList();
+        List<FileInfo> pathlist = fragmentSearch.getSearchResiltsList();
         return pathlist == null ? 0 : pathlist.size();
     }
 
@@ -229,7 +230,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
 
     public interface OnImageSelectListener {
-        void OnImageSelect(MessageFileContent fileSource, boolean isSelect, int position);
+        void OnImageSelect(FileInfo fileSource, boolean isSelect, int position);
     }
 
     public interface OnClickListener {

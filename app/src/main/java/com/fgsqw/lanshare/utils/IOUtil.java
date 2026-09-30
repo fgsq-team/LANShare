@@ -2,9 +2,6 @@ package com.fgsqw.lanshare.utils;
 
 import android.content.Context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -18,13 +15,7 @@ import java.util.List;
 
 public class IOUtil {
 
-    /**
-     * 日志
-     */
-    private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
-
     public static void closeIO(Object... io) {
-        logger.debug("closeIO");
         if (io != null) {
             for (Object closeable : io) {
                 if (closeable != null) {
@@ -35,7 +26,7 @@ public class IOUtil {
                             ((Closeable) closeable).close();
                         }
                     } catch (IOException e) {
-                        logger.error("error", e);
+                        LLog.error("error", e);
                     }
                 }
             }
@@ -75,7 +66,7 @@ public class IOUtil {
             }
             return sb.toString();
         } catch (IOException e) {
-            logger.error("error", e);
+            LLog.error("error", e);
 
         }
         return null;
@@ -88,7 +79,7 @@ public class IOUtil {
         try {
             return readInputTxt(context.getAssets().open(fileName));
         } catch (IOException e) {
-            logger.error("error", e);
+            LLog.error("error", e);
         }
         return "";
     }
@@ -108,8 +99,13 @@ public class IOUtil {
         int size = len;
         while (size > 0) {
             int i = is.read(buf, off, size);
-            if (i <= 0) {
-                return i;
+            if (i < 0) {
+                // 底层 EOF：已读到的字节必须原样返回，否则调用方会把尾部数据误判成短读
+                return totalRecv > 0 ? totalRecv : -1;
+            }
+            if (i == 0) {
+                // 偶发空读不是 EOF，继续读到满为止
+                continue;
             }
             off += i;
             totalRecv += i;
