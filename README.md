@@ -120,7 +120,7 @@ cd LANShare
 
 ## 相关项目
 
-- **LANShare-win**：Windows 桌面端（开发中）— [fgsqme/LANShare-win](https://github.com/fgsqme/LANShare-win)
+- **LANShare-win**：Windows 桌面端（开发中）— [fgsq-team/LANShare-PC](https://github.com/fgsq-team/LANShare-PC)
 
 ## 问题反馈
 
