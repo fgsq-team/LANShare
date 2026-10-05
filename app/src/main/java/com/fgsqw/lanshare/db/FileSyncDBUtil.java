@@ -12,16 +12,38 @@ import com.fgsqw.lanshare.utils.LLog;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 文件同步数据库工具类
+ * <p>负责管理文件同步配置,存储和查询设备文件夹同步信息</p>
+ *
+ * @author fgsq
+ * @version 1.0
+ */
 public class FileSyncDBUtil extends SQLiteOpenHelper {
 
+    /** 数据库版本 */
     private static final int DB_VERSION = 1;
+    
+    /** 数据库名称 */
     private static final String DB_NAME = "file_sync_data.db";
+    
+    /** 表名 */
     public static final String TABLE_NAME = "file_sync_table";
 
+    /**
+     * 构造函数
+     *
+     * @param context 上下文
+     */
     public FileSyncDBUtil(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
+    /**
+     * 添加文件同步数据
+     *
+     * @param folderPath 文件同步数据对象
+     */
     public void addFileSyncData(FileSyncData folderPath) {
         try {
             SQLiteDatabase db = getWritableDatabase();
@@ -39,6 +61,12 @@ public class FileSyncDBUtil extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * 查询文件同步数据
+     *
+     * @param deviceId 设备 ID
+     * @return 文件同步数据,如果未找到则返回 null
+     */
     @SuppressLint("Range")
     public FileSyncData queryFileSyncData(String deviceId) {
         SQLiteDatabase db = getWritableDatabase();
@@ -65,6 +93,11 @@ public class FileSyncDBUtil extends SQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * 查询文件同步列表
+     *
+     * @return 文件同步列表
+     */
     public List<FileSyncData> queryList() {
         SQLiteDatabase db = getWritableDatabase();
         @SuppressLint("Recycle")
@@ -91,6 +124,11 @@ public class FileSyncDBUtil extends SQLiteOpenHelper {
         return list;
     }
 
+    /**
+     * 删除文件同步数据
+     *
+     * @param deviceId 设备 ID
+     */
     public void deleteFileSyncData(String deviceId) {
         SQLiteDatabase db = getWritableDatabase();
         String sql = "delete from " + TABLE_NAME + " where device_id = ?1";

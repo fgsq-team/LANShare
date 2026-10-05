@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 分割线颜色 -->
+    <attr name="dividerColor" format="color" />
+
+    <!-- 卡片边框色 -->
+    <attr name="cardStrokeColor" format="color" />
+
+    <!-- Toolbar -->
+    <attr name="toolbarBackground" format="color" />
+    <attr name="toolbarTextColor" format="color" />
+
+    <!-- 按钮 -->
+    <attr name="buttonBackgroundColor" format="color" />
+    <attr name="buttonTextColor" format="color" />
+    <attr name="buttonRippleColor" format="color" />
+
+    <!-- 聊天气泡 -->
+    <attr name="chatRightBackgroundColor" format="color" />
+    <attr name="chatLeftBackgroundColor" format="color" />
+    <attr name="chatRightTextColor" format="color" />
+    <attr name="chatLeftTextColor" format="color" />
+    <attr name="chatBackgroundColor" format="color" />
+
+    <!-- 底部导航 -->
+    <attr name="bottomTextColor" format="color" />
+    <attr name="bottomSelectedTextColor" format="color" />
+    <attr name="bottomBackgroundColor" format="color" />
+    <attr name="bottomIndicatorColor" format="color" />
+
+    <!-- 图标 -->
+    <attr name="iconColor" format="color" />
+    <attr name="iconSelectedColor" format="color" />
+    <attr name="mediaTextColor" format="color" />
+    <attr name="chatInfoTextColor" format="color" />
+    <attr name="chatLeftInfoTextColor" format="color" />
+    <attr name="chatRightInfoTextColor" format="color" />
+    <attr name="errorTextColor" format="color" />
+    <attr name="successTextColor" format="color" />
+    <attr name="chatLeftSuccessColor" format="color" />
+    <attr name="chatRightSuccessColor" format="color" />
+
+    <!-- 其他 -->
+    <attr name="textSelectColor" format="color" />
+    <attr name="textNotSelectColor" format="color" />
+    <attr name="itemTextColor" format="color" />
+    <attr name="rippleColor" format="color" />
+    <attr name="shadowColor" format="color" />
+    <attr name="gainsboro" format="color" />
+    <attr name="colorPrimaryLight" format="color" />
+</resources>

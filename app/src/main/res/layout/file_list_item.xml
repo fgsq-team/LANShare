@@ -1,78 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
     android:layout_marginTop="2dp"
-    android:background="@drawable/focused_background"
+    android:layout_marginBottom="2dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:orientation="vertical">
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp">
 
     <LinearLayout
         android:id="@+id/file_item_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_toLeftOf="@+id/file_item_select_layout"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
 
+        <!-- 文件图标 -->
         <ImageView
             android:id="@+id/file_item_img"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:scaleType="centerCrop"
+            android:scaleType="centerInside"
             android:src="@drawable/ic_null" />
 
-        <View
-            android:layout_width="5dp"
-            android:layout_height="50dp" />
-
+        <!-- 文件信息 -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/file_item_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:ellipsize="end"
+                android:maxLines="2"
                 android:text="@string/file_selection"
-                android:textSize="14sp" />
+                android:textColor="?attr/android:textColorPrimary"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/file_item_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_marginTop="4dp"
                 android:ellipsize="middle"
-                android:maxEms="30"
                 android:singleLine="true"
                 android:text="0"
-                android:textColor="@color/textColorSecondary"
-                android:textSize="10sp" />
+                android:textColor="?attr/android:textColorSecondary"
+                android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- 选择按钮 -->
+        <LinearLayout
+            android:id="@+id/file_item_select_layout"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/file_item_select"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_image_un_select" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/file_item_select_layout"
-        android:layout_width="50dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:gravity="center">
-
-        <ImageView
-            android:id="@+id/file_item_select"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_image_un_select" />
-
-    </LinearLayout>
-
-</RelativeLayout>
-
+</androidx.cardview.widget.CardView>

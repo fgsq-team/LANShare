@@ -1,55 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <!-- Base application theme - Dark -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
 
         <!-- Background and text colors -->
         <item name="android:windowBackground">@color/backgroundColor</item>
-        <item name="android:textColor">@color/textColorPrimary</item>
-        <item name="android:textColorSecondary">@color/textColorPrimary</item>
+        <item name="android:colorBackground">@color/backgroundColor</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorSecondary</item>
 
-        <!-- CardView and Button styles -->
-        <item name="buttonStyle">@style/AppTheme.ButtonStyle</item>
-        <item name="android:itemBackground">@color/backgroundColor</item>
-        <item name="popupMenuStyle">@style/ToolbarPopupTheme</item>
-        <item name="actionOverflowMenuStyle">@style/ToolbarPopupTheme</item>
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="android:navigationBarColor">@color/bottomBackgroundColor</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- CardView styles -->
+        <item name="cardViewStyle">@style/Widget.App.CardView</item>
+
+        <!-- Button styles -->
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+
+        <!-- Toolbar popup -->
+        <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.App.PopupMenu.Overflow</item>
+
+        <!-- Dialog -->
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
         <item name="dialogTheme">@style/AlertDialogTheme</item>
+
+        <!-- Switch -->
+        <item name="switchStyle">@style/Widget.App.Switch</item>
+
+        <!-- Custom theme attributes for dark theme -->
+        <item name="dividerColor">@color/dividerColor</item>
+        <item name="cardStrokeColor">@color/cardStrokeColor</item>
+        <item name="toolbarBackground">@color/toolbarBackground</item>
+        <item name="toolbarTextColor">@color/toolbarTextColor</item>
+        <item name="buttonBackgroundColor">@color/buttonBackgroundColor</item>
+        <item name="buttonTextColor">@color/buttonTextColor</item>
+        <item name="buttonRippleColor">@color/buttonRippleColor</item>
+        <item name="chatRightBackgroundColor">@color/chatRightBackgroundColor</item>
+        <item name="chatLeftBackgroundColor">@color/chatLeftBackgroundColor</item>
+        <item name="chatRightTextColor">@color/chatRightTextColor</item>
+        <item name="chatLeftTextColor">@color/chatLeftTextColor</item>
+        <item name="chatBackgroundColor">@color/chatBackgroundColor</item>
+        <item name="bottomTextColor">@color/bottomTextColor</item>
+        <item name="bottomSelectedTextColor">@color/bottomSelectedTextColor</item>
+        <item name="bottomBackgroundColor">@color/bottomBackgroundColor</item>
+        <item name="bottomIndicatorColor">@color/bottomIndicatorColor</item>
+        <item name="iconColor">@color/iconColor</item>
+        <item name="iconSelectedColor">@color/iconSelectedColor</item>
+        <item name="mediaTextColor">@color/mediaTextColor</item>
+        <item name="chatInfoTextColor">@color/chatInfoTextColor</item>
+        <item name="chatLeftInfoTextColor">@color/chatLeftInfoTextColor</item>
+        <item name="chatRightInfoTextColor">@color/chatRightInfoTextColor</item>
+        <item name="errorTextColor">@color/errorTextColor</item>
+        <item name="successTextColor">@color/successTextColor</item>
+        <item name="chatLeftSuccessColor">@color/chatLeftSuccessColor</item>
+        <item name="chatRightSuccessColor">@color/chatRightSuccessColor</item>
+        <item name="textSelectColor">@color/text_select</item>
+        <item name="textNotSelectColor">@color/textNotSelectColor</item>
+        <item name="itemTextColor">@color/itemTextColor</item>
+        <item name="rippleColor">@color/rippleColor</item>
+        <item name="shadowColor">@color/shadowColor</item>
+        <item name="gainsboro">@color/gainsboro</item>
+        <item name="colorPrimaryLight">@color/colorPrimaryLight</item>
     </style>
 
-    <style name="AppTheme.ButtonStyle" parent="Widget.AppCompat.Button">
-        <item name="android:background">@color/buttonBackgroundColor</item>
-        <item name="android:padding">12dp</item>
+    <!-- Dark CardView Style -->
+    <style name="Widget.App.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/cardBackgroundColor</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/cardStrokeColor</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- Dark Button Style -->
+    <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/buttonBackgroundColor</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="rippleColor">@color/buttonRippleColor</item>
     </style>
 
-    <style name="ToolbarPopupTheme" parent="@style/ThemeOverlay.AppCompat.Dark">
-        <item name="android:colorBackground">@color/backgroundColor</item>
-        <item name="android:textColor">@color/textColorPrimary</item>
-        <item name="actionOverflowMenuStyle">@style/OverflowMenuStyle</item>
-        <item name="colorControlNormal">@color/textColor</item>
-
+    <!-- Dark Popup Menu Style -->
+    <style name="Widget.App.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
     </style>
 
-    <style name="OverflowMenuStyle" parent="Widget.AppCompat.Light.PopupMenu.Overflow">
+    <style name="Widget.App.PopupMenu.Overflow" parent="Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
         <item name="overlapAnchor">true</item>
     </style>
 
+    <!-- Dark Dialog Styles -->
     <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="dialogCornerRadius">20dp</item>
+        <item name="dialogCornerRadius">16dp</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColor">@color/textColorPrimary</item>
-        <item name="android:background">@color/backgroundColor</item>
+        <item name="android:background">@color/surfaceColor</item>
         <item name="android:textColorAlertDialogListItem">@color/textColorPrimary</item>
     </style>
 
+    <!-- Dark Switch Style -->
+    <style name="Widget.App.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="thumbTint">@color/switch_thumb_selector</item>
+        <item name="trackTint">@color/switch_track_selector</item>
+    </style>
 
 </resources>

@@ -1,372 +1,398 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
         android:layout_width="match_parent"
-        android:layout_height="90dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/toolbarBackground"
+        android:elevation="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/toolbarBackground"
+            android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="10dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
             <ImageView
                 android:id="@+id/about_exit_img"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:src="@drawable/ic_exit" />
+                android:padding="2dp"
+                android:src="@drawable/ic_exit"
+                android:tint="?attr/iconColor" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20px"
+                android:layout_marginStart="16dp"
                 android:text="@string/about"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="20sp" />
+                android:textColor="?attr/toolbarTextColor"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
-    </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
 
-    <RelativeLayout
+    <!-- 内容区域 -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="120dp">
-
-        <ImageView
-            android:id="@+id/about_logo"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/focused_background"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@mipmap/ic_launcher_round" />
-
-        <TextView
-            android:id="@+id/aboutTextView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/textColorPrimary"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
-
-        <TextView
-            android:id="@+id/about_version_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/aboutTextView1"
-            android:layout_centerHorizontal="true"
-            android:text="@string/version"
-            android:textColor="@color/textColorPrimary"
-            android:textSize="16sp" />
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/about_build_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:id="@+id/aboutLinearLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical" />
-
-        <TextView
-            android:id="@+id/about_copyright"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/aboutLinearLayout1"
-            android:layout_centerHorizontal="true"
-            android:text="@string/copyright"
-            android:textColor="@color/textColorPrimary" />
-
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/about_copyright"
-            android:layout_alignParentTop="true"
-            android:gravity="center"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="30dp">
+            android:padding="16dp">
 
-            <!--    <RelativeLayout
-                    android:id="@+id/about_github"
+            <!-- Logo 和版本信息卡片 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:background="@drawable/focused_background"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <ImageView
+                        android:id="@+id/about_logo"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:background="@drawable/focused_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:src="@mipmap/ic_launcher_round" />
+
+                    <TextView
+                        android:id="@+id/about_version_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/version"
+                        android:textColor="?attr/android:textColorPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/aboutTextView1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="?attr/android:textColorSecondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/about_build_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="?attr/android:textColorTertiary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- 功能列表卡片 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
+
+                    <!-- 官网 -->
+                    <RelativeLayout
+                        android:id="@+id/about_official_website"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/official_website"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
+
+                    </RelativeLayout>
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:layout_alignParentTop="true"
-                        android:background="#5F5F5F" />
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/dividerColor" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:text="@string/github" />
+                    <!-- 检查更新 -->
+                    <RelativeLayout
+                        android:id="@+id/about_update_version"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_next" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/check_update"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
 
-                </RelativeLayout>-->
-            <RelativeLayout
-                android:id="@+id/about_official_website"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
 
+                    </RelativeLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/official_website"
-                    android:textColor="@color/textColorPrimary" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/dividerColor" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
-            </RelativeLayout>
+                    <!-- 使用帮助 -->
+                    <RelativeLayout
+                        android:id="@+id/about_help"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
 
-            <RelativeLayout
-                android:id="@+id/about_update_version"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/help"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
 
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/check_update"
-                    android:textColor="@color/textColorPrimary" />
+                    </RelativeLayout>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
-            </RelativeLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/dividerColor" />
 
-            <RelativeLayout
-                android:id="@+id/about_upload_logs"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                    <!-- 隐私声明 -->
+                    <RelativeLayout
+                        android:id="@+id/about_privacy"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/upload_logs"
-                    android:textColor="@color/textColorPrimary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/privacy"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
-            </RelativeLayout>
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
 
+                    </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/about_help"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/dividerColor" />
 
+                    <!-- 加入QQ群 -->
+                    <RelativeLayout
+                        android:id="@+id/about_group"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/help"
-                    android:textColor="@color/textColorPrimary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/join_group"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
 
-                <!-- <View
-                         android:layout_width="match_parent"
-                         android:layout_height="0.5dp"
-                         android:layout_alignParentTop="true"
-                         android:background="#5F5F5F"/>-->
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                    </RelativeLayout>
 
-            </RelativeLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/dividerColor" />
 
-            <RelativeLayout
-                android:id="@+id/about_privacy"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                    <!-- 上传日志 (隐藏) -->
+                    <RelativeLayout
+                        android:id="@+id/about_upload_logs"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/privacy"
-                    android:textColor="@color/textColorPrimary" />
-                <!--
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/upload_logs"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
 
-                                <View
-                                        android:layout_width="match_parent"
-                                        android:layout_height="0.5dp"
-                                        android:layout_alignParentTop="true"
-                                        android:background="#5F5F5F"/>
-                -->
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                    </RelativeLayout>
 
-            </RelativeLayout>
+                    <!-- 打赏支持 -->
+                    <RelativeLayout
+                        android:id="@+id/about_reward"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
 
-            <RelativeLayout
-                android:id="@+id/about_group"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
-                <!--
-                                <View
-                                        android:layout_width="match_parent"
-                                        android:layout_height="0.5dp"
-                                        android:layout_alignParentBottom="true"
-                                        android:background="#5F5F5F"/>-->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="打赏支持"
+                            android:textColor="?attr/android:textColorPrimary"
+                            android:textSize="16sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="@string/join_group"
-                    android:textColor="@color/textColorPrimary" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_next"
+                            android:tint="?attr/android:textColorTertiary" />
 
-                <!--    <View
-                            android:layout_width="match_parent"
-                            android:layout_height="0.5dp"
-                            android:layout_alignParentTop="true"
-                            android:background="#5F5F5F"/>-->
+                    </RelativeLayout>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
+                </LinearLayout>
 
-            </RelativeLayout>
+            </androidx.cardview.widget.CardView>
 
-            <RelativeLayout
-                android:id="@+id/about_reward"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/focused_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:gravity="center_vertical"
-                    android:text="打赏支持"
-                    android:textColor="@color/textColorPrimary" />
-
-
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_next" />
-
-            </RelativeLayout>
+            <!-- 版权信息 -->
+            <TextView
+                android:id="@+id/about_copyright"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/copyright"
+                android:textColor="?attr/android:textColorTertiary"
+                android:textSize="12sp" />
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </ScrollView>
 
 </LinearLayout>
-

@@ -65,11 +65,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     .into(holder.mImg);
             holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
         } else if (fileType == MessageFileContent.FILE_TYPE_AUDIO) {
-            Glide.with(context)
-                    .load(R.drawable.ic_music)
-                    .centerCrop()
-                    .placeholder(R.drawable.ic_null)
-                    .into(holder.mImg);
+            holder.mImg.setImageResource(R.drawable.ic_music);
             holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
         } else if (fileType == MessageFileContent.FILE_TYPE_IMAGE || fileType == MessageFileContent.FILE_TYPE_VIDEO) {
             MessageMediaContent mediaInfo = (MessageMediaContent) fileInfo;

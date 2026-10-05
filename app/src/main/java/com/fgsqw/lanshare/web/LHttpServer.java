@@ -55,16 +55,30 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * LANShare HTTP服务
+ * <p>
+ * 负责启动和管理HTTP服务器，提供网页端访问局域网设备资源的接口。
+ * 主要功能包括：文件浏览与下载、APK管理、媒体文件访问、文件上传与分享、
+ * WebSocket实时通讯、设备列表同步等。
+ * </p>
+ *
+ * @author fgsq
+ * @version 1.0
  */
 public class LHttpServer {
 
+    /** HTTP服务器实例 */
     private final HttpServer httpServer;
+    /** APK图标数据库操作工具 */
     private ApkIconDBUtil apkIconDBUtil;
+    /** Token令牌数据库操作工具 */
     private TokenDBUtil tokenDBUtil;
+    /** 文件分享数据库操作工具 */
     private FileShareDBUtil fileShareDBUtil;
+    /** 局域网服务实例 */
     private LANService lanService;
 
-    String[] paths = {
+    /** 需要进行Token鉴权的路径列表 */
+    private String[] paths = {
             "/apps",
             "/media",
             "/files",
@@ -78,8 +92,18 @@ public class LHttpServer {
             "/updateWebName",
     };
 
+    /** 当前所有已连接的WebSocket服务器列表（线程安全） */
     public static List<WebSocketServer> webSocketServers = new Vector<>();
 
+    // ==================== 文件压缩 ====================
+
+    /**
+     * 递归压缩文件/目录到ZipOutputStream
+     *
+     * @param beginIndex     路径截取起始索引，用于生成zip内的相对路径
+     * @param file           待压缩的文件或目录
+     * @param zipOutputStream 目标Zip输出流
+     */
     public void compressFiles(int beginIndex, File file, ZipOutputStream zipOutputStream) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
@@ -101,13 +125,19 @@ public class LHttpServer {
 
     }
 
+    // ==================== WebSocket消息推送 ====================
+
     /**
-     * 发送消息
+     * 向所有已连接的WebSocket客户端广播消息
      *
-     * @param message   消息内容
-     * @param toDevName 设备名
-     * @param devType   设备类型
-     * @param isLeft    是否在左边
+     * @param message     消息内容
+     * @param toDevName   目标设备名
+     * @param filePath    文件路径（如有）
+     * @param messageType 消息类型
+     * @param devType     设备类型
+     * @param fileSize    文件大小描述
+     * @param isLeft      是否显示在左侧
+     * @param isClip      是否为剪贴板内容
      */
     public static void sendMessage(String message, String toDevName, String filePath, int messageType, int devType, String fileSize, boolean isLeft, boolean isClip) {
         Iterator<WebSocketServer> iterator = webSocketServers.iterator();
@@ -137,6 +167,19 @@ public class LHttpServer {
         }
     }
 
+    /**
+     * 向指定WebSocket客户端发送消息
+     *
+     * @param webSocketServer 目标WebSocket服务器
+     * @param message         消息内容
+     * @param toDevName       目标设备名
+     * @param filePath        文件路径（如有）
+     * @param messageType     消息类型
+     * @param devType         设备类型
+     * @param fileSize        文件大小描述
+     * @param isLeft          是否显示在左侧
+     * @param isClip          是否为剪贴板内容
+     */
     public static void sendMessage(WebSocketServer webSocketServer, String message, String toDevName, String filePath, int messageType, int devType, String fileSize, boolean isLeft, boolean isClip) {
         // 判断webSocket是否已经关闭，已经关闭的顺便从列表移除
         if (!webSocketServer.isClosed()) {
@@ -158,6 +201,9 @@ public class LHttpServer {
         }
     }
 
+    /**
+     * 向所有已连接的WebSocket客户端推送在线设备列表
+     */
     public static void sendDeviceList() {
         Iterator<WebSocketServer> iterator = webSocketServers.iterator();
         while (iterator.hasNext()) {
@@ -193,13 +239,20 @@ public class LHttpServer {
     }
 
 
+    // ==================== 路由注册 ====================
+
+    /**
+     * 构造LHttpServer实例，初始化数据库工具并注册所有HTTP路由
+     *
+     * @param lanService 局域网服务实例
+     */
     public LHttpServer(LANService lanService) {
         this.lanService = lanService;
         apkIconDBUtil = new ApkIconDBUtil(lanService);
         tokenDBUtil = new TokenDBUtil(lanService);
         fileShareDBUtil = new FileShareDBUtil(lanService);
         httpServer = new HttpServer(ThreadUtils.EXECUTOR_SERVICE);
-        // 过滤器
+        // ==================== 鉴权过滤器 ====================
         httpServer.setRequestFilter((request, response, httpHandler) -> {
             if (Config.WEB_OPEN) {
                 httpHandler.handle(request, response);
@@ -225,7 +278,9 @@ public class LHttpServer {
             httpHandler.handle(request, response);
         });
 
-        // 检测是否通行
+        // ==================== Token与设备管理接口 ====================
+
+        // 检测Token是否已通过授权
         httpServer.addPath("/checkPass", (request, response) -> {
             String token = request.getHeaderValue("token");
             Token t = tokenDBUtil.queryByToken(token);
@@ -234,7 +289,9 @@ public class LHttpServer {
             response.writeString(object.toJSONString());
         });
 
-        // 文件分享
+        // ==================== 文件分享接口 ====================
+
+        // 文件分享下载（根据UUID获取分享文件）
         httpServer.addPath("/sharefile/*", (request, response) -> {
             String uuid = request.getQueryParam("uuid");
             MessageDownloadInfoContent fileInfo = fileShareDBUtil.queryShare(uuid);
@@ -260,7 +317,9 @@ public class LHttpServer {
             fileShareDBUtil.updateDownloaded(uuid, true);
         });
 
-        // 文件上传
+        // ==================== 文件上传接口 ====================
+
+        // 聊天文件上传（流式转发到指定设备）
         httpServer.addPath("/chatUploadFile", (request, response) -> {
             String address = request.getQueryParam("address");
             Device device = lanService.getOnLineDevices().get(address);
@@ -282,7 +341,7 @@ public class LHttpServer {
             response.writeString("文件上传成功，大小: " + FileUtil.computeSize(uploadInputStream.getFileSize()));
         });
 
-        // 文件上传
+        // 通用文件上传（保存到本地并通知UI）
         httpServer.addPath("/uploadFile", (request, response) -> {
             File file = new File(Config.FILE_SAVE_PATH + "网页收到的文件/");
             if (!file.exists()) {
@@ -313,6 +372,7 @@ public class LHttpServer {
             response.writeString("文件上传成功，大小: " + FileUtil.computeSize(fileSize));
         });
 
+        // 更新网页端设备名称
         httpServer.addPath("/updateWebName", (request, response) -> {
             JSONObject object = JSON.parseObject(request.getRequestBody());
             String webName = object.getString("webName");
@@ -321,7 +381,9 @@ public class LHttpServer {
             response.writeEmpty();
         });
 
-        // 初始化配置
+        // ==================== 初始化配置接口 ====================
+
+        // 初始化网页端配置（Token分配、设备命名、授权检测）
         httpServer.addPath("/initConfig", (request, response) -> {
             JSONObject object = new JSONObject();
             object.put("rootPath", Environment.getExternalStorageDirectory().getPath());
@@ -377,11 +439,13 @@ public class LHttpServer {
             response.writeString(object.toJSONString());
         });
 
-        // app列表
+        // ==================== APK管理接口 ====================
+
+        // 获取已安装APK列表
         httpServer.addPath("/apps", (request, response) -> {
             List<MessageApkContent> apkFileList = AnyData.apkFileList;
             if (apkFileList != null) {
-                JSONObject resault = new JSONObject();
+                JSONObject result = new JSONObject();
                 JSONArray array = new JSONArray();
                 for (MessageApkContent apkInfo : apkFileList) {
                     JSONObject apk = new JSONObject();
@@ -390,19 +454,21 @@ public class LHttpServer {
                     apk.put("length", FileUtil.computeSize(apkInfo.getLength()));
                     array.add(apk);
                 }
-                resault.put("list", array);
-                response.writeString(resault.toJSONString());
+                result.put("list", array);
+                response.writeString(result.toJSONString());
             }
         });
 
-        // app图标
+        // 获取APK图标
         httpServer.addPath("/appicon", (request, response) -> {
             String packageName = request.getQueryParam("packageName");
             byte[] bytes = apkIconDBUtil.queryIconByPackageName(packageName);
             response.writeBytes(bytes, HttpConstant.STREAM_CONTEXT_IMAGE);
         });
 
-        // 相册图片
+        // ==================== 媒体文件接口 ====================
+
+        // 获取相册图片缩略图
         httpServer.addPath("/imageload/*", (request, response) -> {
             String index = request.getQueryParam("index");
             MediaResult mediaResult = AnyData.mediaResult;
@@ -421,7 +487,9 @@ public class LHttpServer {
             }
         });
 
-        // 获取图片
+        // ==================== 静态资源接口 ====================
+
+        // 加载web目录下的静态图片资源
         httpServer.addPath("/images/*", (request, response) -> {
             String path = request.getRequestPath();
             String filePath = "web";
@@ -435,7 +503,9 @@ public class LHttpServer {
             }
         });
 
-        // 文件列表
+        // ==================== 文件浏览接口 ====================
+
+        // 获取指定目录的文件列表
         httpServer.addPath("/files", (request, response) -> {
             String str = request.getRequestBody();
             JSONObject jsonObject = JSON.parseObject(str);
@@ -458,7 +528,7 @@ public class LHttpServer {
                 MessageFileContent fs = new MessageFileContent();
                 fs.setPath(file.getPath());
                 int fileSortMethod = App.getPrefUtil().getInt(PreConfig.FILE_SORT_METHOD, 0);
-                List<MessageFileContent> fileList = FileSearchUtils.getFileList(fs, showHiddenFiles, fileSortMethod, lanService);
+                List<MessageFileContent> fileList = DeviceDataScanner.listDirectoryContents(fs, showHiddenFiles, fileSortMethod, lanService);
                 JSONObject object = new JSONObject();
                 object.put("path", file.getAbsolutePath());
                 JSONArray jsonArray = new JSONArray();
@@ -490,7 +560,9 @@ public class LHttpServer {
             }
         });
 
-        // 下载压缩后的文件
+        // ==================== 文件压缩与下载接口 ====================
+
+        // 下载已压缩的临时zip文件
         httpServer.addPath("/downloadZipFile", (request, response) -> {
             String tempFile = request.getQueryParam("tempFile");
             File file = new File(lanService.getExternalCacheDir().getPath() + "/" + tempFile);
@@ -502,7 +574,7 @@ public class LHttpServer {
             file.delete();
         });
 
-        // 压缩文件
+        // 压缩指定文件列表为zip（返回临时文件名）
         httpServer.addPath("/compressFiles", (request, response) -> {
             String str = request.getRequestBody();
             JSONObject jsonObject = JSON.parseObject(str);
@@ -521,7 +593,7 @@ public class LHttpServer {
             response.writeString(result.toJSONString());
         });
 
-        // 压缩打包媒体
+        // 压缩打包媒体文件为zip（返回临时文件名）
         httpServer.addPath("/compressMedias", (request, response) -> {
             String str = request.getRequestBody();
             JSONObject jsonObject = JSON.parseObject(str);
@@ -558,7 +630,9 @@ public class LHttpServer {
 
         });
 
-        // 媒体列表
+        // ==================== 媒体浏览接口 ====================
+
+        // 获取媒体列表（folderIndex=-1时返回文件夹列表，否则返回指定文件夹内的媒体）
         httpServer.addPath("/media", (request, response) -> {
             String str = request.getRequestBody();
             JSONObject jsonObject = JSON.parseObject(str);
@@ -609,7 +683,9 @@ public class LHttpServer {
             }
         });
 
-        // apk文件下载
+        // ==================== 文件下载接口 ====================
+
+        // APK文件下载（根据包名获取APK文件）
         httpServer.addPath("/apkfile/*", (request, response) -> {
             String packageName = request.getQueryParam("packageName");
             String path = apkIconDBUtil.queryPathByPackageName(packageName);
@@ -625,7 +701,7 @@ public class LHttpServer {
             response.writeFile(file);
         });
 
-        // 文件下载
+        // 通用文件下载（根据路径下载任意文件）
         httpServer.addPath("/file/*", (request, response) -> {
             String path = request.getQueryParam("path");
             File file = new File(path);
@@ -636,7 +712,9 @@ public class LHttpServer {
             }
         });
 
-        // drawable下载图片映射
+        // ==================== 资源映射接口 ====================
+
+        // Drawable资源图片映射（根据资源名返回对应的图片）
         httpServer.addPath("/drawable", (request, response) -> {
             String name = request.getQueryParam("name");
             Resources r = lanService.getResources();
@@ -647,7 +725,9 @@ public class LHttpServer {
             response.writeStream(is, contentTypeByName);
         });
 
-        // LANShare webSocket 通讯服务
+        // ==================== WebSocket通讯接口 ====================
+
+        // WebSocket升级与消息通讯处理
         httpServer.addPath("/wss", (request, response) -> {
             String headerValue = request.getHeaderValue("Sec-WebSocket-Key");
             WebSocketServer webSocketServer = new WebSocketServer(headerValue, request.getSocket());
@@ -665,12 +745,7 @@ public class LHttpServer {
             webDevice.setWebSocketServer(webSocketServer);
             String address = webDevice.getDevIP() + ":" + webDevice.getDevPort();
 
-            lanService.onLineWebDevices.put(address, webDevice);
-//            lanService.addDevice(
-//                    webDevice
-//            );
-
-//            LHttpServer.sendDeviceList();
+            lanService.getDeviceManager().onLineWebDevices.put(address, webDevice);
             try {
                 while (!webSocketServer.isClosed()) {
                     String text = webSocketServer.readString();
@@ -709,13 +784,15 @@ public class LHttpServer {
             } finally {
                 IOUtil.closeIO(webSocketServer);
                 lanService.removeDevice(ip + ":" + port);
-                lanService.onLineWebDevices.remove(address);
+                lanService.getDeviceManager().onLineWebDevices.remove(address);
                 webSocketServers.remove(webSocketServer);
             }
 
         });
 
-        // 主页
+        // ==================== Web前端静态资源接口 ====================
+
+        // CSS样式文件加载
         httpServer.addPath("/css/*", (request, response) -> {
             String path = request.getRequestPath();
             String filePath = "web";
@@ -729,6 +806,7 @@ public class LHttpServer {
             }
         });
 
+        // JS脚本文件加载
         httpServer.addPath("/js/*", (request, response) -> {
             String path = request.getRequestPath();
             String filePath = "web";
@@ -742,6 +820,7 @@ public class LHttpServer {
             }
         });
 
+        // 网站图标
         httpServer.addPath("/favicon.ico", (request, response) -> {
             String filePath = "web/images/lanshare.png";
             InputStream open = lanService.getAssets().open(filePath);
@@ -751,7 +830,7 @@ public class LHttpServer {
             response.writeBytes(bytes, myMIMEType);
         });
 
-        // 主页
+        // 主页（加载默认HTML页面）
         httpServer.addPath("/", (request, response) -> {
             String filePath = "web";
             filePath += "/lanshare.html";
@@ -764,17 +843,33 @@ public class LHttpServer {
 
     }
 
+    // ==================== 服务器控制 ====================
+
+    /**
+     * 获取HTTP服务器实例
+     *
+     * @return HTTP服务器实例
+     */
     public HttpServer getHttpServer() {
         return httpServer;
     }
 
+    /**
+     * 启动HTTP服务器
+     *
+     * @throws Exception 启动异常
+     */
     public void startHttpServer() throws Exception {
         httpServer.start();
     }
 
+    /**
+     * 以混合模式启动HTTP服务器（与LANService共用端口）
+     *
+     * @throws IOException IO异常
+     */
     public void startBlendingModeHttpServer() throws IOException {
         httpServer.startBlendingMode();
     }
-
 
 }

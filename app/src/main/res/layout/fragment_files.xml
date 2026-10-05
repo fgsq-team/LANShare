@@ -4,43 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor"
+    android:background="?attr/colorSurface"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="5dp" />
-
+    <!-- TabLayout 卡片 -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="2dp"
-        app:cardCornerRadius="4dp"
-        app:cardPreventCornerOverlap="false"
-        app:cardUseCompatPadding="true"
-        tools:targetApi="lollipop">
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        app:cardBackgroundColor="?attr/colorSurface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_files"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@color/backgroundColor"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
             app:tabGravity="fill"
-            app:tabTextColor="@color/textColorPrimary"
-            app:tabIndicatorColor="@color/textColorPrimary"
-            app:tabSelectedTextColor="#FF4081" />
+            app:tabMode="fixed"
+            app:tabTextColor="?attr/android:textColorSecondary"
+            app:tabSelectedTextColor="?attr/colorPrimary"
+            app:tabIndicatorColor="?attr/colorPrimary"
+            app:tabIndicatorHeight="3dp"
+            app:tabRippleColor="?attr/colorPrimaryLight"
+            app:tabTextAppearance="@style/TextAppearance.App.Tab" />
+
     </androidx.cardview.widget.CardView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="5dp" />
-
+    <!-- ViewPager -->
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pag_files"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
 </LinearLayout>
-

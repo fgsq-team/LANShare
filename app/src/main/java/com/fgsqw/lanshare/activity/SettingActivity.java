@@ -234,6 +234,9 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             case AppCompatDelegate.MODE_NIGHT_NO:
                 tv_theme.setText(R.string.light_theme);
                 break;
+            case 3: // 翠绿主题
+                tv_theme.setText(R.string.emerald_theme);
+                break;
             default:
                 tv_theme.setText(R.string.follow_system);
                 break;
@@ -271,6 +274,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         switch (v.getId()) {
             case R.id.setting_exit_img: {
                 finish();
+                break;
             }
             case R.id.setting_theme: {
                 showThemeSelectDialog();
@@ -625,7 +629,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     private void showThemeSelectDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
         builder.setTitle(R.string.theme_setting);
-        String[] themes = {getString(R.string.light_theme), getString(R.string.dark_theme), getString(R.string.follow_system)};
+        String[] themes = {getString(R.string.light_theme), getString(R.string.dark_theme), getString(R.string.emerald_theme), getString(R.string.follow_system)};
         int selectedTheme = prefUtil.getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         int selectedIndex;
         switch (selectedTheme) {
@@ -635,8 +639,11 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             case AppCompatDelegate.MODE_NIGHT_NO:
                 selectedIndex = 0;
                 break;
-            default:
+            case 3: // 翠绿主题
                 selectedIndex = 2;
+                break;
+            default:
+                selectedIndex = 3;
                 break;
         }
         builder.setSingleChoiceItems(themes, selectedIndex, (dialog, which) -> {
@@ -648,14 +655,20 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 case 1: // 深色主题
                     themeMode = AppCompatDelegate.MODE_NIGHT_YES;
                     break;
+                case 2: // 翠绿主题
+                    themeMode = 3;
+                    break;
                 default: // 跟随系统
                     themeMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
                     break;
             }
             prefUtil.saveInt(PreConfig.THEME_MODE, themeMode);
-            AppCompatDelegate.setDefaultNightMode(themeMode);
+            AppCompatDelegate.setDefaultNightMode(
+                    themeMode == 3 ? AppCompatDelegate.MODE_NIGHT_NO : themeMode
+            );
             tv_theme.setText(themes[which]);
             dialog.dismiss();
+            recreate(); // 重建 Activity 以立即应用主题
         });
         builder.setNegativeButton(R.string.cancel, null);
         builder.show();

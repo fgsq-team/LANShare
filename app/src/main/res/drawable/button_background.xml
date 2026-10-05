@@ -1,36 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- pressed -->
-    <item android:state_pressed="true" >
-        <shape  android:shape="rectangle">
-            <gradient
-                android:startColor="#0090AC"
-                android:endColor="#0090AC"
-                android:angle="270" />
-            <corners
-                android:radius="4dp" />
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/colorPrimaryDark" />
+            <corners android:radius="12dp" />
         </shape>
     </item>
-    <!-- focus -->
-    <item android:state_focused="true" >
-        <shape>
-            <gradient
-                android:startColor="#ffc2b7"
-                android:endColor="#ffc2b7"
-                android:angle="270" />
-            <corners
-                android:radius="4dp" />
+    <!-- focused -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/colorPrimary" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <!-- disabled -->
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/dividerColor" />
+            <corners android:radius="12dp" />
         </shape>
     </item>
     <!-- default -->
     <item>
-        <shape>
-            <gradient
-                android:startColor="@color/text_select"
-                android:endColor="@color/text_select"
-                android:angle="0" />
-            <corners
-                android:radius="4dp" />
+        <shape android:shape="rectangle">
+            <solid android:color="@color/buttonBackgroundColor" />
+            <corners android:radius="12dp" />
         </shape>
     </item>
 </selector>

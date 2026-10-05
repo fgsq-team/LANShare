@@ -3,9 +3,10 @@ package com.fgsqw.lanshare.fragment;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Message;
+
+import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -67,7 +68,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
 
     private View view;
     // 发下消息按钮
-    private Button btnSned;
+    private ImageButton btnSned;
     // 消息编辑框
     private EditText editContent;
     private LinearLayout chatEditLayout;
@@ -82,6 +83,11 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     // 消息列表
     private final List<MessageContent> messageContentList = new ArrayList<>();
     private final List<MessageContent> checkedMessageList = new ArrayList<>();
+    private int leftSuccessColor;
+    private int rightSuccessColor;
+    private int errorColor;
+    private int leftInfoColor;
+    private int rightInfoColor;
     // 选中的设备
     private Device selectedDevice;
     // 配置文件加载工具
@@ -119,7 +125,20 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         messsageDButil = new MesssageDButil(context);
         Config.lastMessageTime = messsageDButil.getLastMessageTime();
         tokenDBUtil = new TokenDBUtil(context);
+        leftSuccessColor = resolveThemeAttr(R.attr.chatLeftSuccessColor);
+        rightSuccessColor = resolveThemeAttr(R.attr.chatRightSuccessColor);
+        errorColor = resolveThemeAttr(R.attr.errorTextColor);
+        leftInfoColor = resolveThemeAttr(R.attr.chatLeftInfoTextColor);
+        rightInfoColor = resolveThemeAttr(R.attr.chatRightInfoTextColor);
         super.onAttach(context);
+    }
+
+    private int resolveThemeAttr(int attrRes) {
+        TypedValue typedValue = new TypedValue();
+        if (requireContext().getTheme().resolveAttribute(attrRes, typedValue, true)) {
+            return typedValue.data;
+        }
+        return 0;
     }
 
     // 接收LANService的消息
@@ -224,7 +243,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
             if (viewHolder.progressBar.getVisibility() == View.GONE) {
                 viewHolder.progressBar.setVisibility(View.VISIBLE);
                 viewHolder.stateTv.setVisibility(View.GONE);
-                viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.itemTextColor));
+                viewHolder.stateTv.setTextColor(fileContent.isLeft() ? leftInfoColor : rightInfoColor);
                 fileContent.setStatus(MessageContent.IN);
             }
             viewHolder.progressBar.setProgress(fileContent.getProgress());
@@ -272,7 +291,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 .setMessage(String.format("是否同意%s的获取的%d个APP更新请求", device.getDevName(), fileInfos.size()))
                 .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
                     dialogInterface.dismiss();
-                    LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, fileInfos);
+                    LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, fileInfos);
                 }).setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
                     dialogInterface.dismiss();
                 });
@@ -296,6 +315,13 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
             parent.removeView(view);
         }
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Activity重建（如切换主题）时清除缓存的view，避免状态恢复时类型不匹配
+        view = null;
     }
 
     public class TopScrollListener extends RecyclerView.OnScrollListener {
@@ -541,15 +567,15 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 if (fileContent.existStatus(MessageContent.IN)) {
                     viewHolder.progressBar.setVisibility(View.VISIBLE);
                     viewHolder.stateTv.setVisibility(View.GONE);
-                    viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.itemTextColor));
+                    viewHolder.stateTv.setTextColor(messageContent.isLeft() ? leftInfoColor : rightInfoColor);
                 } else {
                     viewHolder.progressBar.setVisibility(View.GONE);
                     viewHolder.stateTv.setVisibility(View.VISIBLE);
                     viewHolder.stateTv.setText(fileContent.getStateMessage());
                     if (fileContent.existStatus(MessageContent.SUCCESS)) {
-                        viewHolder.stateTv.setTextColor(getContext().getResources().getColor(R.color.itemTextColor));
+                        viewHolder.stateTv.setTextColor(fileContent.isLeft() ? leftSuccessColor : rightSuccessColor);
                     } else if (fileContent.existStatus(MessageContent.ERROR)) {
-                        viewHolder.stateTv.setTextColor(Color.RED);
+                        viewHolder.stateTv.setTextColor(errorColor);
                     }
                 }
             } /*else {

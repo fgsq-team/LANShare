@@ -7,7 +7,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import com.fgsqw.lanshare.service.LANService;
-import com.fgsqw.lanshare.utils.FileSearchUtils;
+import com.fgsqw.lanshare.utils.DeviceDataScanner;
 import com.fgsqw.lanshare.utils.ThreadUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -36,7 +36,7 @@ public class ImageObserver extends ContentObserver {
                 TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException ignored) {
             }
-            FileSearchUtils.loadImageForSDCard(lanService, true);
+            DeviceDataScanner.scanImages(lanService, true);
             lanService.syncMedia();
         });
     }

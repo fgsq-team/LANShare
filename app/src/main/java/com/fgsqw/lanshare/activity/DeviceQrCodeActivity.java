@@ -60,7 +60,7 @@ public class DeviceQrCodeActivity extends BaseActivity implements CompoundButton
 
     public void updateQrCode(boolean useIPv6) {
         if (useIPv6) {
-            List<NetInfo> ipv6NetInfoList = LANService.getInstance().ipv6NetInfoList;
+            List<NetInfo> ipv6NetInfoList = LANService.getInstance().getDeviceManager().ipv6NetInfoList;
             if (ipv6NetInfoList == null || ipv6NetInfoList.isEmpty()) {
                 T.s((R.string.ipv6_address_not_found));
                 return;
@@ -72,7 +72,7 @@ public class DeviceQrCodeActivity extends BaseActivity implements CompoundButton
             tvIpAddress.setText(netInfo.getIp());
 
         } else {
-            Set<Device> localDevices = LANService.getInstance().localDevices;
+            Set<Device> localDevices = LANService.getInstance().getDeviceManager().localDevices;
             if (localDevices == null || localDevices.isEmpty()) {
                 T.s((R.string.failed_to_get_ip));
                 return;

@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 圆形背景填充 -->
+    <path
+        android:fillColor="@color/colorPrimary"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z" />
+    <!-- 白色音符 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13,7.5v5.11c-0.47,-0.32 -1.03,-0.51 -1.63,-0.51 -1.56,0 -2.82,1.26 -2.82,2.82s1.26,2.82 2.82,2.82 2.82,-1.26 2.82,-2.82V9h2.5V7.5h-3.69z" />
+</vector>

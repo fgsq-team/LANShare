@@ -47,7 +47,8 @@
             android:layout_marginRight="10dp"
             android:layout_toStartOf="@+id/chat_item_header"
             android:layout_toLeftOf="@+id/chat_item_header"
-            android:text="MIX4" />
+            android:text="MIX4"
+            android:textColor="?attr/android:textColorSecondary" />
 
 
         <RelativeLayout
@@ -93,7 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/cancelled"
-                        android:textColor="#a8a8a8"
+                        android:textColor="?attr/chatRightInfoTextColor"
                         android:textSize="11sp"
                         android:visibility="gone" />
 
@@ -101,7 +102,7 @@
                         android:id="@+id/chat_msg_tv_file_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="#a8a8a8"
+                        android:textColor="?attr/chatRightInfoTextColor"
                         android:textSize="12sp" />
 
                     <TextView
@@ -112,7 +113,7 @@
                         android:layout_marginRight="5dp"
                         android:ellipsize="middle"
                         android:singleLine="true"
-                        android:textColor="@color/mediaTextColor"
+                        android:textColor="?attr/mediaTextColor"
                         android:text="@string/test_text"
                         android:textSize="13sp" />
 
@@ -160,7 +161,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:text="@string/time_zero"
-                    android:textColor="@color/textColor"
+                    android:textColor="@color/videoTimeTextColor"
                     android:textSize="12sp" />
 
             </RelativeLayout>

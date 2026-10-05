@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/toolbarBackground"
+    android:background="?attr/toolbarBackground"
+    android:elevation="0dp"
+    app:titleTextColor="?attr/toolbarTextColor"
     android:fitsSystemWindows="true">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
 
+        <!-- 左侧：应用名和IP -->
         <LinearLayout
             android:id="@+id/main_ip_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:gravity="center_vertical"
@@ -27,58 +32,55 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="19sp"
-                android:textStyle="bold" />
+                android:textColor="?attr/toolbarTextColor"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.02" />
 
             <TextView
                 android:id="@+id/main_ip"
-                android:layout_width="210dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:maxWidth="200dp"
                 android:ellipsize="middle"
                 android:singleLine="true"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="16sp" />
+                android:textColor="?attr/android:textColorSecondary"
+                android:textSize="13sp" />
         </LinearLayout>
 
+        <!-- 右侧：扫码和开关 -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_toStartOf="@+id/main_scan_code"
-            android:layout_toLeftOf="@+id/main_scan_code">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <Switch
                 android:id="@+id/main_web_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
+                android:layout_marginEnd="4dp" />
+
+            <LinearLayout
+                android:id="@+id/main_scan_code"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_scan"
+                    android:tint="?attr/iconColor"
+                    tools:ignore="UseAppTint" />
+            </LinearLayout>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/main_scan_code"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="right"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_scan"
-                tools:ignore="RtlHardcoded" />
-        </LinearLayout>
-
 
     </RelativeLayout>
-
 
 </androidx.appcompat.widget.Toolbar>

@@ -51,7 +51,12 @@ public class App extends Application {
         LLog.debug("App Create");
         prefUtil = new PrefUtil(this);
         int themeMode = prefUtil.getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        AppCompatDelegate.setDefaultNightMode(themeMode);
+        // 翠绿主题(值=3)基于浅色模式，强制使用 MODE_NIGHT_NO 作为基础
+        if (themeMode == 3) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(themeMode);
+        }
         app = this;
     }
 

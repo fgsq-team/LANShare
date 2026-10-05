@@ -3,101 +3,111 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_nar_layout"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:background="@color/bottomBackgroundColor"
+    android:layout_height="64dp"
+    android:background="?attr/bottomBackgroundColor"
     android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:elevation="8dp">
 
-    android:orientation="horizontal">
-
+    <!-- 记录 Tab -->
     <LinearLayout
         android:id="@+id/bottom_record"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1.0"
-        android:background="@drawable/focused_background"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
         android:gravity="center"
-        android:nextFocusUp="@+id/chat_et_content"
-        android:orientation="vertical">
-
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:nextFocusUp="@+id/chat_et_content">
 
         <ImageView
             android:id="@+id/img_record"
-            android:layout_width="25dp"
-            android:layout_height="21dp"
-            android:src="@drawable/ic_record" />
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@drawable/ic_record"
+            android:tint="?attr/bottomTextColor"
+            tools:ignore="UseAppTint" />
 
         <TextView
             android:id="@+id/bottom_record_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="@string/record"
-            android:textColor="@color/bottomTextColor"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
-
+            android:textColor="?attr/bottomTextColor"
+            android:textSize="11sp" />
 
     </LinearLayout>
 
+    <!-- 发送 Tab -->
     <LinearLayout
         android:id="@+id/bottom_send"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1.0"
-        android:background="@drawable/focused_background"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
         android:gravity="center"
-        android:nextFocusUp="@+id/chat_et_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:nextFocusUp="@+id/chat_et_content">
 
         <ImageView
             android:id="@+id/img_send"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_send" />
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@drawable/ic_send"
+            android:tint="?attr/colorAccent"
+            tools:ignore="UseAppTint" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="@string/send"
-            android:textColor="@color/bottomTextColor"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+            android:textColor="?attr/colorAccent"
+            android:textSize="11sp" />
 
     </LinearLayout>
 
+    <!-- 文件 Tab -->
     <LinearLayout
         android:id="@+id/bottom_files"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1.0"
-        android:background="@drawable/focused_background"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
         android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:nextFocusRight="@+id/main_scan_code"
-        android:nextFocusUp="@+id/chat_et_content"
-        android:orientation="vertical">
+        android:nextFocusUp="@+id/chat_et_content">
 
         <ImageView
             android:id="@+id/img_files"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:src="@drawable/ic_file" />
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@drawable/ic_file"
+            android:tint="?attr/bottomTextColor"
+            tools:ignore="UseAppTint" />
 
         <TextView
             android:id="@+id/bottom_files_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="@string/file"
-            android:textColor="@color/bottomTextColor"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+            android:textColor="?attr/bottomTextColor"
+            android:textSize="11sp" />
 
     </LinearLayout>
 

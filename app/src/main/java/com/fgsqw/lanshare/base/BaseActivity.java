@@ -5,7 +5,9 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.preference.PreferenceManager;
 import com.fgsqw.lanshare.App;
+import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.utils.PrefUtil;
 
@@ -13,10 +15,24 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected PrefUtil prefUtil;
     int topMargin = 0;
 
+    // 翠绿主题模式值（与 SettingActivity 保持一致）
+    private static final int THEME_MODE_EMERALD = 3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefUtil = new PrefUtil(this);
+    }
+
+    @Override
+    protected void onApplyThemeResource(android.content.res.Resources.Theme theme, int resid, boolean first) {
+        super.onApplyThemeResource(theme, resid, first);
+        // 在 AppCompatDelegate 处理完主题后，覆盖为翠绿主题
+        int themeMode = PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt(PreConfig.THEME_MODE, -1);
+        if (themeMode == THEME_MODE_EMERALD) {
+            setTheme(R.style.AppTheme_Emerald);
+        }
     }
 
     @Override

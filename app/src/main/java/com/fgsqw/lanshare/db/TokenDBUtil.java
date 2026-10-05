@@ -13,17 +13,43 @@ import com.fgsqw.lanshare.utils.LLog;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Token 数据库工具类
+ * <p>负责管理设备访问令牌,存储和查询设备 Token 信息</p>
+ *
+ * @author fgsq
+ * @version 1.0
+ */
 public class TokenDBUtil extends SQLiteOpenHelper {
 
+    /** 数据库版本 */
     private static final int DB_VERSION = 1;
+    
+    /** 数据库名称 */
     private static final String DB_NAME = "token_list_new_v1.db";
+    
+    /** 表名 */
     public static final String TABLE_NAME = "token";
 
+    /**
+     * 构造函数
+     *
+     * @param context 上下文
+     */
     public TokenDBUtil(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
 
+    /**
+     * 添加 Token
+     *
+     * @param token  Token 字符串
+     * @param custom 是否自定义
+     * @param pass   密码
+     * @param ip     IP 地址
+     * @param name   设备名称
+     */
     public void addToken(String token, boolean custom, int pass, String ip, String name) {
         try {
             SQLiteDatabase db = getWritableDatabase();
@@ -41,6 +67,12 @@ public class TokenDBUtil extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * 根据 Token 查询
+     *
+     * @param token Token 字符串
+     * @return Token 对象,如果未找到则返回 null
+     */
     @SuppressLint("Range")
     public Token queryByToken(String token) {
         SQLiteDatabase db = getWritableDatabase();
@@ -66,6 +98,13 @@ public class TokenDBUtil extends SQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * 设置密码
+     *
+     * @param token Token 字符串
+     * @param pass  密码
+     * @return 是否设置成功
+     */
     public boolean setPass(String token, int pass) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -76,6 +115,13 @@ public class TokenDBUtil extends SQLiteOpenHelper {
         return rowsUpdated > 0;
     }
 
+    /**
+     * 更新设备名称
+     *
+     * @param token Token 字符串
+     * @param name  设备名称
+     * @return 是否更新成功
+     */
     public boolean updateName(String token, String name) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -86,6 +132,12 @@ public class TokenDBUtil extends SQLiteOpenHelper {
         return rowsUpdated > 0;
     }
 
+    /**
+     * 查询自定义 IP
+     *
+     * @param customIp 自定义 IP
+     * @return Token 对象,如果未找到则返回 null
+     */
     public Token queryCustonIp(String customIp) {
         SQLiteDatabase db = getWritableDatabase();
         String sql = "select * from " + TABLE_NAME + " where ip = ?1 and custom = 1 and isdel = 0 ";
@@ -111,6 +163,11 @@ public class TokenDBUtil extends SQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * 查询 Token 列表
+     *
+     * @return Token 列表
+     */
     public List<Token> queryList() {
         SQLiteDatabase db = getWritableDatabase();
         @SuppressLint("Recycle")
@@ -136,6 +193,11 @@ public class TokenDBUtil extends SQLiteOpenHelper {
         return list;
     }
 
+    /**
+     * 删除 Token
+     *
+     * @param id Token ID
+     */
     public void delToken(String id) {
         SQLiteDatabase db = getWritableDatabase();
         String sql = "delete from " + TABLE_NAME + " where id = ?1 ";

@@ -1,79 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainDrawerLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor"
+    android:background="?attr/colorSurface"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
-    android:fitsSystemWindows="true">
+    <!-- Toolbar -->
+    <include layout="@layout/base_toobar" />
 
-    <LinearLayout
+    <!-- Content Area -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <include layout="@layout/base_toobar" />
-
-        <RelativeLayout
+        <!-- Fragment Container -->
+        <FrameLayout
+            android:id="@+id/fl_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_above="@+id/bottom_container" />
 
+        <!-- Bottom Navigation Container -->
+        <LinearLayout
+            android:id="@+id/bottom_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
+
+            <!-- Main Bottom Menu -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@+id/bottom_container">
-
-                <FrameLayout
-                    android:id="@+id/fl_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                </FrameLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/bottom_container"
+                android:id="@+id/bottom_bottom_menu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:background="#FFFFFF"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/bottom_bottom_menu"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:background="#FFFFFF"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                <include layout="@layout/mian_bottom" />
 
-                    <include layout="@layout/mian_bottom" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/bottom_delete_message"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:background="#FFFFFF"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:id="@+id/bottom_delete_message_image"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground"
-                        android:src="@drawable/baseline_delete_black_48" />
-                </LinearLayout>
             </LinearLayout>
-        </RelativeLayout>
-    </LinearLayout>
-</LinearLayout>
 
+            <!-- Delete Message Bar -->
+            <LinearLayout
+                android:id="@+id/bottom_delete_message"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="?attr/colorAccent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/bottom_delete_message_image"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/baseline_delete_black_48"
+                    android:tint="@android:color/white"
+                    tools:ignore="UseAppTint" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

@@ -58,7 +58,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         <View android:layout_width="match_parent"
-              android:background="@color/textNotSelectColor"
+              android:background="?attr/textNotSelectColor"
               android:layout_height="0.5dp"/>
 
     </LinearLayout>

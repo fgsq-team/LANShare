@@ -22,7 +22,7 @@
     <string name="privacy">Privacy Statement</string>
     <string name="join_group">Join QQ Group</string>
     <string name="lan_not_device">No devices found in the local network</string>
-    <string name="send_message_hint">Long press to send to device clipboard</string>
+    <string name="send_message_hint">Long press for clipboard</string>
     <string name="cancelled">Cancelled</string>
     <string name="copy_text">Copy Text</string>
 
@@ -328,6 +328,7 @@
     <string name="light_theme">Light Theme</string>
     <string name="dark_theme">Dark Theme</string>
     <string name="follow_system">Follow System</string>
+    <string name="emerald_theme">Emerald</string>
     <string name="is_backing_up">Backing Up</string>
     <string name="set_global_top_margin">Set Global Top Margin</string>
     <string name="default_select_device_when_sending_files">Default select this device when sending files to single device</string>

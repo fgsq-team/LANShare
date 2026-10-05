@@ -95,6 +95,12 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
 
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+    }
+
     @SuppressLint("CutPasteId")
     public void initView() {
         tvCount = view.findViewById(R.id.app_tv_count);
@@ -180,7 +186,7 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
         tvCount.setText(getString(R.string.loading));
         appSwipe.setRefreshing(true);
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadApp(getContext(), refresh);
+            DeviceDataScanner.scanInstalledApps(getContext(), refresh);
             if (AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty()) {
                 if (appAdapter != null) {
                     ThreadUtils.threadUi(() -> {
@@ -246,7 +252,7 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
 
     @Override
     public void clearSelect() {
-        if (mSelectlist.size() > 0 && isVisible()) {
+        if (!mSelectlist.isEmpty() && isVisible()) {
             mSelectlist.clear();
             appAdapter.refresh();
             checkSelectAll.setChecked(false);

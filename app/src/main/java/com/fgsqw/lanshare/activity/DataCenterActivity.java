@@ -215,6 +215,34 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     protected void onStart() {
         super.onStart();
         getConfig();
+        // 刷新IP显示，防止Activity重建后IP为空
+        refreshIpDisplay();
+    }
+
+    /**
+     * 刷新IP地址显示
+     * <p>从LANService获取当前网络信息并更新IP显示，解决切换界面回来IP为空的问题</p>
+     */
+    private void refreshIpDisplay() {
+        LANService service = LANService.getInstance();
+        if (service == null) return;
+        Set<Device> localDevices = service.getDeviceManager().localDevices;
+        List<NetInfo> ipv6NetInfoList = service.getDeviceManager().ipv6NetInfoList;
+        if (!localDevices.isEmpty()) {
+            String devIp = localDevices.iterator().next().getDevIP();
+            if (Config.WEB_SERVICE) {
+                updateIP("http://" + devIp + ":" + Config.FILE_SERVER_PORT);
+            } else {
+                updateIP(devIp);
+            }
+        } else if (ipv6NetInfoList != null && !ipv6NetInfoList.isEmpty()) {
+            String ipv6 = ipv6NetInfoList.get(0).getIp();
+            if (Config.WEB_SERVICE) {
+                updateIP("http://[" + ipv6 + "]:" + Config.FILE_SERVER_PORT);
+            } else {
+                updateIP(ipv6);
+            }
+        }
     }
 
     private void processExtraData() {
@@ -349,13 +377,13 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         if (whichFragment == 0) {
             tvRecord.setTextColor(getResources().getColor(R.color.text_select));
             tvFiles.setTextColor(getResources().getColor(R.color.textNotSelectColor));
-            imgRecord.setImageResource(R.drawable.ic_select_record);
-            imgFiles.setImageResource(R.drawable.ic_file);
+            imgRecord.setColorFilter(getResources().getColor(R.color.text_select));
+            imgFiles.setColorFilter(getResources().getColor(R.color.textNotSelectColor));
         } else {
             tvRecord.setTextColor(getResources().getColor(R.color.textNotSelectColor));
             tvFiles.setTextColor(getResources().getColor(R.color.text_select));
-            imgRecord.setImageResource(R.drawable.ic_record);
-            imgFiles.setImageResource(R.drawable.ic_select_file);
+            imgRecord.setColorFilter(getResources().getColor(R.color.textNotSelectColor));
+            imgFiles.setColorFilter(getResources().getColor(R.color.text_select));
         }
         Fragment fragment = fragmentList.get(whichFragment);
         setFragment(fragment);
@@ -511,7 +539,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 qrCode.setOnLongClickListener(this);
                 qrIpv6.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked) {
-                        List<NetInfo> ipv6NetInfoList = LANService.getInstance().ipv6NetInfoList;
+                        List<NetInfo> ipv6NetInfoList = LANService.getInstance().getDeviceManager().ipv6NetInfoList;
                         if (ipv6NetInfoList.isEmpty()) {
                             T.s((R.string.failed_to_get_device_ipv6));
                             return;
@@ -568,7 +596,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
         List<MessageFileContent> finalFileSelects = fileSelects;
         dialog.setOnDeviceSelect(device -> {
-            LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(finalFileSelects));
+            LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, new LinkedList<>(finalFileSelects));
             fragmentFiles.clearSelect();
             finalFileSelects.clear();
             DataCenterActivity.this.fileSelects.clear();
@@ -591,7 +619,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             if (size == 1) {
                 Device device = onLineDevices.values().iterator().next();
                 T.s("已默认发送数据到：" + device.getDevName());
-                LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(fileSelects));
+                LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, new LinkedList<>(fileSelects));
                 fragmentFiles.clearSelect();
                 fileSelects.clear();
                 DataCenterActivity.this.fileSelects.clear();
@@ -602,7 +630,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());
         List<MessageFileContent> finalFileSelects = fileSelects;
         dialog.setOnDeviceSelect(device -> {
-            LANService.getInstance().fileSend(LANService.getInstance().getDevice(device), device, new LinkedList<>(finalFileSelects));
+            LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, new LinkedList<>(finalFileSelects));
             fragmentFiles.clearSelect();
             finalFileSelects.clear();
             DataCenterActivity.this.fileSelects.clear();
@@ -810,10 +838,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                             InetAddress inetAddress = null;
                             if (isIPV6) {
                                 inetAddress = Inet6Address.getByName(ip);
-                                device = LANService.getInstance().makeIPv6Device();
+                                device = LANService.getInstance().getDeviceManager().makeIPv6Device();
                             } else {
                                 String[] split1 = ip.split(",");
-                                Set<Device> localDevices = LANService.getInstance().localDevices;
+                                Set<Device> localDevices = LANService.getInstance().getDeviceManager().localDevices;
                                 flag:
                                 for (Device localDevice : localDevices) {
                                     for (String s : split1) {
@@ -829,7 +857,7 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                                 T.s((R.string.ip_is_not_in_local_network));
                             }
                             Socket socket = LANService.getInstance().makeSocket(inetAddress, port);
-                            DataEnc dataEnc = LANService.getInstance().makeDataEnc(device, null, 1024);
+                            DataEnc dataEnc = LANService.getInstance().getDeviceManager().makeDataEnc(device, null, 1024);
                             dataEnc.setCmd(LCmd.FS_ADD_DEVICE);
                             dataEnc.putBool(isIPV6);
                             InputStream inputStream = socket.getInputStream();
@@ -1064,16 +1092,16 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
      */
     public void preloadData() {
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadApp(DataCenterActivity.this, true);
+            DeviceDataScanner.scanInstalledApps(DataCenterActivity.this, true);
         });
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadImageForSDCard(DataCenterActivity.this, true);
+            DeviceDataScanner.scanImages(DataCenterActivity.this, true);
             if (Config.MEDIA_SYNC) {
                 LANService.getInstance().syncMedia();
             }
         });
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadMusicForSDCard(DataCenterActivity.this, true);
+            DeviceDataScanner.scanAudioFiles(DataCenterActivity.this, true);
         });
     }
 
@@ -1086,8 +1114,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 prefUtil.saveBoolean(PreConfig.WEB_SERCICE, isChecked);
                 Config.WEB_SERVICE = isChecked;
                 LANService instance = LANService.getInstance();
-                Set<Device> localDevices = instance.localDevices;
-                List<NetInfo> ipv6NetInfoList = instance.ipv6NetInfoList;
+                Set<Device> localDevices = instance.getDeviceManager().localDevices;
+                List<NetInfo> ipv6NetInfoList = instance.getDeviceManager().ipv6NetInfoList;
                 if (isChecked) {
                     T.s((R.string.web_service_has_been_enabled));
                     if (!localDevices.isEmpty()) {

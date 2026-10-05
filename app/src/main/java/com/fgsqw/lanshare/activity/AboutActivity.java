@@ -55,7 +55,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         tvVersionName = bind(R.id.about_version_name);
         exitImg = bind(R.id.about_exit_img);
         TextView copyright = bind(R.id.about_copyright);
-        copyright.setText(mUtil.addString("Copyright © 2021-2025 By FGSQ", "\n", "        All Rights Reserved"));
+        copyright.setText(mUtil.addString("Copyright © 2021-2026 By FGSQ", "\n", "        All Rights Reserved"));
         tvVersionName.setText("V" + mUtil.getAppVersionName(this));
         privacyLayout.setOnClickListener(this);
         aboutLayout.setOnClickListener(this);
@@ -154,6 +154,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
             case R.id.about_official_website: {
                 mUtil.openUrlInBrowser(this, Config.SERVER);
             }
+            break;
             case R.id.about_reward: {
                 RewardDialog rewardDialog = new RewardDialog(this);
                 rewardDialog.show();

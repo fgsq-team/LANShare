@@ -46,21 +46,40 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 文件服务器
+ * <p>负责接收其他设备发送的文件、消息和媒体同步请求</p>
+ * <p>支持 V4 版本的传输协议,提供加密和未加密两种传输模式</p>
+ *
+ * @author fgsq
+ * @version 1.0
+ */
 public class FileServer {
 
-    /**
-     * 日志
-     */
+    /** 日志记录器 */
     private static final Logger logger = LoggerFactory.getLogger(FileServer.class);
 
+    /** LAN 服务实例 */
     private final LANService lanService;
 
+    /**
+     * 构造函数
+     *
+     * @param lanService LAN 服务实例
+     */
     public FileServer(LANService lanService) {
         this.lanService = lanService;
     }
 
     /**
-     * 处理版本1
+     * 处理版本 1 协议请求
+     *
+     * @param device       发送方设备
+     * @param socket       Socket 连接
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @throws IOException            如果发生 I/O 错误
+     * @throws ClassNotFoundException 如果类未找到
      */
     public void handleVersion1(Device device, Socket socket, CustomDataInputStream inputStream, CustomDataOutputStream outputStream) throws IOException, ClassNotFoundException {
         int cmd = inputStream.readInt();
@@ -78,7 +97,12 @@ public class FileServer {
     }
 
     /**
-     * 处理消息
+     * 处理消息接收
+     *
+     * @param device      发送方设备
+     * @param socket      Socket 连接
+     * @param inputStream 输入流
+     * @throws IOException 如果发生 I/O 错误
      */
     public void handleMessage(Device device, Socket socket, CustomDataInputStream inputStream) throws IOException {
         // 是否写入剪切板
@@ -109,7 +133,13 @@ public class FileServer {
     }
 
     /**
-     * 处理媒体同步
+     * 处理媒体同步请求
+     *
+     * @param device       发送方设备
+     * @param socket       Socket 连接
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @throws IOException 如果发生 I/O 错误
      */
     public void handleMediaSync(Device device, Socket socket, CustomDataInputStream inputStream, CustomDataOutputStream outputStream) throws IOException {
         String mediaSyncJson = inputStream.readString();
@@ -127,7 +157,13 @@ public class FileServer {
     }
 
     /**
-     * 处理文件传输
+     * 处理文件传输请求
+     *
+     * @param fromDevice   发送方设备
+     * @param socket       Socket 连接
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @throws IOException 如果发生 I/O 错误
      */
     public void handleFileTransfer(Device fromDevice, Socket socket, CustomDataInputStream inputStream, CustomDataOutputStream outputStream) throws IOException {
         boolean encData = inputStream.readBoolean();
@@ -204,6 +240,18 @@ public class FileServer {
         }
     }
 
+    /**
+     * 开始接收文件
+     *
+     * @param fromDevice   发送方设备
+     * @param fileTransfer 文件传输对象
+     * @param files        文件列表
+     * @param client       Socket 连接
+     * @param input        输入流
+     * @param output       输出流
+     * @param encData      是否加密数据
+     * @throws IOException 如果发生 I/O 错误
+     */
     public void startReceiveFile(Device fromDevice, FileTransfer fileTransfer, List<MessageFileContent> files, Socket client, CustomDataInputStream input, CustomDataOutputStream output, boolean encData) throws IOException {
         progressCallback.onStart(fileTransfer);
         for (MessageFileContent fileContent : files) {
@@ -221,7 +269,13 @@ public class FileServer {
     }
 
     /**
-     * 处理文件夹
+     * 处理文件夹接收
+     *
+     * @param inputStream  输入流
+     * @param fileTransfer 文件传输对象
+     * @param fileItem     文件夹内容
+     * @param encData      是否加密数据
+     * @throws IOException 如果发生 I/O 错误
      */
     private void handleFolder(CustomDataInputStream inputStream, FileTransfer fileTransfer, MessageFolderContent fileItem, boolean encData) throws IOException {
         long fileSize = fileItem.getLength();
@@ -263,7 +317,13 @@ public class FileServer {
     }
 
     /**
-     * 处理文件
+     * 处理文件接收
+     *
+     * @param inputStream  输入流
+     * @param fileTransfer 文件传输对象
+     * @param fileItem     文件内容
+     * @param encData      是否加密数据
+     * @throws IOException 如果发生 I/O 错误
      */
     private void handleFile(CustomDataInputStream inputStream, FileTransfer fileTransfer, MessageFileContent fileItem, boolean encData) throws IOException {
         String fileName = fileItem.getName();
@@ -296,7 +356,18 @@ public class FileServer {
     }
 
     /**
-     * 接收流到文件
+     * 接收流到文件(未加密)
+     *
+     * @param fileTransfer 文件传输对象
+     * @param inputStream  输入流
+     * @param total        已接收总大小
+     * @param finalSize    最终总大小
+     * @param baseFileItem 基础文件项
+     * @param fileItem     当前文件项
+     * @param filePath     目标文件路径
+     * @param callback     进度回调
+     * @return 实际接收的字节数,失败返回 -1
+     * @throws IOException 如果发生 I/O 错误
      */
     public long recvStreamToFile(FileTransfer fileTransfer, CustomDataInputStream inputStream, long total, long finalSize, MessageFileContent baseFileItem, MessageFileContent fileItem, File filePath, ProgressCallback callback) throws IOException {
         int ten;
@@ -346,6 +417,20 @@ public class FileServer {
         return subTotal;
     }
 
+    /**
+     * 接收流到文件(加密)
+     *
+     * @param fileTransfer 文件传输对象
+     * @param inputStream  输入流
+     * @param total        已接收总大小
+     * @param finalSize    最终总大小
+     * @param baseFileItem 基础文件项
+     * @param fileItem     当前文件项
+     * @param filePath     目标文件路径
+     * @param callback     进度回调
+     * @return 实际接收的字节数,失败返回 -1
+     * @throws IOException 如果发生 I/O 错误
+     */
     public long recvStreamToFileDec(FileTransfer fileTransfer, CustomDataInputStream inputStream, long total, long finalSize, MessageFileContent baseFileItem, MessageFileContent fileItem, File filePath, ProgressCallback callback) throws IOException {
         int ten;
         long subTotal = 0;
@@ -397,6 +482,7 @@ public class FileServer {
     }
 
 
+    /** 进度回调 */
     public ProgressCallback progressCallback = new ProgressCallback() {
         @Override
         public void onStart(FileTransfer fileTransfer) {

@@ -10,9 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.fragment.child.FragmentMusic;
 import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
@@ -67,9 +64,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
         }
 */
 
-        Glide.with(context).load(R.drawable.ic_music)
-                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
-                .into(holder.mImg);
+        holder.mImg.setImageResource(R.drawable.ic_music);
 
         setItemSelect(holder, isSelect(fileSource));
 

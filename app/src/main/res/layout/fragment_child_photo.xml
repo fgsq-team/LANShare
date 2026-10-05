@@ -103,7 +103,7 @@
                 android:id="@+id/photo_recy"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/backgroundColor"
+                android:background="?attr/colorSurface"
 
                 android:fadingEdge="none"
                 android:fadingEdgeLength="0dp"

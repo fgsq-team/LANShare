@@ -265,6 +265,7 @@
     <string name="light_theme">光明</string>
     <string name="dark_theme">暗黑</string>
     <string name="follow_system">跟随系统</string>
+    <string name="emerald_theme">翠绿</string>
     <string name="is_backing_up">正在备份</string>
     <string name="set_global_top_margin">设置全局顶部外边距</string>
     <string name="default_select_device_when_sending_files">单个设备发送文件时默认选中此设备</string>

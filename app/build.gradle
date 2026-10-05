@@ -7,8 +7,8 @@ android {
         applicationId "com.fgsqw.lanshare"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2500922
-        versionName "1.2.9_dev"
+        versionCode 2601005
+        versionName "1.2.9.2_dev"
     }
 
     buildTypes {

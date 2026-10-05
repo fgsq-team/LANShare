@@ -94,6 +94,12 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+    }
+
     public void initView() {
         searchEdit = view.findViewById(R.id.search_edit);
         Button searchButton = view.findViewById(R.id.search_button);

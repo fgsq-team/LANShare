@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 纸飞机图标（朝上） -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M3,21.99L12,1 21,21.99 14,22l-2,-15 -2,15z" />
+</vector>

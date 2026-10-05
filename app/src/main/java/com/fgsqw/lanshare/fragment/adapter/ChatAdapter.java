@@ -2,8 +2,9 @@ package com.fgsqw.lanshare.fragment.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+
+import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +25,6 @@ import com.fgsqw.lanshare.utils.DateUtils;
 import com.fgsqw.lanshare.utils.FileUtil;
 
 import java.util.List;
-import java.util.Objects;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -41,7 +41,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final LayoutInflater mInflater;
     private final RequestOptions options;
     private final FragmentChat fragmentChat;
-    private final int stateTvColor;
+    private final int leftSuccessColor;
+    private final int rightSuccessColor;
+    private final int errorColor;
     private boolean checkMode = false;
     private OnItemLongClickListener mLongListener;
     private OnItemClickListener mListener;
@@ -49,7 +51,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public ChatAdapter(FragmentChat fragmentChat) {
         mContext = fragmentChat.getContext();
-        stateTvColor = Objects.requireNonNull(mContext).getResources().getColor(R.color.itemTextColor);
+        leftSuccessColor = resolveThemeAttr(mContext, R.attr.chatLeftSuccessColor);
+        rightSuccessColor = resolveThemeAttr(mContext, R.attr.chatRightSuccessColor);
+        errorColor = resolveThemeAttr(mContext, R.attr.errorTextColor);
         this.fragmentChat = fragmentChat;
         mInflater = LayoutInflater.from(mContext);
         options = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
@@ -127,9 +131,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (status) {
                 fileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
                 if (messageFileContent.existStatus(MessageContent.SUCCESS)) {
-                    fileMsgHolder.stateTv.setTextColor(stateTvColor);
+                    fileMsgHolder.stateTv.setTextColor(messageContent.isLeft() ? leftSuccessColor : rightSuccessColor);
                 } else if (messageFileContent.existStatus(MessageContent.ERROR)) {
-                    fileMsgHolder.stateTv.setTextColor(Color.RED);
+                    fileMsgHolder.stateTv.setTextColor(errorColor);
                 }
             }
             // 判断为媒体文件
@@ -149,7 +153,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 mediaMsgHolder.stateTv.setVisibility(View.VISIBLE);
                 boolean statusSuccess = mediaContent.existStatus(MessageContent.SUCCESS);
                 mediaMsgHolder.mediaInfo.setVisibility(statusSuccess ? View.GONE : View.VISIBLE);
-                mediaMsgHolder.stateTv.setTextColor(statusSuccess ? stateTvColor : Color.RED);
+                mediaMsgHolder.stateTv.setTextColor(statusSuccess ? (messageContent.isLeft() ? leftSuccessColor : rightSuccessColor) : errorColor);
                 mediaMsgHolder.stateTv.setText(mediaContent.getStateMessage());
                 Glide.with(mContext).load(statusSuccess ? mediaContent.getPath() : ((Drawable) null))
                         .apply(options)
@@ -270,5 +274,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public interface OnItemLongClickListener {
         boolean onItemLongClick(MessageContent messageContent, View view, int position);
+    }
+
+    private static int resolveThemeAttr(Context context, int attrRes) {
+        TypedValue typedValue = new TypedValue();
+        if (context.getTheme().resolveAttribute(attrRes, typedValue, true)) {
+            return typedValue.data;
+        }
+        return 0;
     }
 }

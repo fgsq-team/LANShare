@@ -242,7 +242,7 @@ public class mUtil {
             fileShareDBUtil.addShare(uuid, fileSource.getName(), fileSource.getPath(), false, days);
             String ip;
             if (isIPv4) {
-                Set<Device> localDevices = LANService.getInstance().localDevices;
+                Set<Device> localDevices = LANService.getInstance().getDeviceManager().localDevices;
                 if (!localDevices.isEmpty()) {
                     ip = "http://" + localDevices.iterator().next().getDevIP() + ":" + Config.FILE_SERVER_PORT + "/sharefile/" + fileSource.getName() + "?uuid=" + uuid;
                 } else {
@@ -250,7 +250,7 @@ public class mUtil {
                     return;
                 }
             } else {
-                List<NetInfo> ipv6NetInfoList = LANService.getInstance().ipv6NetInfoList;
+                List<NetInfo> ipv6NetInfoList = LANService.getInstance().getDeviceManager().ipv6NetInfoList;
                 if (ipv6NetInfoList == null || ipv6NetInfoList.isEmpty()) {
                     T.s((R.string.no_available_ipv6_address_found));
                     return;

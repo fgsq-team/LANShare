@@ -14,16 +14,42 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 文件分享数据库工具类
+ * <p>负责管理文件分享记录,存储和查询文件分享信息</p>
+ *
+ * @author fgsq
+ * @version 1.0
+ */
 public class FileShareDBUtil extends SQLiteOpenHelper {
 
+    /** 数据库版本 */
     private static final int DB_VERSION = 2;
+    
+    /** 数据库名称 */
     private static final String DB_NAME = "file_share.db";
+    
+    /** 表名 */
     public static final String TABLE_NAME = "file_share";
 
+    /**
+     * 构造函数
+     *
+     * @param context 上下文
+     */
     public FileShareDBUtil(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
+    /**
+     * 添加分享记录
+     *
+     * @param id         分享 ID
+     * @param name       文件名
+     * @param path       文件路径
+     * @param downloaded 是否已下载
+     * @param days       有效天数
+     */
     public void addShare(String id, String name, String path, boolean downloaded, int days) {
         try {
             SQLiteDatabase db = getWritableDatabase();
@@ -42,6 +68,12 @@ public class FileShareDBUtil extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * 查询分享记录
+     *
+     * @param id 分享 ID
+     * @return 分享信息,如果未找到则返回 null
+     */
     @SuppressLint("Range")
     public MessageDownloadInfoContent queryShare(String id) {
         SQLiteDatabase db = getWritableDatabase();
@@ -67,6 +99,13 @@ public class FileShareDBUtil extends SQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * 更新下载状态
+     *
+     * @param id         分享 ID
+     * @param downloaded 是否已下载
+     * @return 是否更新成功
+     */
     public boolean updateDownloaded(String id, boolean downloaded) {
         String table = TABLE_NAME;
         ContentValues values = new ContentValues();
@@ -78,6 +117,11 @@ public class FileShareDBUtil extends SQLiteOpenHelper {
         return rowsAffected == 1;
     }
 
+    /**
+     * 查询分享列表
+     *
+     * @return 分享列表
+     */
     public List<Token> queryList() {
         SQLiteDatabase db = getWritableDatabase();
         @SuppressLint("Recycle")
@@ -99,6 +143,11 @@ public class FileShareDBUtil extends SQLiteOpenHelper {
         return list;
     }
 
+    /**
+     * 删除分享记录
+     *
+     * @param id 分享 ID
+     */
     public void delToken(String id) {
         SQLiteDatabase db = getWritableDatabase();
         String sql = "delete from " + TABLE_NAME + " where id = ?1 ";

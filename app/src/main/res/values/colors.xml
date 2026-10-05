@@ -1,48 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- 现代蓝绿色调方案 (柔和版) -->
-    <color name="text_select">#42A5F5</color>        <!-- 选中文本颜色 (更柔和的蓝色) -->
+    <!-- Material Design 3 现代蓝紫色调方案 -->
+    <color name="text_select">#5B8DEF</color>        <!-- 选中文本颜色 (MD3蓝) -->
     <color name="textNotSelectColor">#9E9E9E</color>    <!-- 未选中文本颜色 (中性灰) -->
 
-    <color name="itemTextColor">#757575</color>         <!-- 项目文本颜色 -->
-    
-    <color name="backgroundColor">#F5F5F5</color>   <!-- 背景色 (浅灰) -->
-    <color name="textColorPrimary">#424242</color>   <!-- 主要文字颜色 (深灰) -->
-    <color name="textColorSecondary">#757575</color> <!-- 次要文字颜色 (中灰) -->
-    <color name="dividerColor">#E0E0E0</color>      <!-- 分割线颜色 (浅灰) -->
+    <color name="itemTextColor">#6B6B6B</color>         <!-- 项目文本颜色 -->
 
+    <!-- 背景色系 -->
+    <color name="backgroundColor">#F8F9FE</color>   <!-- 背景色 (微蓝白) -->
+    <color name="surfaceColor">#FFFFFF</color>      <!-- 表面色 (纯白) -->
+    <color name="surfaceVariantColor">#F0F2F8</color> <!-- 表面变体色 -->
+
+    <!-- 文字颜色系 -->
+    <color name="textColorPrimary">#1A1C1E</color>   <!-- 主要文字颜色 (深黑) -->
+    <color name="textColorSecondary">#6B6B6B</color> <!-- 次要文字颜色 (中灰) -->
+    <color name="textColorTertiary">#9E9E9E</color>  <!-- 三级文字颜色 (浅灰) -->
+    <color name="dividerColor">#E8E8E8</color>       <!-- 分割线颜色 (浅灰) -->
+
+    <!-- 卡片与组件背景 -->
     <color name="cardBackgroundColor">#FFFFFF</color>    <!-- 卡片背景色 (纯白) -->
-    <color name="buttonBackgroundColor">#64B5F6</color>   <!-- 按钮背景色 (柔和蓝) -->
-    <color name="buttonTextColor">#FFFFFF</color>        <!-- 按钮文字颜色 -->
-    <color name="chatRightBackgroundColor">#CCEAFF</color>    <!-- 聊天气泡右边 -->
-    <color name="chatLeftBackgroundColor">#ffffff</color>    <!-- 聊天气泡左边 -->
-    <color name="textColor">#FFFFFF</color>        <!-- 按钮文字颜色 -->
-    <color name="bottomTextColor">#515151</color>              <!--  底部导航文本颜色-->
-    <color name="bottomBackgroundColor">#ffffff</color>              <!--  底部导航背景颜色-->
-    <color name="chatBackgroundColor">#F5F5F5</color>              <!--  聊天背景-->
-    <color name="iconColor">#444444</color>              <!--  iconColor-->
-    <color name="mediaTextColor">#757575</color>              <!--  iconColor-->
+    <color name="cardStrokeColor">#E8E8E8</color>        <!-- 卡片边框色 -->
 
-    <color name="colorPrimary">#42A5F5</color>      <!-- 首要颜色 (柔和蓝) -->
-    <color name="colorPrimaryDark">#1E88E5</color>  <!-- 首要颜色暗色 (深蓝) -->
-    <color name="colorAccent">#FF7043</color>       <!-- 色彩强调 (柔和橙) -->
-    
-    <color name="toolbarBackground">#1E88E5</color> <!-- Toolbar背景色 (柔和蓝) -->
+    <!-- 主色调系 -->
+    <color name="colorPrimary">#5B8DEF</color>       <!-- 首要颜色 (MD3蓝) -->
+    <color name="colorPrimaryDark">#3D6DD8</color>   <!-- 首要颜色暗色 (深蓝) -->
+    <color name="colorPrimaryLight">#E8F0FE</color>  <!-- 首要颜色亮色 (浅蓝) -->
+    <color name="colorAccent">#FF6B6B</color>        <!-- 色彩强调 (珊瑚红) -->
+    <color name="colorSecondary">#7C5CFC</color>     <!-- 次要颜色 (紫色) -->
 
-    <color name="gainsboro">#DCDCDC</color>         <!-- 淡灰色 -->
-    <color name="green">#66BB6A</color>             <!-- 绿色 (柔和绿) -->
-    <color name="limegreen">#9CCC65</color>         <!-- 橙绿色 (柔和黄绿) -->
+    <!-- Toolbar -->
+    <color name="toolbarBackground">#FFFFFF</color>  <!-- Toolbar背景色 (白色) -->
+    <color name="toolbarTextColor">#1A1C1E</color>   <!-- Toolbar文字颜色 -->
 
-    <color name="bottom_item">#00000000</color>     <!-- 底部项目 -->
-    <color name="rippleColor">#757575</color>         <!-- 灰色文本 -->
-    <color name="videoTimeTextColor">#212121</color>             <!-- 视频时间颜色 -->
+    <!-- 按钮 -->
+    <color name="buttonBackgroundColor">#5B8DEF</color>   <!-- 按钮背景色 -->
+    <color name="buttonTextColor">#FFFFFF</color>         <!-- 按钮文字颜色 -->
+    <color name="buttonRippleColor">#3D6DD8</color>       <!-- 按钮水波纹色 -->
 
-    <color name="battery0">#EF5350</color>          <!-- 电池0%颜色 -->
-    <color name="battery1">#FFA726</color>          <!-- 电池25%颜色 -->
-    <color name="battery2">#FFEE58</color>          <!-- 电池50%颜色 -->
-    <color name="battery3">#9CCC65</color>          <!-- 电池75%颜色 -->
-    <color name="battery4">#66BB6A</color>          <!-- 电池100%颜色 -->
-    <color name="color_null">#00000000</color>      <!-- 透明色 -->
+    <!-- 聊天气泡 -->
+    <color name="chatRightBackgroundColor">#5B8DEF</color>    <!-- 聊天气泡右边 (主色) -->
+    <color name="chatLeftBackgroundColor">#F0F2F8</color>     <!-- 聊天气泡左边 (浅灰) -->
+    <color name="chatRightTextColor">#FFFFFF</color>           <!-- 右边气泡文字 -->
+    <color name="chatLeftTextColor">#1A1C1E</color>            <!-- 左边气泡文字 -->
+    <color name="chatBackgroundColor">#F8F9FE</color>          <!-- 聊天背景 -->
+
+    <!-- 底部导航 -->
+    <color name="bottomTextColor">#9E9E9E</color>              <!-- 底部导航未选中文本 -->
+    <color name="bottomSelectedTextColor">#5B8DEF</color>      <!-- 底部导航选中文本 -->
+    <color name="bottomBackgroundColor">#FFFFFF</color>        <!-- 底部导航背景 -->
+    <color name="bottomIndicatorColor">#E8F0FE</color>         <!-- 底部导航指示器 -->
+
+    <!-- 图标 -->
+    <color name="iconColor">#6B6B6B</color>                    <!-- 图标颜色 -->
+    <color name="iconSelectedColor">#5B8DEF</color>            <!-- 选中图标颜色 -->
+    <color name="mediaTextColor">#6B6B6B</color>               <!-- 媒体文字颜色 -->
+    <color name="chatInfoTextColor">#777777</color>             <!-- 聊天信息提示文字 -->
+    <color name="chatLeftInfoTextColor">#999999</color>          <!-- 左侧气泡信息文字 -->
+    <color name="chatRightInfoTextColor">#C0C0C0</color>         <!-- 右侧气泡信息文字(蓝底) -->
+    <color name="errorTextColor">#F44336</color>                 <!-- 错误文字颜色 -->
+    <color name="successTextColor">#4CAF50</color>               <!-- 成功文字颜色 -->
+    <color name="chatLeftSuccessColor">#4CAF50</color>            <!-- 左侧气泡成功色(浅底) -->
+    <color name="chatRightSuccessColor">#C8E6C9</color>            <!-- 右侧气泡成功色(蓝底) -->
+
+    <!-- 通用颜色 -->
+    <color name="textColor">#FFFFFF</color>                    <!-- 白色文字 -->
+    <color name="gainsboro">#E8E8E8</color>                    <!-- 淡灰色 -->
+    <color name="green">#4CAF50</color>                        <!-- 绿色 (MD3) -->
+    <color name="limegreen">#8BC34A</color>                    <!-- 黄绿色 -->
+
+    <color name="bottom_item">#00000000</color>                <!-- 底部项目透明 -->
+    <color name="rippleColor">#1A000000</color>                <!-- 水波纹颜色 -->
+    <color name="videoTimeTextColor">#FFFFFF</color>           <!-- 视频时间颜色 -->
+
+    <!-- 电池颜色 -->
+    <color name="battery0">#F44336</color>                     <!-- 电池0% (红) -->
+    <color name="battery1">#FF9800</color>                     <!-- 电池25% (橙) -->
+    <color name="battery2">#FFC107</color>                     <!-- 电池50% (黄) -->
+    <color name="battery3">#8BC34A</color>                     <!-- 电池75% (浅绿) -->
+    <color name="battery4">#4CAF50</color>                     <!-- 电池100% (绿) -->
+    <color name="color_null">#00000000</color>                 <!-- 透明色 -->
+
+    <!-- 阴影颜色 -->
+    <color name="shadowColor">#14000000</color>                <!-- 阴影颜色 -->
+
+    <!-- 状态栏 -->
+    <color name="statusBarColor">#F8F9FE</color>               <!-- 状态栏颜色 -->
 
 </resources>

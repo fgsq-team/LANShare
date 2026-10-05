@@ -10,38 +10,17 @@ import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.SendTask;
-import com.fgsqw.lanshare.pojo.message.MessageContent;
-import com.fgsqw.lanshare.pojo.message.MessageFileContent;
-import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
-import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
-import com.fgsqw.lanshare.pojo.message.MessageStreamContent;
-import com.fgsqw.lanshare.pojo.message.MessageUriContent;
+import com.fgsqw.lanshare.pojo.message.*;
 import com.fgsqw.lanshare.service.CustomDataInputStream;
 import com.fgsqw.lanshare.service.CustomDataOutputStream;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
-import com.fgsqw.lanshare.utils.FileSearchUtils;
-import com.fgsqw.lanshare.utils.FileUtil;
-import com.fgsqw.lanshare.utils.IOUtil;
-import com.fgsqw.lanshare.utils.LLog;
-import com.fgsqw.lanshare.utils.ParameterizedTaskQueue;
-import com.fgsqw.lanshare.utils.StringLockManager;
-import com.fgsqw.lanshare.utils.StringUtils;
-import com.fgsqw.lanshare.utils.ThreadUtils;
-import com.fgsqw.lanshare.utils.mUtil;
-
-
+import com.fgsqw.lanshare.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
-import java.nio.channels.FileChannel;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,21 +28,42 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * 文件发送器
+ * <p>负责向其他设备发送文件、消息和同步媒体文件</p>
+ * <p>支持 V4 版本的传输协议,提供加密和未加密两种传输模式</p>
+ *
+ * @author fgsq
+ * @version 1.0
+ */
 public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> {
 
-    /**
-     * 日志
-     */
+    /** 日志记录器 */
     private static final Logger logger = LoggerFactory.getLogger(FileSend.class);
 
+    /** LAN 服务实例 */
     private final LANService lanService;
+    
+    /** 任务队列,用于串行化文件发送任务 */
     private final ParameterizedTaskQueue<SendTask> taskQueue = new ParameterizedTaskQueue<>(this);
 
+    /**
+     * 构造函数
+     *
+     * @param lanService LAN 服务实例
+     */
     public FileSend(LANService lanService) {
         this.lanService = lanService;
         ThreadUtils.runThread(taskQueue::consumeTasks);
     }
 
+    /**
+     * 开始同步媒体文件
+     * <p>与目标设备协商需要同步的媒体文件,并发送这些文件</p>
+     *
+     * @param device    目标设备
+     * @param mediaList 本地媒体列表
+     */
     public void startSyncingMedias(Device device, List<MessageMediaContent> mediaList) {
         Lock lock = StringLockManager.getStringLock(device.getUniqueUUid());
         if (lock.tryLock()) {
@@ -71,7 +71,7 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
                 Socket socket;
                 Device d;
                 if (device.isIPv4()) {
-                    d = lanService.getDevice(device);
+                    d = lanService.getDeviceManager().getDevice(device);
                 } else {
                     d = lanService.makeIPv6Device();
                 }
@@ -140,6 +140,13 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
         }
     }
 
+    /**
+     * 发送消息到指定设备
+     *
+     * @param device  目标设备
+     * @param message 消息内容(已加密)
+     * @param isClip  是否写入剪贴板
+     */
     public void sendMessage(Device device, String message, boolean isClip) {
         Socket socket = null;
         try {
@@ -157,6 +164,16 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
         IOUtil.closeIO(socket);
     }
 
+    /**
+     * 发送文件到指定设备
+     *
+     * @param fromDevice   发送方设备
+     * @param toDevice     接收方设备
+     * @param socket       Socket 连接
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @param fileList     文件列表
+     */
     public void send(Device fromDevice, Device toDevice, Socket socket, CustomDataInputStream inputStream, CustomDataOutputStream outputStream, List<MessageFileContent> fileList) {
         try {
             sendNewVersionFlag(fromDevice, outputStream);
@@ -169,7 +186,7 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
                     File file = new File(fileContent.getPath());
                     // 扫描文件并返回扫描到的文件总大小
                     fileContent.setLength(0);
-                    FileSearchUtils.createFileItem(file, "", (MessageFolderContent) fileContent, fileInfos);
+                    DeviceDataScanner.buildFileItemTree(file, "", (MessageFolderContent) fileContent, fileInfos);
                     // 创建Message实体类
                     MessageFolderContent folderContent = (MessageFolderContent) fileContent;
                     folderContent.setFileCount(fileInfos.size());
@@ -250,45 +267,18 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
 
 
     /**
-     * 处理文件传输
+     * 处理文件传输任务
+     *
+     * @param fileTransfer 文件传输对象
+     * @param socket       Socket 连接
+     * @param encData      是否加密数据
+     * @throws IOException 如果发生 I/O 错误
      */
     public void handleFileTransfer(FileTransfer fileTransfer, Socket socket, boolean encData) throws IOException {
         CustomDataInputStream inputStream = new CustomDataInputStream(socket.getInputStream());
         CustomDataOutputStream outputStream = new CustomDataOutputStream(socket.getOutputStream());
-        // 取消接收文件指令接收线程
-        ThreadUtils.runThread(() -> {
-            int countFlag = 0;
-            while (true) {
-                try {
-                    String fileId = inputStream.readString();
-                    if (fileId == null) {
-                        return;
-                    }
-                    if (StringUtils.isEmpty(fileId)) {
-                        continue;
-                    }
-                    for (MessageFileContent item : fileTransfer.getFiles()) {
-                        if (fileId.equals(item.getFileId())) {
-                            item.setTransfer(false);
-                            break;
-                        }
-                    }
-                } catch (IOException e) {
-                    LLog.error("error: ", e);
-                    return;
-                } catch (Exception e) {
-                    LLog.error("error: ", e);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ignored) {
-                    }
-                    countFlag++;
-                }
-                if (countFlag > 10) {
-                    return;
-                }
-            }
-        });
+        // 启动取消接收文件指令监听线程
+        startCancelFileReceiveListener(inputStream, fileTransfer);
         // 处理每个文件项
         for (MessageFileContent fileItem : fileTransfer.getFiles()) {
             LLog.debug("发送文件:" + fileItem.getName());
@@ -303,6 +293,12 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
 
     /**
      * 发送文件夹
+     *
+     * @param fileTransfer 文件传输对象
+     * @param outputStream 输出流
+     * @param fileItem     文件夹内容
+     * @param encData      是否加密数据
+     * @throws IOException 如果发生 I/O 错误
      */
     public void sendFolder(FileTransfer fileTransfer, CustomDataOutputStream outputStream, MessageFolderContent fileItem, boolean encData) throws IOException {
         long fileSize = fileItem.getLength();
@@ -338,7 +334,13 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
     }
 
     /**
-     * 发送文件
+     * 发送单个文件
+     *
+     * @param fileTransfer 文件传输对象
+     * @param outputStream 输出流
+     * @param fileItem     文件内容
+     * @param encData      是否加密数据
+     * @throws IOException 如果发生 I/O 错误
      */
     private void sendFile(FileTransfer fileTransfer, CustomDataOutputStream outputStream, MessageFileContent fileItem, boolean encData) throws IOException {
         // 服务端同意接收文件，开始发送文件内容
@@ -380,7 +382,16 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
     }
 
     /**
-     * 发送文件流
+     * 发送文件流(未加密)
+     *
+     * @param fileTransfer 文件传输对象
+     * @param total        已传输总大小
+     * @param folderSize   文件夹总大小
+     * @param baseFileItem 基础文件项
+     * @param fileItem     当前文件项
+     * @param outputStream 输出流
+     * @param inputStream  输入流
+     * @return 实际传输的字节数,失败返回 -1
      */
     private long sendFileStream(FileTransfer fileTransfer, long total, long folderSize, MessageFileContent baseFileItem, MessageFileContent fileItem, CustomDataOutputStream outputStream, InputStream inputStream) {
         int len;
@@ -430,6 +441,15 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
 
     /**
      * 发送文件流(加密)
+     *
+     * @param fileTransfer 文件传输对象
+     * @param total        已传输总大小
+     * @param folderSize   文件夹总大小
+     * @param baseFileItem 基础文件项
+     * @param fileItem     当前文件项
+     * @param outputStream 输出流
+     * @param inputStream  输入流
+     * @return 实际传输的字节数,失败返回 -1
      */
     private long sendFileStreamEnc(FileTransfer fileTransfer, long total, long folderSize, MessageFileContent baseFileItem, MessageFileContent fileItem, CustomDataOutputStream outputStream, InputStream inputStream) {
         int len;
@@ -479,6 +499,7 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
         return subTotal;
     }
 
+    /** 进度回调 */
     public ProgressCallback progressCallback = new ProgressCallback() {
         @Override
         public void onStart(FileTransfer fileTransfer) {
@@ -504,6 +525,56 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
         }
     };
 
+    /**
+     * 启动取消文件接收监听线程
+     * 监听来自接收端的取消指令，当收到取消信号时停止对应文件的传输
+     *
+     * @param inputStream  输入流，用于读取取消指令
+     * @param fileTransfer 文件传输对象，包含待传输的文件列表
+     */
+    private void startCancelFileReceiveListener(CustomDataInputStream inputStream, FileTransfer fileTransfer) {
+        ThreadUtils.runThread(() -> {
+            int countFlag = 0;
+            while (true) {
+                try {
+                    String fileId = inputStream.readString();
+                    if (fileId == null) {
+                        return;
+                    }
+                    if (StringUtils.isEmpty(fileId)) {
+                        continue;
+                    }
+                    for (MessageFileContent item : fileTransfer.getFiles()) {
+                        if (fileId.equals(item.getFileId())) {
+                            item.setTransfer(false);
+                            break;
+                        }
+                    }
+                } catch (IOException e) {
+                    LLog.error("error: ", e);
+                    return;
+                } catch (Exception e) {
+                    LLog.error("error: ", e);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                    countFlag++;
+                }
+                if (countFlag > 10) {
+                    return;
+                }
+            }
+        });
+    }
+
+    /**
+     * 发送新版本标识
+     *
+     * @param fromDevice   发送方设备
+     * @param outputStream 输出流
+     * @throws IOException 如果发生 I/O 错误
+     */
     public void sendNewVersionFlag(Device fromDevice, CustomDataOutputStream outputStream) throws IOException {
         outputStream.writeInt(LCmd.NEW_VERSION_4);
         // 发送设备信息

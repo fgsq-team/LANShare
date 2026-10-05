@@ -41,7 +41,8 @@
             android:layout_alignParentTop="true"
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@+id/chat_item_header"
-            android:text="MIX4" />
+            android:text="MIX4"
+            android:textColor="?attr/android:textColorSecondary" />
 
 
         <LinearLayout
@@ -87,6 +88,7 @@
                         android:minWidth="100dp"
                         android:scrollHorizontally="false"
                         android:singleLine="false"
+                        android:textColor="?attr/chatRightTextColor"
                         android:textSize="16sp" />
 
 
@@ -96,7 +98,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/chat_content"
                         android:text="149kb"
-                        android:textColor="@color/textColorSecondary"
+                        android:textColor="?attr/chatRightInfoTextColor"
                         android:textSize="12dp" />
 
                     <ProgressBar
@@ -114,7 +116,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/chat_msg_tv_file_size"
                         android:text="@string/canceled"
-                        android:textColor="@color/textColorSecondary"
+                        android:textColor="?attr/chatRightInfoTextColor"
                         android:textSize="12sp"
                         android:visibility="gone" />
 

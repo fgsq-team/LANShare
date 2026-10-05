@@ -15,24 +15,60 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 消息持久化
+ * 消息数据库工具类
+ * <p>负责消息的持久化存储,支持多种消息类型的增删改查</p>
+ * <p>支持的消息类型:</p>
+ * <ul>
+ *   <li>普通文本消息</li>
+ *   <li>媒体消息(图片、视频)</li>
+ *   <li>文件消息</li>
+ *   <li>时间消息</li>
+ *   <li>GPS 位置消息</li>
+ * </ul>
+ *
+ * @author fgsq
+ * @version 1.0
  */
 public class MesssageDButil extends SQLiteOpenHelper {
 
-    //    private final DBHelper dbHelper;
+    /** 数据库版本 */
     private static final int DB_VERSION = 3;
+    
+    /** 数据库名称 */
     private static final String DB_NAME = "msg.db";
+    
+    /** 表名 */
     public static final String TABLE_NAME = "LANShre_Msg";
+    
+    /** 消息类型:时间消息 */
     private static final int MESSAGE_TIME = -1;
+    
+    /** 消息类型:普通消息 */
     private static final int MESSAGE = 1;
+    
+    /** 消息类型:媒体消息 */
     private static final int MESSAGE_MEDIA = 2;
+    
+    /** 消息类型:文件消息 */
     private static final int MESSAGE_FILE = 3;
+    
+    /** 消息类型:GPS 消息 */
     private static final int MESSAGE_GPS = 4;
 
+    /**
+     * 构造函数
+     *
+     * @param context 上下文
+     */
     public MesssageDButil(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
+    /**
+     * 添加消息
+     *
+     * @param messageContent 消息内容
+     */
     public void addMessage(MessageContent messageContent) {
         try {
             SQLiteDatabase db = getWritableDatabase();
@@ -162,6 +198,11 @@ public class MesssageDButil extends SQLiteOpenHelper {
     }
 
 
+    /**
+     * 更新消息
+     *
+     * @param messageContent 消息内容
+     */
     public void updateMessage(MessageContent messageContent) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -303,12 +344,22 @@ public class MesssageDButil extends SQLiteOpenHelper {
     }
 
 
+    /**
+     * 批量添加消息
+     *
+     * @param messageContent 消息列表
+     */
     public void addListMessage(List<? extends MessageContent> messageContent) {
         for (MessageContent content : messageContent) {
             addMessage(content);
         }
     }
 
+    /**
+     * 删除消息(软删除)
+     *
+     * @param id 消息 ID
+     */
     public void delMessage(String id) {
 //        SQLiteDatabase db = ordergetWritableDatabase();
 //        db.delete(OrderTABLE_NAME, "id = ?", new String[]{messageContent.getId()});
@@ -317,6 +368,11 @@ public class MesssageDButil extends SQLiteOpenHelper {
         db.execSQL(sql, new Object[]{id});
     }
 
+    /**
+     * 批量删除消息(软删除)
+     *
+     * @param messageContent 消息列表
+     */
     public void delListMessage(List<MessageContent> messageContent) {
         for (MessageContent content : messageContent) {
             delMessage(content.getId());
@@ -324,7 +380,7 @@ public class MesssageDButil extends SQLiteOpenHelper {
     }
 
     /**
-     * 删除所有消息
+     * 删除所有消息(软删除)
      */
     public void deleteAllMessage() {
         SQLiteDatabase db = getWritableDatabase();
@@ -332,6 +388,11 @@ public class MesssageDButil extends SQLiteOpenHelper {
     }
 
 
+    /**
+     * 获取最后一条消息时间
+     *
+     * @return 最后一条消息的时间戳,如果没有消息则返回 -1
+     */
     public long getLastMessageTime() {
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery("select createTime from " + TABLE_NAME + " where isdel = 0 and messageType = -1 ORDER BY createTime DESC LIMIT 1 ", null);
@@ -343,6 +404,12 @@ public class MesssageDButil extends SQLiteOpenHelper {
         return -1;
     }
 
+    /**
+     * 根据绑定 ID 查询消息
+     *
+     * @param bingId 绑定 ID
+     * @return 消息 ID,如果未找到则返回 null
+     */
     public String queryByBindId(String bingId) {
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery("select id from " + TABLE_NAME + " where isdel = 0 and messageType = -1 and toUser =?1 LIMIT 1 ", new String[]{bingId});
@@ -354,6 +421,11 @@ public class MesssageDButil extends SQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * 查询所有消息
+     *
+     * @return 消息列表
+     */
     public List<MessageContent> queryMessage() {
         List<MessageContent> messageContents = new ArrayList<>();
         SQLiteDatabase db = getWritableDatabase();
@@ -473,8 +545,9 @@ public class MesssageDButil extends SQLiteOpenHelper {
 
     /**
      * 分页查询消息记录
+     *
      * @param pageSize 每页大小
-     * @param pageNum 页码（从0开始）
+     * @param pageNum  页码(从 0 开始)
      * @return 消息列表
      */
     public List<MessageContent> queryMessage(int pageSize, int pageNum) {

@@ -116,6 +116,12 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -161,7 +167,7 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
         sizImgTv.setText(R.string.loading);
         swipe.setRefreshing(true);
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadImageForSDCard(Objects.requireNonNull(getContext()), refresh);
+            DeviceDataScanner.scanImages(Objects.requireNonNull(getContext()), refresh);
             if (AnyData.mediaResult != null) {
                 mFolders = AnyData.mediaResult.getmFolders();
             }

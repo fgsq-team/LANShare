@@ -9,65 +9,66 @@
     android:focusable="true"
     android:nextFocusRight="@+id/main_scan_code"
     android:orientation="horizontal"
-    android:padding="5dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <CheckBox
         android:id="@+id/chat_item_check_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="10dp" />
+        android:layout_marginEnd="8dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="20dp">
+        android:layout_marginStart="4dp">
 
+        <!-- 头像 -->
         <ImageView
             android:id="@+id/chat_item_header"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="5dp"
-            android:scaleType="centerInside"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginEnd="10dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/ic_phone" />
 
+        <!-- 发送者名称 -->
         <TextView
             android:id="@+id/chat_item_tv_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginRight="10dp"
-            android:layout_toRightOf="@+id/chat_item_header"
-            android:text="MIX4 → Pixe 4" />
+            android:layout_marginBottom="4dp"
+            android:layout_toEndOf="@+id/chat_item_header"
+            android:textColor="?attr/android:textColorSecondary"
+            android:textSize="12sp" />
 
+        <!-- 消息气泡 -->
         <LinearLayout
             android:id="@+id/rc_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/chat_item_tv_user"
-            android:layout_marginRight="10dp"
-            android:layout_toRightOf="@id/chat_item_header"
+            android:layout_toEndOf="@id/chat_item_header"
             android:background="@drawable/chat_left_bg"
-
             android:orientation="vertical"
-            android:padding="10dp">
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/chat_content"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:textColor="?attr/chatLeftTextColor"
+                android:textSize="15sp"
+                android:lineSpacingExtra="2dp" />
 
-                <TextView
-                    android:id="@+id/chat_content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
         </LinearLayout>
-
 
     </RelativeLayout>
 

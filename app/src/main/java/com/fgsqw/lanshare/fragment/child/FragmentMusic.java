@@ -26,7 +26,7 @@ import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
 import com.fgsqw.lanshare.service.MusicService;
 import com.fgsqw.lanshare.toast.T;
-import com.fgsqw.lanshare.utils.FileSearchUtils;
+import com.fgsqw.lanshare.utils.DeviceDataScanner;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.ThreadUtils;
 
@@ -298,6 +298,12 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+    }
+
     public void next() {
         if (musicList.isEmpty()) {
             return;
@@ -331,7 +337,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
     private void loadImageForSDCard(boolean refresh) {
         mSwipe.setRefreshing(true);
         ThreadUtils.runThread(() -> {
-            FileSearchUtils.loadMusicForSDCard(Objects.requireNonNull(getContext()), refresh);
+            DeviceDataScanner.scanAudioFiles(Objects.requireNonNull(getContext()), refresh);
             if (AnyData.musicInfoList != null) {
                 musicList = AnyData.musicInfoList;
             }

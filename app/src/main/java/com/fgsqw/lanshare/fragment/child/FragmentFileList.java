@@ -123,6 +123,12 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
 
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        view = null;
+    }
+
     public void initView() {
         mPathTv = view.findViewById(R.id.file_view_text);
         selectStorageTv = view.findViewById(R.id.file_view_select_storage_text);
@@ -234,7 +240,7 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
         }
         try {
             int fileSortMethod = prefUtil.getInt(PreConfig.FILE_SORT_METHOD, 0);
-            List<MessageFileContent> fileList = FileSearchUtils.getFileList(f, showHiddenFiles, fileSortMethod, dataCenterActivity);
+            List<MessageFileContent> fileList = DeviceDataScanner.listDirectoryContents(f, showHiddenFiles, fileSortMethod, dataCenterActivity);
             if (!fileList.isEmpty()) {
                 this.fileList = fileList;
                 mFileAdapter.refresh();
