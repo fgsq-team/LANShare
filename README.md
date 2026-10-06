@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Android-4.4.2%2B-green.svg)]()
-[![Version](https://img.shields.io/badge/version-1.2.9.1-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-1.2.9.2-orange.svg)]()
 
 LANShare 是一款运行在 Android 平台上的局域网文件传输工具。只需处于同一局域网内，即可自动发现设备并实现文件、消息、媒体等内容的快速互传，无需手动输入 IP 地址，操作简洁、上手即用。
 
@@ -39,7 +39,7 @@ LANShare 是一款运行在 Android 平台上的局域网文件传输工具。�
 | 设备发现 | UDP 广播 |
 | 文件/长文本传输 | TCP 协议 |
 | 消息加密 | AES 加密 |
-| Web 文件服务 | HTTP（内置 NanoHTTPD） |
+| Web 文件服务 | HTTP（内置 HttpServer） |
 | 二维码 | ZXing |
 | 日志 | SLF4J + Logback |
 
@@ -63,7 +63,7 @@ LANShare 是一款运行在 Android 平台上的局域网文件传输工具。�
 | XXPermissions | 权限申请 |
 | SLF4J + Logback | 日志框架 |
 | Commons Codec | 工具库 |
-| NanoHTTPD | HTTP 文件服务器 |
+| HttpServer | HTTP 文件服务器（[fgsq-team/HttpServer](https://github.com/fgsq-team/HttpServer)） |
 
 ## 项目结构
 
@@ -120,7 +120,9 @@ cd LANShare
 
 ## 相关项目
 
-- **LANShare-win**：Windows 桌面端（开发中）— [fgsq-team/LANShare-PC](https://github.com/fgsq-team/LANShare-PC)
+- **HttpServer**：内置 HTTP 文件服务器 — [fgsq-team/HttpServer](https://github.com/fgsq-team/HttpServer)
+- **LANShare-PC**：桌面端（Win / Mac / Linux）— [fgsq-team/LANShare-PC](https://github.com/fgsq-team/LANShare-PC)
+- **LANShare-Harmony**：鸿蒙版（开发中）— [fgsq-team/LANShare-Harmony](https://github.com/fgsq-team/LANShare-Harmony)
 
 ## 问题反馈
 
