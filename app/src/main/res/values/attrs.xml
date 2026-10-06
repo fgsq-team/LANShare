@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 表面变体色（卡片等需要与 toolbar 区分的组件） -->
+    <attr name="colorSurfaceVariant" format="color" />
+
     <!-- 分割线颜色 -->
     <attr name="dividerColor" format="color" />
 
@@ -48,4 +51,7 @@
     <attr name="shadowColor" format="color" />
     <attr name="gainsboro" format="color" />
     <attr name="colorPrimaryLight" format="color" />
+
+    <!-- 聊天文件图标背景 -->
+    <attr name="fileIconBgColor" format="color" />
 </resources>

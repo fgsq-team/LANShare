@@ -26,6 +26,8 @@ import com.fgsqw.lanshare.utils.AESUtils;
 import com.fgsqw.lanshare.utils.LLog;
 import com.fgsqw.lanshare.utils.PermissionsUtils;
 import com.fgsqw.lanshare.utils.PrefUtil;
+import com.fgsqw.lanshare.utils.ThreadUtils;
+import com.fgsqw.lanshare.web.LHttpServer;
 
 public class SettingActivity extends BaseActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         SeekBar.OnSeekBarChangeListener {
@@ -666,6 +668,10 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             AppCompatDelegate.setDefaultNightMode(
                     themeMode == 3 ? AppCompatDelegate.MODE_NIGHT_NO : themeMode
             );
+            // 推送主题变更到所有网页客户端（后台线程，避免 NetworkOnMainThreadException）
+            final String[] themeNames = {"light", "dark", "emerald", "follow_system"};
+            final String theme = themeNames[which < themeNames.length ? which : 3];
+            ThreadUtils.runThread(() -> LHttpServer.sendThemeChange(theme));
             tv_theme.setText(themes[which]);
             dialog.dismiss();
             recreate(); // 重建 Activity 以立即应用主题

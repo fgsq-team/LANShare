@@ -1,7 +1,8 @@
 package com.fgsqw.lanshare.utils;
 
 
-import com.fgsqw.utils.ByteUtil;
+
+import com.fgsqw.httpserver.utils.ByteUtil;
 
 import java.nio.charset.Charset;
 

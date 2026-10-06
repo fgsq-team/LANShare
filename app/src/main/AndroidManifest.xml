@@ -146,6 +146,7 @@
         <activity android:name="com.fgsqw.lanshare.activity.web.PrivacyWebActivity"/>
         <activity android:name="com.fgsqw.lanshare.activity.WebClientManagerActivity"/>
         <activity android:name="com.fgsqw.lanshare.activity.FileSyncManagerActivity"/>
+        <activity android:name="com.fgsqw.lanshare.activity.DrawingActivity"/>
         <activity
                 android:name="com.fgsqw.lanshare.activity.video.VideoPlayer"
                 android:configChanges="keyboardHidden|orientation|screenSize"

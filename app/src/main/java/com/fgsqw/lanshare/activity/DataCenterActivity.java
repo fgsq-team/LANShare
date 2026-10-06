@@ -1071,6 +1071,9 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             case R.id.menu_file_sync:
                 startActivity(new Intent(this, FileSyncManagerActivity.class));
                 break;
+            case R.id.menu_drawing:
+                startActivity(new Intent(this, DrawingActivity.class));
+                break;
 //            case R.id.menu_acquire_advanced_version:
 //                T.s("敬请期待。。。。");
 //                break;打赏时候可以备注昵称,后期会将打赏名单放入网页

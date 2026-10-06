@@ -199,10 +199,10 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
         if (mLayoutManager == null) {
             mLayoutManager = new GridLayoutManager(getActivity(), 4);
         }
+        recyclerView.setLayoutManager(mLayoutManager);
         if (mMediaAdapter == null) {
             mMediaAdapter = new MediaAdapter(this, !selectMode.isChecked());
         }
-        recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(mMediaAdapter);
         mMediaAdapter.refresh();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

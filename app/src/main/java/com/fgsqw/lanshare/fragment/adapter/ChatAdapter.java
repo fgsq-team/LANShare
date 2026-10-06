@@ -117,13 +117,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             fileMsgHolder.content.setText(messageFileContent.getContent());
             fileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
             if (messageFileContent.getFileType() == MessageFileContent.FILE_TYPE_FOLDER) {
-                Glide.with(mContext).load(R.drawable.rc_file_blue_icon)
-                        .apply(options)
-                        .into(fileMsgHolder.fileTypeIcon);
+                fileMsgHolder.fileTypeIcon.setImageResource(R.drawable.rc_file_blue_icon);
             } else {
-                Glide.with(mContext).load(R.drawable.rc_file_icon_file)
-                        .apply(options)
-                        .into(fileMsgHolder.fileTypeIcon);
+                fileMsgHolder.fileTypeIcon.setImageResource(R.drawable.rc_file_icon_file);
             }
             boolean status = !messageFileContent.existStatus(MessageContent.IN);
             fileMsgHolder.progressBar.setVisibility(status ? View.GONE : View.VISIBLE);

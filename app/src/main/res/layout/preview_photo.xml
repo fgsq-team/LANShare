@@ -9,6 +9,25 @@
         android:layout_height="match_parent"
         android:background="#000000" />
 
+    <TextView
+        android:id="@+id/preview_live_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="24dp"
+        android:background="#80000000"
+        android:paddingLeft="8dp"
+        android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="4dp"
+        android:text="LIVE"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <RelativeLayout
         android:id="@+id/preview_top_bar"
         android:layout_width="match_parent"

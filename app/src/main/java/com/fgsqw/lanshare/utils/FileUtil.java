@@ -18,7 +18,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 
-import com.fgsqw.ContentTypes;
+import com.fgsqw.httpserver.ContentTypes;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;

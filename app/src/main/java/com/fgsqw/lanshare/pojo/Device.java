@@ -4,7 +4,7 @@ import androidx.annotation.Nullable;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.fgsqw.websocket.WebSocketServer;
+import com.fgsqw.httpserver.websocket.WebSocketServer;
 
 import java.io.Serializable;
 

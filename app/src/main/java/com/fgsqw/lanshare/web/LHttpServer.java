@@ -6,17 +6,27 @@ import android.os.Environment;
 import android.os.Message;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fgsqw.*;
 
-import com.fgsqw.exception.L302Exception;
-import com.fgsqw.exception.L404Exception;
+
+import com.fgsqw.httpserver.HttpConstant;
+import com.fgsqw.httpserver.HttpServer;
+import com.fgsqw.httpserver.Request;
+import com.fgsqw.httpserver.Response;
+import com.fgsqw.httpserver.exception.L302Exception;
+import com.fgsqw.httpserver.exception.L404Exception;
+import com.fgsqw.httpserver.stream.SingleUploadInputStream;
+import com.fgsqw.httpserver.websocket.WebSocketServer;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
+import com.fgsqw.lanshare.activity.DrawingActivity;
 import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.constants.WSCmd;
 import com.fgsqw.lanshare.db.ApkIconDBUtil;
@@ -37,8 +47,7 @@ import com.fgsqw.lanshare.pojo.network.MediaResult;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
-import com.fgsqw.stream.SingleUploadInputStream;
-import com.fgsqw.websocket.WebSocketServer;
+
 
 
 import java.io.File;
@@ -228,6 +237,55 @@ public class LHttpServer {
                     String jsonString = jsonObject.toJSONString();
                     webSocketServer.sendString(jsonString);
                 } catch (Exception e) {
+                    e.printStackTrace();
+                    IOUtil.closeIO(webSocketServer);
+                    iterator.remove();
+                }
+            } else {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
+     * 向所有已连接的WebSocket客户端推送主题变更通知
+     *
+     * @param theme 主题名称: "light" / "dark" / "emerald" / "follow_system"
+     */
+    public static void sendThemeChange(String theme) {
+        Iterator<WebSocketServer> iterator = webSocketServers.iterator();
+        while (iterator.hasNext()) {
+            WebSocketServer webSocketServer = iterator.next();
+            if (!webSocketServer.isClosed()) {
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("cmd", WSCmd.CHANGE_THEME);
+                    jsonObject.put("theme", theme);
+                    webSocketServer.sendString(jsonObject.toJSONString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    IOUtil.closeIO(webSocketServer);
+                    iterator.remove();
+                }
+            } else {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
+     * 向所有已连接的WebSocket客户端广播绘图事件
+     *
+     * @param drawEventJson 绘图事件JSON字符串，包含cmd/action/x/y/color/strokeWidth
+     */
+    public static void sendDrawEvent(String drawEventJson) {
+        Iterator<WebSocketServer> iterator = webSocketServers.iterator();
+        while (iterator.hasNext()) {
+            WebSocketServer webSocketServer = iterator.next();
+            if (!webSocketServer.isClosed()) {
+                try {
+                    webSocketServer.sendString(drawEventJson);
+                } catch (IOException e) {
                     e.printStackTrace();
                     IOUtil.closeIO(webSocketServer);
                     iterator.remove();
@@ -436,6 +494,24 @@ public class LHttpServer {
             object.put("token", token);
             object.put("name", name);
             object.put("pass", pass);
+            // 返回当前APP的主题模式
+            int themeMode = App.getPrefUtil().getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            String theme;
+            switch (themeMode) {
+                case AppCompatDelegate.MODE_NIGHT_YES:
+                    theme = "dark";
+                    break;
+                case AppCompatDelegate.MODE_NIGHT_NO:
+                    theme = "light";
+                    break;
+                case 3:
+                    theme = "emerald";
+                    break;
+                default:
+                    theme = "follow_system";
+                    break;
+            }
+            object.put("theme", theme);
             response.writeString(object.toJSONString());
         });
 
@@ -518,6 +594,9 @@ public class LHttpServer {
                 file = new File(path);
                 if (isBack) {
                     file = file.getParentFile();
+                    if (file == null || !file.exists() || !file.canRead()) {
+                        file = Environment.getExternalStorageDirectory();
+                    }
                 }
             }
             if (file == null) {
@@ -525,7 +604,7 @@ public class LHttpServer {
             }
             boolean showHiddenFiles = App.getPrefUtil().getBoolean(PreConfig.SHOW_HIDDEN_FILES, false);
             try {
-                MessageFileContent fs = new MessageFileContent();
+                MessageFolderContent fs = new MessageFolderContent();
                 fs.setPath(file.getPath());
                 int fileSortMethod = App.getPrefUtil().getInt(PreConfig.FILE_SORT_METHOD, 0);
                 List<MessageFileContent> fileList = DeviceDataScanner.listDirectoryContents(fs, showHiddenFiles, fileSortMethod, lanService);
@@ -777,6 +856,33 @@ public class LHttpServer {
                         mMessage.obj = messageContent;
                         instance.messageSend(mMessage);
                         Log.d("TAG", "ws msg:" + message);
+                    } else if (cmd == WSCmd.DRAW_EVENT) {
+                        // 网页端发来的绘图事件：广播给其他网页客户端 + 转发给APP本地渲染
+                        String drawText = text;
+                        ThreadUtils.runThread(() -> {
+                            // 广播给所有网页客户端（网页端会忽略 from=web 的消息，防止回显）
+                            JSONObject drawJson = JSON.parseObject(drawText);
+                            drawJson.put("from", "web");
+                            String broadcastJson = drawJson.toJSONString();
+                            Iterator<WebSocketServer> it = webSocketServers.iterator();
+                            while (it.hasNext()) {
+                                WebSocketServer ws = it.next();
+                                if (!ws.isClosed() && ws != webSocketServer) {
+                                    try {
+                                        ws.sendString(broadcastJson);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                            // 转发给APP本地 DrawingActivity 渲染
+                            String action = drawJson.getString("action");
+                            float nx = drawJson.getFloatValue("x");
+                            float ny = drawJson.getFloatValue("y");
+                            int color = drawJson.getIntValue("color");
+                            float sw = drawJson.getFloatValue("strokeWidth");
+                            DrawingActivity.handleRemoteDraw(action, nx, ny, color, sw);
+                        });
                     }
                 }
             } catch (IOException e) {

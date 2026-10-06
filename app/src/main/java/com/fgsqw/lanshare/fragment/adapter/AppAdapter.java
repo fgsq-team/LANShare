@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -143,10 +144,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
     private void setItemSelect(ViewHolder holder, boolean isSelect) {
         if (isSelect) {
             holder.mSelect.setImageResource(R.drawable.ic_select);
-            holder.mIcon.setAlpha(0.3f);//设置imageview透明度
+            holder.contentLayout.setAlpha(0.3f);
         } else {
             holder.mSelect.setImageResource(R.drawable.ic_null);
-            holder.mIcon.setAlpha(1f);//设置imageview透明度
+            holder.contentLayout.setAlpha(1f);
         }
     }
 
@@ -195,6 +196,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
         TextView mName;
         ImageView mIcon;
         CardView mClick;
+        LinearLayout contentLayout;
 
         public ViewHolder(View v) {
             super(v);
@@ -203,6 +205,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
             mSelect = v.findViewById(R.id.app_item_img_select);
             mClick = v.findViewById(R.id.app_item_card);
             mSize = v.findViewById(R.id.app_item_tv_size);
+            contentLayout = v.findViewById(R.id.app_item_content);
         }
     }
 

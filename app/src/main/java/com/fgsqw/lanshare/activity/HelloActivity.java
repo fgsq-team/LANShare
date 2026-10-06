@@ -89,6 +89,7 @@ public class HelloActivity extends BaseActivity {
 
     public void startActivity() {
         Intent intent = new Intent(HelloActivity.this, DataCenterActivity.class);
+//        Intent intent = new Intent(HelloActivity.this, SensorTrailActivity.class);
         startActivity(intent);
         finish();
     }

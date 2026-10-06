@@ -70,6 +70,8 @@
         <item name="shadowColor">@color/shadowColor</item>
         <item name="gainsboro">@color/gainsboro</item>
         <item name="colorPrimaryLight">@color/colorPrimaryLight</item>
+        <item name="colorSurfaceVariant">@color/surfaceVariantColor</item>
+        <item name="fileIconBgColor">@color/fileIconBgColor</item>
     </style>
 
     <!-- CardView Style -->
@@ -230,6 +232,8 @@
         <item name="shadowColor">#14000000</item>
         <item name="gainsboro">#C8E6C9</item>
         <item name="colorPrimaryLight">#E8F5E9</item>
+        <item name="colorSurfaceVariant">#EDF7ED</item>
+        <item name="fileIconBgColor">#FFFFFF</item>
     </style>
 
     <!-- Emerald CardView -->

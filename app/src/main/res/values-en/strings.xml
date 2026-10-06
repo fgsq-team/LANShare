@@ -55,6 +55,8 @@
     <string name="save_message_detail">Enable to save all message content</string>
     <string name="save_to_gallery">Save Media to Gallery</string>
     <string name="save_to_gallery_detail">Enable to directly add received media files to the gallery</string>
+    <string name="web_qr_code">Web QR Code</string>
+    <string name="scan_to_connect">Scan to connect</string>
     <string name="device_qr_code_info">Long press to copy address, devices need to scan the QR code in the same LAN to
         take effect
     </string>
@@ -262,7 +264,11 @@
     <string name="accept_files">Accept Files?</string>
     <string name="use_help_detail">
         Two mobile phones only need to be on the same local network and have the software open to transfer files between
-        each other. \n\n1.Select the file. \n2.Choose the device. \n3.On the receiving end, select to receive the
+        each other. 
+
+1.Select the file. 
+2.Choose the device. 
+3.On the receiving end, select to receive the
         file. \n\nWeb file transfer:\n Enter the software\'s main interface top-left corner address into the browser,
         then
         agree to access permissions in the software to access.

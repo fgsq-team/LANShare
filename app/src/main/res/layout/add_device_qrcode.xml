@@ -1,45 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/qr_layout"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center"
-              android:orientation="vertical"
-              android:fitsSystemWindows="true"
-              android:background="@drawable/dialog_qr_background"
-              tools:ignore="UseCompoundDrawables">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/qr_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/dialog_qr_background"
+    android:fitsSystemWindows="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp"
+    tools:ignore="UseCompoundDrawables">
 
+    <!-- 标题 -->
     <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:text="网页二维码"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/web_qr_code"
+        android:textColor="?attr/toolbarTextColor"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <ImageView
+    <!-- 副标题 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/scan_to_connect"
+        android:textColor="?attr/android:textColorSecondary"
+        android:textSize="13sp" />
+
+    <!-- 二维码卡片 -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@color/surfaceColor"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp">
+
+        <ImageView
             android:id="@+id/qr_code"
             android:layout_width="200dp"
-            android:layout_height="200dp"/>
+            android:layout_height="200dp"
+            android:padding="12dp"
+            android:scaleType="fitCenter" />
 
+    </androidx.cardview.widget.CardView>
+
+    <!-- IP 地址 -->
+    <TextView
+        android:id="@+id/qr_tv_ip_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="monospace"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- IPv6 开关 -->
     <CheckBox
-            android:id="@+id/qr_ipv6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ipv6_connection">
+        android:id="@+id/qr_ipv6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/ipv6_connection"
+        android:textColor="?attr/android:textColorSecondary"
+        android:textSize="13sp" />
 
-    </CheckBox>
-
+    <!-- 提示信息 -->
     <TextView
-            android:id="@+id/qr_tv_ip_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""/>
-
-    <TextView
-            android:id="@+id/qr_tv_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/device_qr_code_info"/>
+        android:id="@+id/qr_tv_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/device_qr_code_info"
+        android:textColor="?attr/android:textColorSecondary"
+        android:textSize="12sp" />
 
 </LinearLayout>

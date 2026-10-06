@@ -1,6 +1,5 @@
 package com.fgsqw.lanshare.utils;
 
-import com.fgsqw.utils.IOUtil;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -117,7 +116,7 @@ public class HttpClientUtils {
                         + END_FLAG
                         + END_FLAG;
                 // 添加文件
-                os.write(sb.getBytes(com.fgsqw.utils.FileUtil.UTF_8));
+                os.write(sb.getBytes(FileUtil.UTF_8));
                 FileInputStream fis = new FileInputStream(file);
                 // 写入文件
                 IOUtil.transfer(fis, os);
@@ -125,9 +124,9 @@ public class HttpClientUtils {
                 fis.close();
                 // 发送结束标记
                 os.write(END_FLAG.getBytes(FileUtil.UTF_8));
-                os.write(("-----" + boundary).getBytes(com.fgsqw.utils.FileUtil.UTF_8));
+                os.write(("-----" + boundary).getBytes(FileUtil.UTF_8));
                 if (i == files.length - 1) {
-                    os.write(("--").getBytes(com.fgsqw.utils.FileUtil.UTF_8));
+                    os.write(("--").getBytes(FileUtil.UTF_8));
                 }
                 os.write(END_FLAG.getBytes(FileUtil.UTF_8));
                 os.flush();

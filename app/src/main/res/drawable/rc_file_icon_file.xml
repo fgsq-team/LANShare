@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- 圆角矩形背景 -->
+    <path
+        android:fillColor="?attr/fileIconBgColor"
+        android:pathData="M10,2H38C42.42,2 46,5.58 46,10V38C46,42.42 42.42,46 38,46H10C5.58,46 2,42.42 2,38V10C2,5.58 5.58,2 10,2z" />
+    <!-- 文件符号（光学居中） -->
+    <path
+        android:fillColor="?attr/colorPrimary"
+        android:pathData="M15.5,10H27.5L34.5,17V36Q34.5,38 32.5,38H15.5Q13.5,38 13.5,36V12Q13.5,10 15.5,10z" />
+    <!-- 折角（圆角） -->
+    <path
+        android:fillColor="?attr/fileIconBgColor"
+        android:fillAlpha="0.4"
+        android:pathData="M27.5,10L34.5,17H29.5Q27.5,17 27.5,15z" />
+</vector>

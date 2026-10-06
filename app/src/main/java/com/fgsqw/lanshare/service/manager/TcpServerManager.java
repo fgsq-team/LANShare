@@ -4,6 +4,7 @@ import android.os.Message;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fgsqw.httpserver.utils.ByteUtil;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.LVersion;
@@ -18,7 +19,6 @@ import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.service.version.four.FileServer;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
-import com.fgsqw.utils.ByteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,16 +51,16 @@ public class TcpServerManager {
 
     /** LAN 服务实例 */
     private final LANService service;
-    
+
     /** 设备管理器 */
     private final DeviceManager deviceManager;
-    
+
     /** 文件服务器 */
     private final FileServer fileServer;
-    
+
     /** TCP 服务器 Socket */
     private ServerSocket fileReceive;
-    
+
     /** 运行状态标志 */
     private boolean running = true;
 
@@ -199,7 +199,7 @@ public class TcpServerManager {
      * @param out      输出流
      * @throws Exception 如果发生错误
      */
-    private void handleVersion(int cmd, DataDec dataDec, Device device, Socket client, 
+    private void handleVersion(int cmd, DataDec dataDec, Device device, Socket client,
                                CustomDataInputStream input, CustomDataOutputStream out) throws Exception {
         if (cmd == LCmd.NEW_VERSION_4) {
             CustomDataInputStream inputStream = new CustomDataInputStream(input);
@@ -240,7 +240,7 @@ public class TcpServerManager {
      * @param out     输出流
      * @throws Exception 如果发生错误
      */
-    private void fsAddDevice(DataDec dataDec, Device device, Socket client, 
+    private void fsAddDevice(DataDec dataDec, Device device, Socket client,
                              CustomDataInputStream input, CustomDataOutputStream out) throws Exception {
         boolean isIPV6 = dataDec.getBool();
         device.setIPv4(!isIPV6);
@@ -286,7 +286,7 @@ public class TcpServerManager {
      * @param out     输出流
      * @throws Exception 如果发生错误
      */
-    private void fsShareFile(DataDec dataDec, Device device, Socket client, 
+    private void fsShareFile(DataDec dataDec, Device device, Socket client,
                              CustomDataInputStream input, CustomDataOutputStream out) throws Exception {
         byte[] buffer = new byte[1024 * 1024];
         int count = dataDec.getCount();
@@ -351,12 +351,12 @@ public class TcpServerManager {
             }
         }
 
-        com.fgsqw.lanshare.service.version.four.FileTransfer fileTransfer = 
+        com.fgsqw.lanshare.service.version.four.FileTransfer fileTransfer =
             new com.fgsqw.lanshare.service.version.four.FileTransfer();
         fileTransfer.setFiles(fileContentList);
         fileTransfer.setFromDevice(device);
 
-        com.fgsqw.lanshare.service.RecvFileCallback recvFileCallback = 
+        com.fgsqw.lanshare.service.RecvFileCallback recvFileCallback =
             new com.fgsqw.lanshare.service.RecvFileCallback(fileTransfer, fileContentList, client, input, out, encData) {
             @Override
             public void receviceFile(boolean isAgree) {
@@ -385,7 +385,7 @@ public class TcpServerManager {
      * @param input   输入流
      * @param out     输出流
      */
-    private void fsMessage(DataDec dataDec, Device device, Socket client, 
+    private void fsMessage(DataDec dataDec, Device device, Socket client,
                            CustomDataInputStream input, CustomDataOutputStream out) {
         try {
             String messageEnc = dataDec.getString();
@@ -415,7 +415,7 @@ public class TcpServerManager {
      * @param out     输出流
      * @throws Exception 如果发生错误
      */
-    private void fsGetMediaSync(DataDec dataDec, Device device, Socket client, 
+    private void fsGetMediaSync(DataDec dataDec, Device device, Socket client,
                                 CustomDataInputStream input, CustomDataOutputStream out) throws Exception {
         int count = dataDec.getCount();
         byte[] buffer = new byte[1024 * 1024 * 2];
@@ -443,7 +443,7 @@ public class TcpServerManager {
      * @param out     输出流
      * @throws Exception 如果发生错误
      */
-    private void fsUpdateApps(DataDec dataDec, Device device, Socket client, 
+    private void fsUpdateApps(DataDec dataDec, Device device, Socket client,
                               InputStream input, OutputStream out) throws Exception {
         List<MessageApkContent> apkFileList = AnyData.apkFileList;
         if (apkFileList == null || apkFileList.isEmpty()) {
@@ -489,7 +489,7 @@ public class TcpServerManager {
      * @param out     输出流
      * @throws Exception 如果发生错误
      */
-    private void fsGetApps(DataDec dataDec, Device device, Socket client, 
+    private void fsGetApps(DataDec dataDec, Device device, Socket client,
                            InputStream input, OutputStream out) throws Exception {
         List<MessageApkContent> apkFileList = AnyData.apkFileList;
         if (apkFileList == null || apkFileList.isEmpty()) {

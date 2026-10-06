@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import com.alibaba.fastjson.JSONObject;
+import com.fgsqw.httpserver.utils.ByteUtil;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
@@ -20,7 +21,6 @@ import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
 import com.fgsqw.lanshare.web.LHttpServer;
-import com.fgsqw.utils.ByteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +51,13 @@ public class UdpServerManager {
 
     /** LAN 服务实例 */
     private final LANService service;
-    
+
     /** 设备管理器 */
     private final DeviceManager deviceManager;
-    
+
     /** UDP Socket */
     private DatagramSocket ipGetSocket = null;
-    
+
     /** 运行状态标志 */
     private boolean running = true;
 
@@ -143,7 +143,7 @@ public class UdpServerManager {
         int dataVersion = dataDec.getInt();
         int batteryLevel = dataDec.getInt();
         byte chargeStatus = dataDec.getByte();
-        
+
         // 排除自己发送的数据包
         for (Device dev : deviceManager.localDevices) {
             if (devIp != null && devIp.equals(dev.getDevIP())) {

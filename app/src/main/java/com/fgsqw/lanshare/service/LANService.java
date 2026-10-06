@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.*;
 import androidx.annotation.Nullable;
+import com.fgsqw.httpserver.utils.ByteUtil;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseService;
 import com.fgsqw.lanshare.config.Config;
@@ -58,49 +59,49 @@ public class LANService extends BaseService {
 
     /** 日志标签 */
     public static final String TAG = "LANService";
-    
+
     /** 服务实例 */
     public static LANService instance;
-    
+
     /** 设备管理器 */
     private DeviceManager deviceManager;
-    
+
     /** TCP 服务器管理器 */
     private TcpServerManager tcpServerManager;
-    
+
     /** UDP 服务器管理器 */
     private UdpServerManager udpServerManager;
-    
+
     /** 文件传输管理器 */
     private FileTransferManager fileTransferManager;
-    
+
     /** 消息数据库工具 */
     private MesssageDButil messsageDButil;
-    
+
     /** 媒体 ID 路径数据库工具 */
     private MediaIdPathDBUtil mediaIdPathDBUtil;
-    
+
     /** 文件同步数据库工具 */
     private FileSyncDBUtil fileSyncDBUtil;
-    
+
     /** HTTP 服务器 */
     private LHttpServer httpServer;
-    
+
     /** 文件服务器 */
     private FileServer fileServer;
-    
+
     /** 文件发送器 */
     private FileSend fileSend;
-    
+
     /** 图片监听器 */
     private ImageObserver imageObserver;
-    
+
     /** 网络监听器 */
     private NetWorkReceiver netWorkReceiver;
-    
+
     /** Messenger,用于向 UI 发送消息 */
     private Messenger mMessenger;
-    
+
     /** 系统音量 */
     private int systemVolume = 0;
 
@@ -127,34 +128,34 @@ public class LANService extends BaseService {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        
+
         // 初始化管理器
         initManagers();
-        
+
         // 启动Web服务器
         startWebServer();
-        
+
         // Service保活
         NotificationUtils.showBackendNotification(this, getString(R.string.app_name), getString(R.string.service_is_running));
-        
+
         // 初始化数据
         initData();
-        
+
         // 监听网络
         networkReceiver();
-        
+
         // UDP广播监听
         udpServerManager.startServer();
-        
+
         // 文件接收监听
         tcpServerManager.startServer();
-        
+
         // 广播局域网所有设备我已上线
         deviceManager.notifyAllDevicesOnline();
-        
+
         // UDP 广播扫描设备
         deviceManager.scanDevices();
-        
+
         // 初始化媒体监听
         initMediaListener();
     }
@@ -168,11 +169,11 @@ public class LANService extends BaseService {
         messsageDButil = new MesssageDButil(this);
         mediaIdPathDBUtil = new MediaIdPathDBUtil(this);
         fileSyncDBUtil = new FileSyncDBUtil(this);
-        
+
         // 初始化文件服务
         fileServer = new FileServer(this);
         fileSend = new FileSend(this);
-        
+
         // 初始化管理器
         deviceManager = new DeviceManager(this, this);
         tcpServerManager = new TcpServerManager(this, deviceManager, fileServer);
@@ -184,20 +185,20 @@ public class LANService extends BaseService {
     public void onDestroy() {
         super.onDestroy();
         logger.debug("onDestroy 退出");
-        
+
         // 停止管理器
         deviceManager.setRunning(false);
         tcpServerManager.stop();
         udpServerManager.stop();
-        
+
         // 通知所有设备下线
         deviceManager.notifyAllDevicesOffline();
-        
+
         // 注销媒体监听
         if (Config.MEDIA_SYNC && imageObserver != null) {
             imageObserver.unregisterObserver();
         }
-        
+
         // 注销网络监听
         if (netWorkReceiver != null) {
             unregisterReceiver(netWorkReceiver);
@@ -284,7 +285,7 @@ public class LANService extends BaseService {
      */
     public void checkAndAddChatTime(String bindId) {
         if (DateUtils.isFiveMinutesAgo(Config.lastMessageTime)) {
-            com.fgsqw.lanshare.pojo.message.MessageTimeContent messageTimeContent = 
+            com.fgsqw.lanshare.pojo.message.MessageTimeContent messageTimeContent =
                 new com.fgsqw.lanshare.pojo.message.MessageTimeContent();
             messageTimeContent.setId(StringUtils.getUUID());
             messageTimeContent.setBindId(bindId);
@@ -420,7 +421,7 @@ public class LANService extends BaseService {
     public Socket makeSocket(InetAddress host, int port) throws IOException {
         Socket socket = new Socket(host, port);
         OutputStream outputStream = socket.getOutputStream();
-        byte[] magicBytes = com.fgsqw.utils.ByteUtil.intToBytes(Config.MAGIC_NUM);
+        byte[] magicBytes = ByteUtil.intToBytes(Config.MAGIC_NUM);
         outputStream.write(magicBytes);
         outputStream.flush();
         return socket;
@@ -429,8 +430,8 @@ public class LANService extends BaseService {
     /**
      * 开始接收文件
      */
-    public void startReceivingFile(Device device, List<MessageFileContent> messageFileContents, 
-                              Socket client, InputStream input, OutputStream out, 
+    public void startReceivingFile(Device device, List<MessageFileContent> messageFileContents,
+                              Socket client, InputStream input, OutputStream out,
                               boolean encData, boolean isAgree) {
         fileTransferManager.startReceivingFile(device, messageFileContents, client, input, out, encData, isAgree);
     }

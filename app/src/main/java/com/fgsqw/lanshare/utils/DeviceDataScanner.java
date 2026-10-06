@@ -14,6 +14,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -35,6 +36,7 @@ import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 
@@ -79,6 +81,22 @@ public class DeviceDataScanner {
         stringLock.lock();
         try {
             if (!refresh) {
+                // 非刷新模式下使用缓存数据，但仍需确保实况图检测已执行
+                /*if (AnyData.mediaResult != null) {
+                    List<MessageMediaContent> allMedia = AnyData.mediaResult.getAllMedia();
+                    if (allMedia != null && !allMedia.isEmpty()) {
+                        List<MessageMediaContent> imageList = new ArrayList<>();
+                        List<MessageMediaContent> videoList = new ArrayList<>();
+                        for (MessageMediaContent m : allMedia) {
+                            if (m.isVideo()) {
+                                videoList.add(m);
+                            } else {
+                                imageList.add(m);
+                            }
+                        }
+                        detectLivePhotos(imageList, videoList);
+                    }
+                }*/
                 return;
             }
             ContentResolver contentResolver = context.getContentResolver();
@@ -125,6 +143,7 @@ public class DeviceDataScanner {
             }
 
             List<MessageMediaContent> videoList = scanVideos(context);
+//            detectLivePhotos(imageList, videoList);
             AnyData.mediaResult = groupMediaByFolder(context, imageList, videoList);
         } finally {
             stringLock.unlock();
@@ -259,6 +278,92 @@ public class DeviceDataScanner {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * 检测实况图
+     * <p>通过同名文件匹配，为图片关联同目录下的短视频文件（如 IMG_xxx.jpg 对应 IMG_xxx.mp4）</p>
+     *
+     * @param imageList 图片列表
+     * @param videoList 视频列表
+     */
+    private static void detectLivePhotos(List<MessageMediaContent> imageList,
+                                         List<MessageMediaContent> videoList) {
+        // 构建视频文件基础名称到路径的映射
+        Map<String, String> videoBaseNameMap = new HashMap<>();
+        for (MessageMediaContent video : videoList) {
+            String videoPath = video.getPath();
+            if (videoPath == null) continue;
+            File videoFile = new File(videoPath);
+            String parentPath = videoFile.getParent();
+            String baseName = getBaseName(videoFile.getName());
+            // 使用 parentPath + baseName 作为 key，避免不同目录下的同名冲突
+            videoBaseNameMap.put(parentPath + "|" + baseName, videoPath);
+        }
+
+        String[] videoExtensions = {".mp4", ".mov", ".3gp", ".webm"};
+        for (MessageMediaContent image : imageList) {
+            if (image.isVideo() || image.isGif()) continue;
+            String imagePath = image.getPath();
+            if (imagePath == null) continue;
+
+            File imageFile = new File(imagePath);
+            String parentPath = imageFile.getParent();
+            String baseName = getBaseName(imageFile.getName());
+
+            // 方式 1: 检查视频列表中是否有同名文件
+            /*String videoPath = videoBaseNameMap.get(parentPath + "|" + baseName);
+            if (videoPath != null) {
+                image.setLivePhoto(true);
+                image.setLiveVideoPath(videoPath);
+                continue;
+            }
+
+            // 方式 2: 检查同目录下是否存在同名视频文件（补充 MediaStore 未收录的情况）
+            if (parentPath != null) {
+                for (String ext : videoExtensions) {
+                    File companionVideo = new File(parentPath, baseName + ext);
+                    if (companionVideo.exists() && companionVideo.length() > 0) {
+                        image.setLivePhoto(true);
+                        image.setLiveVideoPath(companionVideo.getAbsolutePath());
+                        break;
+                    }
+                }
+            }*/
+
+            // 方式 3: 通过 Exif 信息检测
+            if (isMotionPhoto(imagePath)) {
+                image.setLivePhoto(true);
+                image.setLiveVideoPath(videoBaseNameMap.get(parentPath + "|" + baseName));
+            }
+        }
+    }
+
+    public static boolean isMotionPhoto(String filePath) {
+        try {
+            ExifInterface exif = new ExifInterface(filePath);
+            String xmp = exif.getAttribute(ExifInterface.TAG_XMP);
+            if (xmp == null) return false;
+
+            return xmp.contains("MotionPhoto") && (
+                    xmp.contains("GCamera:MotionPhoto=\"1\"") ||
+                            xmp.contains("MotionPhoto:MotionPhoto=\"1\"") ||
+                            xmp.contains("MotionPhoto>1<") ||          // 部分厂商无引号写法
+                            xmp.contains("Samsung:MotionPhoto=\"1\"") ||
+                            xmp.contains("Xiaomi:MotionPhoto=\"1\"")
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 获取文件名（不含扩展名）
+     */
+    private static String getBaseName(String fileName) {
+        int lastDot = fileName.lastIndexOf('.');
+        return lastDot > 0 ? fileName.substring(0, lastDot) : fileName;
     }
 
     /**

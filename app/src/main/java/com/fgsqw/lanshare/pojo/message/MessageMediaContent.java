@@ -10,6 +10,8 @@ public class MessageMediaContent extends MessageFileContent implements Serializa
 
     private boolean isVideo;
     private String videoTime;
+    private boolean isLivePhoto;
+    private String liveVideoPath;
 
     private Long mediaId = -1L;
 
@@ -35,6 +37,22 @@ public class MessageMediaContent extends MessageFileContent implements Serializa
 
     public void setVideoTime(String videoTime) {
         this.videoTime = videoTime;
+    }
+
+    public boolean isLivePhoto() {
+        return isLivePhoto;
+    }
+
+    public void setLivePhoto(boolean livePhoto) {
+        isLivePhoto = livePhoto;
+    }
+
+    public String getLiveVideoPath() {
+        return liveVideoPath;
+    }
+
+    public void setLiveVideoPath(String liveVideoPath) {
+        this.liveVideoPath = liveVideoPath;
     }
 
     @Override

@@ -9,12 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import android.view.View;
@@ -41,6 +43,7 @@ public class ReviewImages extends BaseActivity {
 
     private PreViewViewPager vpImage;
     private TextView tvIndicator;
+    private TextView tvLiveBadge;
     private RelativeLayout rlTopBar;
 
     //tempImages和tempSelectImages用于图片列表数据的页面传输。
@@ -58,6 +61,7 @@ public class ReviewImages extends BaseActivity {
 
     private BitmapDrawable mSelectDrawable;
     private BitmapDrawable mUnSelectDrawable;
+    private PreViewPagerAdapter mPagerAdapter;
 
     public static void openActivity(Activity activity, List<MessageMediaContent> fileUtils,
                                     List<MessageMediaContent> selectFileUtils, boolean isSingle,
@@ -87,13 +91,8 @@ public class ReviewImages extends BaseActivity {
         //  isSingle = intent.getBooleanExtra(ImageSelector.IS_SINGLE, false);
 
         Resources resources = getResources();
-        Bitmap selectBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_image_select);
-        mSelectDrawable = new BitmapDrawable(resources, selectBitmap);
-        mSelectDrawable.setBounds(0, 0, selectBitmap.getWidth(), selectBitmap.getHeight());
-
-        Bitmap unSelectBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_image_un_select);
-        mUnSelectDrawable = new BitmapDrawable(resources, unSelectBitmap);
-        mUnSelectDrawable.setBounds(0, 0, unSelectBitmap.getWidth(), unSelectBitmap.getHeight());
+        mSelectDrawable = drawableToBitmapDrawable(resources, ContextCompat.getDrawable(this, R.drawable.ic_image_select));
+        mUnSelectDrawable = drawableToBitmapDrawable(resources, ContextCompat.getDrawable(this, R.drawable.ic_image_un_select));
 
         setStatusBarColor();
         initView();
@@ -101,12 +100,34 @@ public class ReviewImages extends BaseActivity {
         initViewPager();
 
         tvIndicator.setText(mUtil.addString(1, "/", mFileUtils.size()));
-        vpImage.setCurrentItem(intent.getIntExtra(POSITION, 0));
+        int initialPosition = intent.getIntExtra(POSITION, 0);
+        vpImage.setCurrentItem(initialPosition);
+        // 初始化实况图标识
+        if (initialPosition < mFileUtils.size() && mFileUtils.get(initialPosition).isLivePhoto()) {
+            tvLiveBadge.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * 将 Drawable 转换为 BitmapDrawable（兼容矢量图）
+     */
+    private BitmapDrawable drawableToBitmapDrawable(Resources resources, Drawable drawable) {
+        if (drawable == null) return null;
+        int size = (int) getResources().getDimension(android.R.dimen.app_icon_size);
+        if (size <= 0) size = 48;
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, size, size);
+        drawable.draw(canvas);
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(resources, bitmap);
+        bitmapDrawable.setBounds(0, 0, size, size);
+        return bitmapDrawable;
     }
 
     private void initView() {
         vpImage = findViewById(R.id.preview_image_vp);
         tvIndicator = findViewById(R.id.preview_indicator_tv);
+        tvLiveBadge = findViewById(R.id.preview_live_badge);
         rlTopBar = findViewById(R.id.preview_top_bar);
 
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) rlTopBar.getLayoutParams();
@@ -122,9 +143,11 @@ public class ReviewImages extends BaseActivity {
      * 初始化ViewPager
      */
     private void initViewPager() {
-        PreViewPagerAdapter adapter = new PreViewPagerAdapter(this, mFileUtils);
-        vpImage.setAdapter(adapter);
-        adapter.setOnItemClickListener((position, photoInfo) -> {
+        mPagerAdapter = new PreViewPagerAdapter(this, mFileUtils);
+        vpImage.setAdapter(mPagerAdapter);
+        // 将 TextureView 叠加层添加到 ViewPager 上
+        mPagerAdapter.attachToViewPager(vpImage);
+        mPagerAdapter.setOnItemClickListener((position, photoInfo) -> {
             if (isShowBar) {
                 hideBar();
             } else {
@@ -140,6 +163,13 @@ public class ReviewImages extends BaseActivity {
             @Override
             public void onPageSelected(int position) {
                 tvIndicator.setText(position + 1 + "/" + mFileUtils.size());
+                // 滑动时停止视频播放并更新实况图标识
+                mPagerAdapter.stopVideoPlayback();
+                if (position < mFileUtils.size() && mFileUtils.get(position).isLivePhoto()) {
+                    tvLiveBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvLiveBadge.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -239,5 +269,12 @@ public class ReviewImages extends BaseActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        if (mPagerAdapter != null) {
+            mPagerAdapter.detachFromViewPager();
+        }
+        super.onDestroy();
+    }
 
 }

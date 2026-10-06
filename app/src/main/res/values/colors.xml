@@ -86,4 +86,7 @@
     <!-- 状态栏 -->
     <color name="statusBarColor">#F8F9FE</color>               <!-- 状态栏颜色 -->
 
+    <!-- 聊天文件图标背景 -->
+    <color name="fileIconBgColor">#FFFFFF</color>               <!-- 文件图标背景 (白色) -->
+
 </resources>

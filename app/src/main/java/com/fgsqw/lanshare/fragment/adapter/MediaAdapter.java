@@ -168,7 +168,8 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
 
     public MessageMediaContent getFirstVisibleImage(int firstVisibleItem) {
         List<MessageMediaContent> currentPhotoList = fragmentMediaList.getcurrentPhotoList();
-        if (currentPhotoList != null && !currentPhotoList.isEmpty()) {
+        if (currentPhotoList != null && !currentPhotoList.isEmpty()
+                && firstVisibleItem >= 0 && firstVisibleItem < currentPhotoList.size()) {
             return currentPhotoList.get(firstVisibleItem);
         }
         return null;

@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- 圆角矩形背景 -->
+    <path
+        android:fillColor="?attr/fileIconBgColor"
+        android:pathData="M10,2H38C42.42,2 46,5.58 46,10V38C46,42.42 42.42,46 38,46H10C5.58,46 2,42.42 2,38V10C2,5.58 5.58,2 10,2z" />
+    <!-- 文件夹符号（圆角，放大） -->
+    <path
+        android:fillColor="?attr/colorPrimary"
+        android:pathData="M14,14H23L26,17H34Q36,17 36,19V33Q36,35 34,35H14Q12,35 12,33V16Q12,14 14,14z" />
+</vector>

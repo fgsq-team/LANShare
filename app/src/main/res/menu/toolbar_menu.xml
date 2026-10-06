@@ -35,6 +35,12 @@
         android:orderInCategory="100"
         android:title="@string/media_sharing_amnagement"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_drawing"
+        android:orderInCategory="100"
+        android:title="网页远程绘图"
+        app:showAsAction="never" />
 <!--
     <item
         android:id="@+id/menu_acquire_advanced_version"
