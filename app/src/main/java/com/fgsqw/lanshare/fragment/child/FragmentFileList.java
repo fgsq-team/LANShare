@@ -2,7 +2,6 @@ package com.fgsqw.lanshare.fragment.child;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Message;
@@ -31,6 +30,7 @@ import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.dialog.EditTextDialog;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.dialog.SelectStorageDialog;
 import com.fgsqw.lanshare.fragment.adapter.FileAdapter;
 import com.fgsqw.lanshare.pojo.message.MessageFileContent;
@@ -261,40 +261,34 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
      * @param files 文件列表
      */
     private void deleteFile(List<MessageFileContent> files) {
-        AlertDialog.Builder normalDialog =
-                new AlertDialog.Builder(dataCenterActivity);
-        normalDialog.setTitle(R.string.warning);
-        normalDialog.setMessage(R.string.file_deletion_is_irreversible);
-        normalDialog.setPositiveButton(getString(R.string.confirm),
-                (dialog, which) -> {
-                    for (MessageFileContent fileSource : files) {
-                        if (fileSource instanceof MessageUriContent) {
-                            MessageUriContent uriFileInfo = (MessageUriContent) fileSource;
-                            DocumentFile documentFile = DocumentFile.fromTreeUri(getContext(), uriFileInfo.getUri());
-                            if (documentFile != null && documentFile.delete()) {
-                                initFileList(currentDirectory);
-                                T.s((R.string.file_deletion_successful));
-                            } else {
-                                T.s((R.string.file_deletion_failed));
-                            }
-                        } else {
-                            if (FileUtil.deleteFile(new File(fileSource.getPath()))) {
-                                initFileList(currentDirectory);
-                            } else {
-                                T.s(getString(R.string.file_deletion_failed_operation_terminated) + fileSource.getPath());
-                                return;
-                            }
+        InfoDialog dialog = new InfoDialog(dataCenterActivity);
+        dialog.setTitle(R.string.warning);
+        dialog.setText(getString(R.string.file_deletion_is_irreversible));
+        dialog.setOnClickListener(agree -> {
+            if (agree) {
+                for (MessageFileContent fileSource : files) {
+                    if (fileSource instanceof MessageUriContent) {
+                        MessageUriContent uriFileInfo = (MessageUriContent) fileSource;
+                        DocumentFile documentFile = DocumentFile.fromTreeUri(getContext(), uriFileInfo.getUri());
+                        if (documentFile != null && documentFile.delete()) {
+                            initFileList(currentDirectory);
                             T.s((R.string.file_deletion_successful));
+                        } else {
+                            T.s((R.string.file_deletion_failed));
                         }
+                    } else {
+                        if (FileUtil.deleteFile(new File(fileSource.getPath()))) {
+                            initFileList(currentDirectory);
+                        } else {
+                            T.s(getString(R.string.file_deletion_failed_operation_terminated) + fileSource.getPath());
+                            return;
+                        }
+                        T.s((R.string.file_deletion_successful));
                     }
-                });
-        normalDialog.setNegativeButton(getString(R.string.cancel),
-                (dialog, which) -> {
-                    dialog.dismiss();
-                });
-        // 显示
-        normalDialog.show();
-
+                }
+            }
+        });
+        dialog.show();
     }
 
     private void showSelectStorageDialog() {
@@ -320,9 +314,6 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
 
 
     private void dialog(MessageFileContent fileSource) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-        builder.setTitle(R.string.please_select_operation);
-        String[] items;
         if (fileSource.getFileType() == MessageFileContent.FILE_TYPE_FILE && fileSource.getLength() == 0) {
             T.s((R.string.file_size_is_zero));
             return;
@@ -334,22 +325,25 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                 return;
             }
         }
+
+        InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+        dialog.setTitle(R.string.please_select_operation);
+
         if (fileSource.getFileType() == MessageFileContent.FILE_TYPE_FOLDER) {
-            items = new String[]{
+            String[] items = new String[]{
                     getString(R.string.send),
                     getString(R.string.open),
                     getString(R.string.search),
                     getString(R.string.delete),
                     getString(R.string.cancel),
             };
-            // 绑定选项和点击事件
-            builder.setItems(items, (arg0, arg1) -> {
+            dialog.setItems(items);
+            dialog.setOnItemClickListener(arg1 -> {
                 switch (arg1) {
-                    case 0: {
+                    case 0:
                         dataCenterActivity.sendSingleFile(fileSource);
                         break;
-                    }
-                    case 1: {
+                    case 1:
                         if (fileSource instanceof MessageUriContent) {
                             MessageUriContent uriFileInfo = (MessageUriContent) fileSource;
                             if (uriFileInfo.isFile()) {
@@ -361,26 +355,22 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                             FileUtil.openFile((Activity) getContext(), new File(fileSource.getPath()));
                         }
                         break;
-                    }
-                    case 2: {
+                    case 2:
                         searchFile(fileSource.getPath());
                         break;
-                    }
-                    case 3: {
+                    case 3:
                         if (!selectFileList.isEmpty()) {
                             deleteFile(selectFileList);
                         } else {
                             deleteFile(Collections.singletonList(fileSource));
                         }
                         break;
-                    }
                     default:
                         break;
                 }
-                arg0.dismiss();
             });
         } else {
-            items = new String[]{
+            String[] items = new String[]{
                     getString(R.string.send),
                     getString(R.string.open),
                     getString(R.string.info),
@@ -389,45 +379,38 @@ public class FragmentFileList extends BaseFragment implements View.OnClickListen
                     getString(R.string.generate_ipv4_sharing_link),
                     getString(R.string.cancel),
             };
-            // 绑定选项和点击事件
-            builder.setItems(items, (arg0, arg1) -> {
+            dialog.setItems(items);
+            dialog.setOnItemClickListener(arg1 -> {
                 switch (arg1) {
-                    case 0: {
+                    case 0:
                         dataCenterActivity.sendSingleFile(fileSource);
                         break;
-                    }
-                    case 1: {
+                    case 1:
                         FileUtil.openFile((Activity) getContext(), new File(fileSource.getPath()));
                         break;
-                    }
-                    case 2: {
+                    case 2:
                         FileInfoDialog fileInfoDialog = new FileInfoDialog(getContext(), fileSource.getPath());
                         fileInfoDialog.show();
                         break;
-                    }
-                    case 3: {
+                    case 3:
                         if (!selectFileList.isEmpty()) {
                             deleteFile(selectFileList);
                         } else {
                             deleteFile(Collections.singletonList(fileSource));
                         }
                         break;
-                    }
-                    case 4: {
+                    case 4:
                         mUtil.shareFile(false, fileSource, getContext());
                         break;
-                    }
-                    case 5: {
+                    case 5:
                         mUtil.shareFile(true, fileSource, getContext());
                         break;
-                    }
                     default:
                         break;
                 }
-                arg0.dismiss();
             });
         }
-        builder.show();
+        dialog.show();
     }
 
 

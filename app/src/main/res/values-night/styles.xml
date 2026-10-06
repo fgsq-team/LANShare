@@ -72,6 +72,7 @@
         <item name="colorPrimaryLight">@color/colorPrimaryLight</item>
         <item name="colorSurfaceVariant">@color/surfaceVariantColor</item>
         <item name="fileIconBgColor">@color/fileIconBgColor</item>
+        <item name="deviceInfoTextColor">@color/deviceInfoTextColor</item>
     </style>
 
     <!-- Dark CardView Style -->

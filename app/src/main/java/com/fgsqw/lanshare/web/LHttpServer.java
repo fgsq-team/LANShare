@@ -55,6 +55,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -103,6 +104,26 @@ public class LHttpServer {
 
     /** 当前所有已连接的WebSocket服务器列表（线程安全） */
     public static List<WebSocketServer> webSocketServers = new Vector<>();
+
+    /** 网页端侧边栏菜单配置 */
+    private static final JSONArray WEB_MENUS = new JSONArray();
+    static {
+        JSONObject m1 = new JSONObject();
+        m1.put("key", "apps"); m1.put("text", "软件"); m1.put("icon", "nav-item-media-apps");
+        WEB_MENUS.add(m1);
+        JSONObject m2 = new JSONObject();
+        m2.put("key", "media"); m2.put("text", "图片"); m2.put("icon", "nav-item-media-img");
+        WEB_MENUS.add(m2);
+        JSONObject m3 = new JSONObject();
+        m3.put("key", "files"); m3.put("text", "文件列表"); m3.put("icon", "nav-item-media-folder");
+        WEB_MENUS.add(m3);
+        JSONObject m4 = new JSONObject();
+        m4.put("key", "chat"); m4.put("text", "消息记录"); m4.put("icon", "nav-item-media-record");
+        WEB_MENUS.add(m4);
+        JSONObject m5 = new JSONObject();
+        m5.put("key", "draw"); m5.put("text", "远程绘图"); m5.put("icon", "nav-item-media-record");
+        WEB_MENUS.add(m5);
+    }
 
     // ==================== 文件压缩 ====================
 
@@ -512,6 +533,7 @@ public class LHttpServer {
                     break;
             }
             object.put("theme", theme);
+            object.put("menus", WEB_MENUS);
             response.writeString(object.toJSONString());
         });
 
@@ -645,7 +667,11 @@ public class LHttpServer {
         httpServer.addPath("/downloadZipFile", (request, response) -> {
             String tempFile = request.getQueryParam("tempFile");
             File file = new File(lanService.getExternalCacheDir().getPath() + "/" + tempFile);
+
             if (file.exists()) {
+                String fileName = file.getName();
+                String encodedFileName = URLEncoder.encode(fileName, "UTF-8").replace("+", "%20");
+                response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + encodedFileName);
                 response.writeFile(file);
             } else {
                 response.write404();
@@ -883,6 +909,15 @@ public class LHttpServer {
                             float sw = drawJson.getFloatValue("strokeWidth");
                             DrawingActivity.handleRemoteDraw(action, nx, ny, color, sw);
                         });
+                    } else if (cmd == WSCmd.PING) {
+                        // 心跳保活：回复PONG
+                        try {
+                            JSONObject pong = new JSONObject();
+                            pong.put("cmd", WSCmd.PONG);
+                            webSocketServer.sendString(pong.toJSONString());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             } catch (IOException e) {

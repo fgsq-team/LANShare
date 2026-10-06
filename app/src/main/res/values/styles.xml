@@ -72,6 +72,7 @@
         <item name="colorPrimaryLight">@color/colorPrimaryLight</item>
         <item name="colorSurfaceVariant">@color/surfaceVariantColor</item>
         <item name="fileIconBgColor">@color/fileIconBgColor</item>
+        <item name="deviceInfoTextColor">@color/deviceInfoTextColor</item>
     </style>
 
     <!-- CardView Style -->
@@ -234,6 +235,7 @@
         <item name="colorPrimaryLight">#E8F5E9</item>
         <item name="colorSurfaceVariant">#EDF7ED</item>
         <item name="fileIconBgColor">#FFFFFF</item>
+        <item name="deviceInfoTextColor">#9E9E9E</item>
     </style>
 
     <!-- Emerald CardView -->

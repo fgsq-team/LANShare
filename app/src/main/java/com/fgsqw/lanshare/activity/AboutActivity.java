@@ -8,13 +8,13 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import com.fgsqw.lanshare.App;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.EditTextDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.dialog.PrivacyDialog;
 import com.fgsqw.lanshare.dialog.RewardDialog;
 import com.fgsqw.lanshare.toast.T;
@@ -123,12 +123,11 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.about_help: {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                InfoDialog dialog = new InfoDialog(this);
                 dialog.setTitle(R.string.use_help);
-                dialog.setMessage(R.string.use_help_detail);
-                dialog.setPositiveButton(getString(R.string.confirm), null);
-                final AlertDialog alertdialog1 = dialog.create();
-                alertdialog1.show();
+                dialog.setText(getString(R.string.use_help_detail));
+                dialog.setLeftButtonText("");
+                dialog.show();
             }
             break;
             case R.id.about_privacy: {

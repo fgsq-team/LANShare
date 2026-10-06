@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.fragment.child;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +27,7 @@ import com.fgsqw.lanshare.base.view.MLayoutManager;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.AppAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.message.MessageApkContent;
@@ -125,10 +125,9 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
 
     @Override
     public void OnLongItenClick(MessageApkContent apkInfo, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-        builder.setTitle(getString(R.string.please_select_operation));
-        String[] items;
-        items = new String[]{
+        InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+        dialog.setTitle(getString(R.string.please_select_operation));
+        String[] items = new String[]{
                 getString(R.string.send),
                 getString(R.string.backup),
                 getString(R.string.info),
@@ -138,14 +137,13 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
                 getString(R.string.generate_ipv4_sharing_link),
                 getString(R.string.cancel),
         };
-        // 绑定选项和点击事件
-        builder.setItems(items, (arg0, arg1) -> {
+        dialog.setItems(items);
+        dialog.setOnItemClickListener(arg1 -> {
             switch (arg1) {
                 case 0:
                     dataCenterActivity.sendSingleFile(apkInfo);
                     break;
                 case 1:
-                    // 备份至本地
                     new CopFileTask(getContext(), apkInfo.getPath(), Config.FILE_SAVE_PATH + "备份/" + apkInfo.getName()).execute(0);
                     break;
                 case 2:
@@ -153,11 +151,9 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
                     fileInfoDialog.show();
                     break;
                 case 3:
-                    // 打开程序
                     FileUtil.startApp(getContext(), apkInfo.getPackageName());
                     break;
                 case 4:
-                    // 卸载程序
                     FileUtil.uninstallApp(getContext(), apkInfo.getPackageName());
                     break;
                 case 5:
@@ -167,13 +163,12 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
                     mUtil.shareFile(true, apkInfo, getContext());
                     break;
                 case 7:
-                    //取消
                     break;
                 default:
                     break;
             }
         });
-        builder.show();
+        dialog.show();
     }
 
     @Override

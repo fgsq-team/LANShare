@@ -2,7 +2,6 @@ package com.fgsqw.lanshare.fragment.child;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +33,7 @@ import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.db.FileSyncDBUtil;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.MediaAdapter;
 import com.fgsqw.lanshare.fragment.adapter.SortPhotoAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
@@ -239,11 +239,10 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
             @Override
             public void OnLongItenClick(final MessageMediaContent mediaInfo, final int position) {
                 final String path = mediaInfo.getPath();
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-                builder.setTitle(getString(R.string.please_select_operation));
-                String[] items;
-                // 如果能写入(修改/删
+                InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+                dialog.setTitle(getString(R.string.please_select_operation));
                 final File f = new File(path);
+                String[] items;
                 if (f.canWrite()) {
                     items = new String[]{
                             getString(R.string.send),
@@ -256,11 +255,10 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
                 } else {
                     items = new String[]{getString(R.string.send)};
                 }
-                // 绑定选项和点击事件
-                builder.setItems(items, (arg0, arg1) -> {
+                dialog.setItems(items);
+                dialog.setOnItemClickListener(arg1 -> {
                     switch (arg1) {
                         case 0:
-                            // 发送
                             dataCenterActivity.sendSingleFile(mediaInfo);
                             break;
                         case 1:
@@ -268,7 +266,6 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
                             fileInfoDialog.show();
                             break;
                         case 2:
-                            //打开
                             if (mediaInfo.isVideo()) {
                                 VideoPlayer.toPreviewVideoActivity(dataCenterActivity, mediaInfo);
                             } else {
@@ -282,12 +279,12 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
                             mUtil.shareFile(true, mediaInfo, getContext());
                             break;
                         case 5:
-                            //取消
                             break;
                         default:
                             break;
                     }
-                }).show();
+                });
+                dialog.show();
             }
         });
         selectAll.setChecked(mMediaAdapter.isSelectAll());
@@ -314,24 +311,19 @@ public class FragmentMediaList extends BaseFragment implements View.OnClickListe
 
             @Override
             public boolean OnLongClickListener(PhotoFolder folder) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-                builder.setTitle(getString(R.string.please_select_operation));
-                // 如果能写入(修改/删)
+                InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+                dialog.setTitle(getString(R.string.please_select_operation));
                 String[] items = new String[]{
                         getString(R.string.media_sync),
                         getString(R.string.cancel),
                 };
-                // 绑定选项和点击事件
-                builder.setItems(items, (arg0, arg1) -> {
-                    switch (arg1) {
-                        case 0:
-                            mediaSync(folder);
-                            break;
-                        case 1:
-                            //取消
-                            break;
+                dialog.setItems(items);
+                dialog.setOnItemClickListener(arg1 -> {
+                    if (arg1 == 0) {
+                        mediaSync(folder);
                     }
-                }).show();
+                });
+                dialog.show();
                 return true;
             }
         });

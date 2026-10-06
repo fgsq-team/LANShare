@@ -3,7 +3,6 @@ package com.fgsqw.lanshare.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -20,6 +19,7 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.db.FileShareDBUtil;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.dialog.WebDialog;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.pojo.message.MessageFileContent;
@@ -216,25 +216,21 @@ public class mUtil {
     public static void shareFile(boolean isIPv4, MessageFileContent fileSource, Context context) {
         FileShareDBUtil fileShareDBUtil = new FileShareDBUtil(context);
         final String[] items = {context.getString(R.string.sure_one_time_download), context.getString(R.string.one_day), context.getString(R.string.three_days)};
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(R.string.select_valid_days);
-        // 设置列表项
-        builder.setItems(items, (dialog, which) -> {
-            // 用户点击列表项后的处理
+        InfoDialog dialog = new InfoDialog(context);
+        dialog.setTitle(R.string.select_valid_days);
+        dialog.setItems(items);
+        dialog.setOnItemClickListener(which -> {
             int days = 0;
             switch (which) {
-                case 0: {
+                case 0:
                     days = -1;
                     break;
-                }
-                case 1: {
+                case 1:
                     days = 1;
                     break;
-                }
-                case 2: {
+                case 2:
                     days = 3;
                     break;
-                }
                 default:
                     break;
             }
@@ -261,8 +257,7 @@ public class mUtil {
             copyString(ip, context);
             T.s((R.string.link_has_been_copied_to_clipboard));
         });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
+        dialog.show();
     }
 
 

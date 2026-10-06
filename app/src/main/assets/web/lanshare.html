@@ -11,7 +11,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.min.css" rel="stylesheet">
     <link href="css/lanshare.min.css" rel="stylesheet">
-    <link href="css/emerald-theme.css" rel="stylesheet">
+    <link href="css/theme.css" rel="stylesheet">
     <link rel="preload" href="/images/no_network.png" as="image">
 </head>
 
@@ -25,37 +25,7 @@
             </div>
             <div class="lyear-layout-sidebar-scroll">
                 <nav class="sidebar-main">
-                    <ul class="nav nav-drawer">
-                        <li class="nav-item nav-item-apps">
-                            <a href="javascript:;" onclick="navTo('apps')">
-                                <i class="nav-item-media-apps"></i>
-                                <span class="nav-text">软件</span>
-                            </a>
-                        </li>
-                        <li class="nav-item nav-item-media">
-                            <a href="javascript:;" onclick="navTo('media')">
-                                <i class="nav-item-media-img"></i>
-                                <span class="nav-text">图片</span>
-                            </a>
-                        </li>
-                        <li class="nav-item nav-item-files">
-                            <a href="javascript:;" onclick="navTo('files')">
-                                <i class="nav-item-media-folder"></i>
-                                <span class="nav-text">文件列表</span>
-                            </a>
-                        </li>
-                        <li class="nav-item nav-item-chat">
-                            <a href="javascript:;" onclick="navTo('chat')">
-                                <i class="nav-item-media-record"></i>
-                                <span class="nav-text">消息记录</span>
-                            </a>
-                        </li>
-                        <li class="nav-item nav-item-draw">
-                            <a href="javascript:;" onclick="navTo('draw')">
-                                <i class="nav-item-media-record"></i>
-                                <span class="nav-text">远程绘图</span>
-                            </a>
-                        </li>
+                    <ul class="nav nav-drawer" id="sidebarNav">
                     </ul>
                 </nav>
             </div>
@@ -140,7 +110,10 @@
                             <button class="draw-btn draw-btn-clear" onclick="clearDrawCanvas()">清空画布</button>
                             <span class="draw-status" id="draw_status">可在画布上直接绘图，同步到APP</span>
                         </div>
-                        <canvas id="drawCanvas"></canvas>
+                        <div class="draw-canvas-wrapper">
+                            <canvas id="drawCanvas"></canvas>
+                            <canvas id="drawRemoteCanvas"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>

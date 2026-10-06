@@ -5,7 +5,7 @@
               android:layout_height="wrap_content"
               android:layout_marginLeft="20dp"
               android:layout_marginRight="20dp"
-              android:background="@drawable/dialog_qr_background"
+
               android:minWidth="2600dip"
               android:orientation="vertical">
 

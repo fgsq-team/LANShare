@@ -15,7 +15,6 @@ import android.view.*;
 import android.widget.*;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -34,6 +33,7 @@ import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.dialog.ApkUpdateDialog;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
 import com.fgsqw.lanshare.dialog.FileSendDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.fragment.FragmentChat;
 import com.fgsqw.lanshare.fragment.FragmentFiles;
 import com.fgsqw.lanshare.fragment.data.AnyData;
@@ -261,20 +261,20 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     public void showExitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setIcon(R.mipmap.ic_launcher_round)
-                .setCancelable(false)
-                .setTitle(getString(R.string.port_changes_notice))
-                .setMessage(R.string.port_changes_require_a_software_restart)
-                .setPositiveButton(getString(R.string.exit), (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    stopService(new Intent(this, LANService.class));
-                    finish();
-                    finish();
-                }).setNegativeButton(R.string.not_exit, (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                });
-        builder.create().show();
+        InfoDialog dialog = new InfoDialog(this);
+        dialog.setCancelable(false);
+        dialog.setTitle(getString(R.string.port_changes_notice));
+        dialog.setText(getString(R.string.port_changes_require_a_software_restart));
+        dialog.setLeftButtonText(getString(R.string.not_exit));
+        dialog.setRightButtonText(getString(R.string.exit));
+        dialog.setOnClickListener(agree -> {
+            if (agree) {
+                stopService(new Intent(this, LANService.class));
+                finish();
+                finish();
+            }
+        });
+        dialog.show();
     }
 
     /**
@@ -530,11 +530,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 
                 Bitmap qrcode = QrCodeUtils.qrcode(ipAddress, 800, 800);
                 qrCode.setImageBitmap(qrcode);
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setView(view)
-                        .create();
-//                alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
+                InfoDialog alertDialog = new InfoDialog(this);
+                alertDialog.setCustomView(view);
                 alertDialog.show();
                 qrCode.setOnLongClickListener(this);
                 qrIpv6.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -962,42 +959,39 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     }
 
     private void setSearchFileTypes() {
-        // 创建构造器
-        AlertDialog.Builder builder = new AlertDialog.Builder(DataCenterActivity.this);
-        builder.setIcon(R.mipmap.ic_launcher_round);
-        builder.setTitle("搜索文件分类");
-        // 设置内容,
+        Config.SEARCH_FLAG =
+                JSONArray.parseObject(
+                        prefUtil.getString(PreConfig.SEARCH_FILE_TYPES,
+                                "[true, true, true, true]"), boolean[].class
+                );
         final String[] cities = {
                 "应用",
                 "媒体",
                 "音频",
                 "文件"
         };
-        Config.SEARCH_FLAG =
-                JSONArray.parseObject(
-                        prefUtil.getString(PreConfig.SEARCH_FILE_TYPES,
-                                "[true, true, true, true]"), boolean[].class
-                );
-        builder.setMultiChoiceItems(cities, Config.SEARCH_FLAG, (dialog, which, isChecked) -> Config.SEARCH_FLAG[which] = isChecked);
-        builder.setPositiveButton("确定", (dialog, which) -> {
-            String jsonString = JSON.toJSONString(Config.SEARCH_FLAG);
-            prefUtil.saveString(PreConfig.SEARCH_FILE_TYPES, jsonString);
+        InfoDialog dialog = new InfoDialog(DataCenterActivity.this);
+        dialog.setTitle("搜索文件分类");
+        dialog.setMultiChoiceItems(cities, Config.SEARCH_FLAG);
+        dialog.setRightButtonText("确定");
+        dialog.setLeftButtonText("取消");
+        dialog.setOnMultiChoiceListener(new InfoDialog.OnMultiChoiceListener() {
+            @Override
+            public void onConfirm(boolean[] checkedItems) {
+                String jsonString = JSON.toJSONString(Config.SEARCH_FLAG);
+                prefUtil.saveString(PreConfig.SEARCH_FILE_TYPES, jsonString);
+            }
+            @Override
+            public void onCancel() {
+            }
         });
-        builder.setNegativeButton("取消", (dialog, which) -> {
-        });
-        // 显示dialog
-        builder.create().show();
+        dialog.show();
     }
 
     /**
      * 文件排序方式
      */
     private void setShowSortFileMenu() {
-        // 创建构造器
-        AlertDialog.Builder builder = new AlertDialog.Builder(DataCenterActivity.this);
-        builder.setIcon(R.mipmap.ic_launcher_round);
-        builder.setTitle("选择排序方式");
-        // 设置内容,
         final String[] cities = {
                 "文件名排序",
                 "文件大小排序",
@@ -1007,15 +1001,25 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
                 "时间排序-倒序",
         };
         int fileSortMethod = prefUtil.getInt(PreConfig.FILE_SORT_METHOD, 0);
-        builder.setSingleChoiceItems(cities, fileSortMethod, (dialog, which) -> prefUtil.saveInt(PreConfig.FILE_SORT_METHOD, which));
-        builder.setPositiveButton("确定", (dialog, which) -> {
-            Message mMessage = Message.obtain();
-            mMessage.what = LCmd.SERVICE_SYNC_SORT;
-            sendHandleMessage(mMessage);
+        InfoDialog dialog = new InfoDialog(DataCenterActivity.this);
+        dialog.setTitle("选择排序方式");
+        dialog.setSingleChoiceItems(cities, fileSortMethod);
+        dialog.setRightButtonText("确定");
+        dialog.setLeftButtonText("取消");
+        dialog.setOnSingleChoiceListener(new InfoDialog.OnSingleChoiceListener() {
+            @Override
+            public void onConfirm(int selectedPosition) {
+                prefUtil.saveInt(PreConfig.FILE_SORT_METHOD, selectedPosition);
+                Message mMessage = Message.obtain();
+                mMessage.what = LCmd.SERVICE_SYNC_SORT;
+                sendHandleMessage(mMessage);
+            }
+            @Override
+            public void onCancel() {
+                prefUtil.saveInt(PreConfig.FILE_SORT_METHOD, fileSortMethod);
+            }
         });
-        builder.setNegativeButton("取消", (dialog, which) -> prefUtil.saveInt(PreConfig.FILE_SORT_METHOD, fileSortMethod));
-        // 显示dialog
-        builder.create().show();
+        dialog.show();
     }
 
     public void setSortFileTypeMenuVisible(boolean visible) {

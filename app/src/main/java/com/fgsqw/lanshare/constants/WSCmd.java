@@ -5,4 +5,8 @@ public class WSCmd {
     public static final int SYNC_DEVICE_LIST = 2;
     public static final int CHANGE_THEME = 3;
     public static final int DRAW_EVENT = 4;
+    /** 客户端心跳ping */
+    public static final int PING = 5;
+    /** 服务端心跳pong响应 */
+    public static final int PONG = 6;
 }

@@ -1,6 +1,5 @@
 package com.fgsqw.lanshare.dialog;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;

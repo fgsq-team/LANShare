@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.activity;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +19,7 @@ import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.dialog.EditTextDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.AESUtils;
@@ -629,8 +629,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
      * 显示主题选择对话框
      */
     private void showThemeSelectDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
-        builder.setTitle(R.string.theme_setting);
         String[] themes = {getString(R.string.light_theme), getString(R.string.dark_theme), getString(R.string.emerald_theme), getString(R.string.follow_system)};
         int selectedTheme = prefUtil.getInt(PreConfig.THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         int selectedIndex;
@@ -648,35 +646,43 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 selectedIndex = 3;
                 break;
         }
-        builder.setSingleChoiceItems(themes, selectedIndex, (dialog, which) -> {
-            int themeMode;
-            switch (which) {
-                case 0: // 浅色主题
-                    themeMode = AppCompatDelegate.MODE_NIGHT_NO;
-                    break;
-                case 1: // 深色主题
-                    themeMode = AppCompatDelegate.MODE_NIGHT_YES;
-                    break;
-                case 2: // 翠绿主题
-                    themeMode = 3;
-                    break;
-                default: // 跟随系统
-                    themeMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
-                    break;
+        InfoDialog dialog = new InfoDialog(this);
+        dialog.setTitle(R.string.theme_setting);
+        dialog.setSingleChoiceItems(themes, selectedIndex);
+        dialog.setLeftButtonText(getString(R.string.cancel));
+        dialog.setOnSingleChoiceListener(new InfoDialog.OnSingleChoiceListener() {
+            @Override
+            public void onConfirm(int which) {
+                int themeMode;
+                switch (which) {
+                    case 0:
+                        themeMode = AppCompatDelegate.MODE_NIGHT_NO;
+                        break;
+                    case 1:
+                        themeMode = AppCompatDelegate.MODE_NIGHT_YES;
+                        break;
+                    case 2:
+                        themeMode = 3;
+                        break;
+                    default:
+                        themeMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+                        break;
+                }
+                prefUtil.saveInt(PreConfig.THEME_MODE, themeMode);
+                AppCompatDelegate.setDefaultNightMode(
+                        themeMode == 3 ? AppCompatDelegate.MODE_NIGHT_NO : themeMode
+                );
+                // 推送主题变更到所有网页客户端（后台线程，避免 NetworkOnMainThreadException）
+                final String[] themeNames = {"light", "dark", "emerald", "follow_system"};
+                final String theme = themeNames[which < themeNames.length ? which : 3];
+                ThreadUtils.runThread(() -> LHttpServer.sendThemeChange(theme));
+                tv_theme.setText(themes[which]);
+                recreate(); // 重建 Activity 以立即应用主题
             }
-            prefUtil.saveInt(PreConfig.THEME_MODE, themeMode);
-            AppCompatDelegate.setDefaultNightMode(
-                    themeMode == 3 ? AppCompatDelegate.MODE_NIGHT_NO : themeMode
-            );
-            // 推送主题变更到所有网页客户端（后台线程，避免 NetworkOnMainThreadException）
-            final String[] themeNames = {"light", "dark", "emerald", "follow_system"};
-            final String theme = themeNames[which < themeNames.length ? which : 3];
-            ThreadUtils.runThread(() -> LHttpServer.sendThemeChange(theme));
-            tv_theme.setText(themes[which]);
-            dialog.dismiss();
-            recreate(); // 重建 Activity 以立即应用主题
+            @Override
+            public void onCancel() {
+            }
         });
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.show();
+        dialog.show();
     }
 }

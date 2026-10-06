@@ -88,4 +88,7 @@
     <!-- 聊天文件图标背景 -->
     <color name="fileIconBgColor">#FFFFFF</color>               <!-- 文件图标背景 (白色) -->
 
+    <!-- 设备选择弹窗信息文字 -->
+    <color name="deviceInfoTextColor">#B0B0B0</color>             <!-- 设备IP等次要信息 (白色稍暗) -->
+
 </resources>

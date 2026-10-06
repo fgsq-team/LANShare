@@ -10,7 +10,9 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fgsqw.lanshare.activity.DrawingActivity;
 import com.fgsqw.lanshare.constants.WSCmd;
+import com.fgsqw.lanshare.service.DrawSyncManager;
 import com.fgsqw.lanshare.utils.ThreadUtils;
 import com.fgsqw.lanshare.web.LHttpServer;
 
@@ -44,11 +46,22 @@ public class DrawingView extends View {
 
     /** 已完成的笔画列表 */
     private final List<Stroke> strokes = new ArrayList<>();
-    /** 当前正在绘制的笔画（未完成） */
-    private Path currentPath;
+    /** 本地用户正在绘制的路径 */
+    private Path localCurrentPath;
+    /** 远端正在绘制的路径 */
+    private Path remoteCurrentPath;
+    /** 用户选中的画笔颜色（仅由用户操作改变，不受远端影响） */
     private int currentColor = Color.RED;
+    /** 用户选中的画笔粗细（仅由用户操作改变，不受远端影响） */
     private float currentStrokeWidth = 5f;
-    private boolean isDrawing = false;
+    /** 远端笔画的渲染颜色 */
+    private int remoteStrokeColor = Color.RED;
+    /** 远端笔画的渲染粗细 */
+    private float remoteStrokeWidth = 5f;
+    /** 本地是否正在绘制 */
+    private boolean isLocalDrawing = false;
+    /** 远端是否正在绘制 */
+    private boolean isRemoteDrawing = false;
 
     /** 通用画笔（每次onDraw根据Stroke设置颜色和粗细） */
     private Paint paint;
@@ -56,6 +69,11 @@ public class DrawingView extends View {
     /** 画布尺寸（用于坐标归一化） */
     private int canvasWidth = 1;
     private int canvasHeight = 1;
+
+    /** 当前同步模式 */
+    private DrawSyncManager.SyncMode syncMode = DrawSyncManager.SyncMode.WEB;
+    /** 设备同步管理器（由DrawingActivity设置） */
+    private DrawSyncManager drawSyncManager;
 
     public DrawingView(Context context) {
         super(context);
@@ -80,7 +98,8 @@ public class DrawingView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeWidth(currentStrokeWidth);
         paint.setColor(currentColor);
-        currentPath = new Path();
+        localCurrentPath = new Path();
+        remoteCurrentPath = new Path();
     }
 
     @Override
@@ -101,11 +120,17 @@ public class DrawingView extends View {
                 canvas.drawPath(stroke.path, paint);
             }
         }
-        // 绘制当前正在进行的笔画
-        if (currentPath != null && isDrawing) {
+        // 绘制本地正在进行的笔画
+        if (localCurrentPath != null && isLocalDrawing) {
             paint.setColor(currentColor);
             paint.setStrokeWidth(currentStrokeWidth);
-            canvas.drawPath(currentPath, paint);
+            canvas.drawPath(localCurrentPath, paint);
+        }
+        // 绘制远端正在进行的笔画（独立路径，互不干扰）
+        if (remoteCurrentPath != null && isRemoteDrawing) {
+            paint.setColor(remoteStrokeColor);
+            paint.setStrokeWidth(remoteStrokeWidth);
+            canvas.drawPath(remoteCurrentPath, paint);
         }
     }
 
@@ -120,31 +145,30 @@ public class DrawingView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                currentPath = new Path();
-                currentPath.moveTo(x, y);
-                isDrawing = true;
+                localCurrentPath = new Path();
+                localCurrentPath.moveTo(x, y);
+                isLocalDrawing = true;
                 sendDrawEvent("start", nx, ny, currentColor, currentStrokeWidth);
                 invalidate();
                 return true;
 
             case MotionEvent.ACTION_MOVE:
-                if (isDrawing) {
-                    currentPath.lineTo(x, y);
+                if (isLocalDrawing) {
+                    localCurrentPath.lineTo(x, y);
                     sendDrawEvent("move", nx, ny, currentColor, currentStrokeWidth);
                     invalidate();
                 }
                 return true;
 
             case MotionEvent.ACTION_UP:
-                if (isDrawing) {
-                    currentPath.lineTo(x, y);
+                if (isLocalDrawing) {
+                    localCurrentPath.lineTo(x, y);
                     sendDrawEvent("end", nx, ny, currentColor, currentStrokeWidth);
-                    // 将当前笔画存入已完成列表
                     synchronized (strokes) {
-                        strokes.add(new Stroke(currentPath, currentColor, currentStrokeWidth));
+                        strokes.add(new Stroke(localCurrentPath, currentColor, currentStrokeWidth));
                     }
-                    currentPath = new Path();
-                    isDrawing = false;
+                    localCurrentPath = new Path();
+                    isLocalDrawing = false;
                     invalidate();
                 }
                 return true;
@@ -155,7 +179,8 @@ public class DrawingView extends View {
     // ==================== 远程绘制（来自网页） ====================
 
     /**
-     * 处理来自网页端的绘图事件（仅本地渲染，不广播）
+     * 处理来自远端的绘图事件（仅本地渲染，不广播）
+     * <p>笔画的颜色和粗细同步（用远端值渲染），但不影响本地用户的画笔选择</p>
      * 需在UI线程调用
      */
     public void drawFromRemote(String action, float nx, float ny, int color, float strokeWidth) {
@@ -164,31 +189,31 @@ public class DrawingView extends View {
 
         switch (action) {
             case "start":
-                currentPath = new Path();
-                currentPath.moveTo(x, y);
-                currentColor = color;
-                currentStrokeWidth = strokeWidth;
-                isDrawing = true;
+                remoteCurrentPath = new Path();
+                remoteCurrentPath.moveTo(x, y);
+                remoteStrokeColor = color;
+                remoteStrokeWidth = strokeWidth;
+                isRemoteDrawing = true;
                 invalidate();
                 break;
 
             case "move":
-                if (isDrawing && currentPath != null) {
-                    currentColor = color;
-                    currentStrokeWidth = strokeWidth;
-                    currentPath.lineTo(x, y);
+                if (isRemoteDrawing && remoteCurrentPath != null) {
+                    remoteStrokeColor = color;
+                    remoteStrokeWidth = strokeWidth;
+                    remoteCurrentPath.lineTo(x, y);
                     invalidate();
                 }
                 break;
 
             case "end":
-                if (isDrawing && currentPath != null) {
-                    currentPath.lineTo(x, y);
+                if (isRemoteDrawing && remoteCurrentPath != null) {
+                    remoteCurrentPath.lineTo(x, y);
                     synchronized (strokes) {
-                        strokes.add(new Stroke(currentPath, color, strokeWidth));
+                        strokes.add(new Stroke(remoteCurrentPath, color, strokeWidth));
                     }
-                    currentPath = new Path();
-                    isDrawing = false;
+                    remoteCurrentPath = new Path();
+                    isRemoteDrawing = false;
                     invalidate();
                 }
                 break;
@@ -199,10 +224,12 @@ public class DrawingView extends View {
         }
     }
 
-    // ==================== WebSocket 广播 ====================
+    // ==================== WebSocket / TCP 广播 ====================
 
     /**
-     * 通过WebSocket广播绘图事件（来源标识为"app"）
+     * 根据当前同步模式发送绘图事件
+     * <p>WEB模式: 通过WebSocket广播到所有网页客户端</p>
+     * <p>DEVICE模式: 通过TCP长连接发送到目标设备（支持发起方和接收方双向同步）</p>
      */
     private void sendDrawEvent(String action, float nx, float ny, int color, float strokeWidth) {
         JSONObject json = new JSONObject();
@@ -214,7 +241,14 @@ public class DrawingView extends View {
         json.put("strokeWidth", strokeWidth);
         json.put("from", "app");
         String jsonStr = json.toJSONString();
-        ThreadUtils.runThread(() -> LHttpServer.sendDrawEvent(jsonStr));
+        ThreadUtils.runThread(() -> {
+            DrawSyncManager active = getActiveDeviceManager();
+            if (active != null) {
+                active.sendDrawEvent(jsonStr);
+            } else {
+                LHttpServer.sendDrawEvent(jsonStr);
+            }
+        });
     }
 
     // ==================== 公共方法 ====================
@@ -230,7 +264,7 @@ public class DrawingView extends View {
     }
 
     /**
-     * 清空画布（本地+广播）
+     * 清空画布（本地+根据模式广播）
      */
     public void clearCanvas() {
         clearLocal();
@@ -239,7 +273,14 @@ public class DrawingView extends View {
         json.put("action", "clear");
         json.put("from", "app");
         String jsonStr = json.toJSONString();
-        ThreadUtils.runThread(() -> LHttpServer.sendDrawEvent(jsonStr));
+        ThreadUtils.runThread(() -> {
+            DrawSyncManager active = getActiveDeviceManager();
+            if (active != null) {
+                active.sendDrawEvent(jsonStr);
+            } else {
+                LHttpServer.sendDrawEvent(jsonStr);
+            }
+        });
     }
 
     /**
@@ -249,8 +290,10 @@ public class DrawingView extends View {
         synchronized (strokes) {
             strokes.clear();
         }
-        currentPath = new Path();
-        isDrawing = false;
+        localCurrentPath = new Path();
+        remoteCurrentPath = new Path();
+        isLocalDrawing = false;
+        isRemoteDrawing = false;
         invalidate();
     }
 
@@ -260,5 +303,38 @@ public class DrawingView extends View {
 
     public float getCurrentStrokeWidth() {
         return currentStrokeWidth;
+    }
+
+    // ==================== 同步模式 ====================
+
+    public void setSyncMode(DrawSyncManager.SyncMode mode) {
+        this.syncMode = mode;
+    }
+
+    public DrawSyncManager.SyncMode getSyncMode() {
+        return syncMode;
+    }
+
+    public void setDrawSyncManager(DrawSyncManager manager) {
+        this.drawSyncManager = manager;
+    }
+
+    /**
+     * 获取当前活跃的TCP设备同步管理器
+     * <p>优先检查发起方的drawSyncManager，再检查接收方的静态receiverSyncManager</p>
+     *
+     * @return 已连接的DrawSyncManager，或null（无设备连接）
+     */
+    private DrawSyncManager getActiveDeviceManager() {
+        // 发起方：用户主动连接的设备
+        if (drawSyncManager != null && drawSyncManager.isConnected()) {
+            return drawSyncManager;
+        }
+        // 接收方：被其他设备请求并接受后创建的
+        DrawSyncManager receiver = DrawingActivity.getReceiverSyncManager();
+        if (receiver != null && receiver.isConnected()) {
+            return receiver;
+        }
+        return null;
     }
 }

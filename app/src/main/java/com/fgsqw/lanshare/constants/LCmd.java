@@ -30,6 +30,10 @@ public class LCmd {
     public static final int FS_SYNC_MEDIA = 1107;     // 同步媒体
     public static final int FS_UPDATE_APPS = 1108;     // 同步媒体
     public static final int FS_GET_APPS = 1109;     // 同步媒体
+    public static final int FS_DRAW = 1110;           // 远程绘图事件（长连接）
+    public static final int FS_DRAW_SYNC_REQUEST = 1111; // 绘图同步请求
+    public static final int FS_DRAW_SYNC_ACCEPT = 1112;  // 绘图同步接受
+    public static final int FS_DRAW_SYNC_REJECT = 1113;  // 绘图同步拒绝
 
 
     // 使用byte命令避免像int命令那样需要两边转换为byte

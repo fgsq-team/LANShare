@@ -54,4 +54,7 @@
 
     <!-- 聊天文件图标背景 -->
     <attr name="fileIconBgColor" format="color" />
+
+    <!-- 设备选择弹窗信息文字 -->
+    <attr name="deviceInfoTextColor" format="color" />
 </resources>

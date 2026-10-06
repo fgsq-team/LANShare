@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.fragment.child;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +20,7 @@ import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
 import com.fgsqw.lanshare.constants.LCmd;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.MusicAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.message.MessageAudioContent;
@@ -203,14 +203,11 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
             public void OnLongClick(int position) {//列表长按时间
                 MessageAudioContent fileInfo = musicList.get(position);
 
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-                builder.setTitle(getString(R.string.please_select_operation));
-                String[] items;
                 if (fileInfo.getLength() == 0) {
                     T.s((R.string.file_size_is_zero));
                     return;
                 }
-                items = new String[]{
+                String[] items = new String[]{
                         getString(R.string.send),
                         getString(R.string.open),
                         getString(R.string.info),
@@ -219,42 +216,39 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
                         getString(R.string.generate_ipv4_sharing_link),
                         getString(R.string.cancel),
                 };
-                builder.setItems(items, (arg0, arg1) -> {
+                InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+                dialog.setTitle(getString(R.string.please_select_operation));
+                dialog.setItems(items);
+                dialog.setOnItemClickListener(arg1 -> {
                     switch (arg1) {
-                        case 0: {
+                        case 0:
                             dataCenterActivity.sendSingleFile(fileInfo);
                             break;
-                        }
-                        case 1: {
+                        case 1:
                             FileUtil.openFile((Activity) getContext(), new File(fileInfo.getPath()));
                             break;
-                        }
-                        case 2: {
+                        case 2:
                             FileInfoDialog fileInfoDialog = new FileInfoDialog(getContext(), fileInfo.getPath());
                             fileInfoDialog.show();
                             break;
-                        }
-                        case 3: {
+                        case 3:
                             Intent intent = new Intent(dataCenterActivity, MusicService.class);
                             intent.putExtra("musicFilePath", fileInfo.getPath());
                             dataCenterActivity.startService(intent);
                             break;
-                        }
                         case 4:
                             mUtil.shareFile(false, fileInfo, getContext());
                             break;
                         case 5:
                             mUtil.shareFile(true, fileInfo, getContext());
                             break;
-                        case 6: {
+                        case 6:
                             break;
-                        }
                         default:
                             break;
                     }
-                    arg0.dismiss();
                 });
-                builder.show();
+                dialog.show();
             }
 
             @Override

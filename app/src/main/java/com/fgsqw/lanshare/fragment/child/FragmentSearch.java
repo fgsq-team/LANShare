@@ -2,7 +2,6 @@ package com.fgsqw.lanshare.fragment.child;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +24,7 @@ import com.fgsqw.lanshare.activity.DataCenterActivity;
 import com.fgsqw.lanshare.base.BaseFragment;
 import com.fgsqw.lanshare.base.view.MLinearLayoutManager;
 import com.fgsqw.lanshare.config.Config;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.SearchAdapter;
 import com.fgsqw.lanshare.fragment.data.AnyData;
 import com.fgsqw.lanshare.pojo.message.MessageApkContent;
@@ -163,136 +163,115 @@ public class FragmentSearch extends BaseFragment implements View.OnClickListener
     private void dialog(final int position) {
         MessageFileContent fileInfo = searchResiltsList.get(position);
         File file = new File(fileInfo.getPath());
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-        builder.setTitle(getString(R.string.please_select_operation));
-        String[] items;
         if (fileInfo.getLength() == 0) {
             T.s((R.string.file_size_is_zero));
             return;
         }
-        if (file.canRead()) {
-            if (fileInfo.getFileType() == MessageFileContent.FILE_TYPE_APK) {
-                items = new String[]{
-                        getString(R.string.send),
-                        getString(R.string.backup),
-                        getString(R.string.open),
-                        getString(R.string.uninstall),
-                        getString(R.string.generate_ipv6_sharing_link),
-                        getString(R.string.generate_ipv4_sharing_link),
-                        getString(R.string.cancel),
-                };
-                builder.setItems(items, (arg0, arg1) -> {
-                    switch (arg1) {
-                        case 0: {
-                            dataCenterActivity.sendSingleFile(fileInfo);
-                            break;
-                        }
-                        case 1: {
-                            // 备份至本地
-                            new CopFileTask(getContext(), fileInfo.getPath(), Config.FILE_SAVE_PATH + "备份/" + fileInfo.getName()).execute(0);
-                            break;
-                        }
-                        case 2: {
-                            FileUtil.startApp(getContext(), ((MessageApkContent) fileInfo).getPackageName());
-                            break;
-                        }
-                        case 3: {
-                            FileUtil.uninstallApp(getContext(), ((MessageApkContent) fileInfo).getPackageName());
-                            break;
-                        }
-                        case 4:
-                            mUtil.shareFile(false, fileInfo, getContext());
-                            break;
-                        case 5:
-                            mUtil.shareFile(true, fileInfo, getContext());
-                            break;
-                        case 6: {
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    arg0.dismiss();
-                });
-            } else if (fileInfo.getFileType() == MessageFileContent.FILE_TYPE_VIDEO) {
-                items = new String[]{
-                        getString(R.string.send),
-                        getString(R.string.open),
-                        getString(R.string.play),
-                        getString(R.string.generate_ipv6_sharing_link),
-                        getString(R.string.generate_ipv4_sharing_link),
-                        getString(R.string.cancel),
-                };
-                builder.setItems(items, (arg0, arg1) -> {
-                    switch (arg1) {
-                        case 0: {
-                            dataCenterActivity.sendSingleFile(fileInfo);
-                            break;
-                        }
-                        case 1: {
-                            FileUtil.openFile((Activity) getContext(), file);
-                            break;
-                        }
-                        case 2: {
-//                            Message mMessage = Message.obtain();
-//                            mMessage.what = LCmd.FRAGMENT_PLAY_MUSIC;
-//                            mMessage.obj = fileInfo;
-//                            LANService.getInstance().messageSend(mMessage);
-                            Intent intent = new Intent(dataCenterActivity, MusicService.class);
-                            intent.putExtra("musicFilePath", fileInfo.getPath());
-                            dataCenterActivity.startService(intent);
-//                            instance.play(fileInfo.getPath());
-                            break;
-                        }
-                        case 3:
-                            mUtil.shareFile(false, fileInfo, getContext());
-                            break;
-                        case 4:
-                            mUtil.shareFile(true, fileInfo, getContext());
-                            break;
-                        default:
-                            break;
-                    }
-                    arg0.dismiss();
-                });
-            } else {
-                items = new String[]{
-                        getString(R.string.send),
-                        getString(R.string.open),
-                        getString(R.string.generate_ipv6_sharing_link),
-                        getString(R.string.generate_ipv4_sharing_link),
-                        getString(R.string.cancel),
-                };
-                builder.setItems(items, (arg0, arg1) -> {
-                    switch (arg1) {
-                        case 0: {
-                            dataCenterActivity.sendSingleFile(fileInfo);
-                            break;
-                        }
-                        case 1: {
-                            FileUtil.openFile((Activity) getContext(), file);
-                            break;
-                        }
-                        case 2:
-                            mUtil.shareFile(false, fileInfo, getContext());
-                            break;
-                        case 3:
-                            mUtil.shareFile(true, fileInfo, getContext());
-                            break;
-                        default:
-                            break;
-                    }
-                    arg0.dismiss();
-                });
-            }
-
-        } else {
+        if (!file.canRead()) {
             T.s((R.string.file_cannot_be_read));
             return;
         }
-        // 绑定选项和点击事件
 
-        builder.show();
+        InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+        dialog.setTitle(getString(R.string.please_select_operation));
+
+        if (fileInfo.getFileType() == MessageFileContent.FILE_TYPE_APK) {
+            String[] items = new String[]{
+                    getString(R.string.send),
+                    getString(R.string.backup),
+                    getString(R.string.open),
+                    getString(R.string.uninstall),
+                    getString(R.string.generate_ipv6_sharing_link),
+                    getString(R.string.generate_ipv4_sharing_link),
+                    getString(R.string.cancel),
+            };
+            dialog.setItems(items);
+            dialog.setOnItemClickListener(arg1 -> {
+                switch (arg1) {
+                    case 0:
+                        dataCenterActivity.sendSingleFile(fileInfo);
+                        break;
+                    case 1:
+                        new CopFileTask(getContext(), fileInfo.getPath(), Config.FILE_SAVE_PATH + "备份/" + fileInfo.getName()).execute(0);
+                        break;
+                    case 2:
+                        FileUtil.startApp(getContext(), ((MessageApkContent) fileInfo).getPackageName());
+                        break;
+                    case 3:
+                        FileUtil.uninstallApp(getContext(), ((MessageApkContent) fileInfo).getPackageName());
+                        break;
+                    case 4:
+                        mUtil.shareFile(false, fileInfo, getContext());
+                        break;
+                    case 5:
+                        mUtil.shareFile(true, fileInfo, getContext());
+                        break;
+                    default:
+                        break;
+                }
+            });
+        } else if (fileInfo.getFileType() == MessageFileContent.FILE_TYPE_VIDEO) {
+            String[] items = new String[]{
+                    getString(R.string.send),
+                    getString(R.string.open),
+                    getString(R.string.play),
+                    getString(R.string.generate_ipv6_sharing_link),
+                    getString(R.string.generate_ipv4_sharing_link),
+                    getString(R.string.cancel),
+            };
+            dialog.setItems(items);
+            dialog.setOnItemClickListener(arg1 -> {
+                switch (arg1) {
+                    case 0:
+                        dataCenterActivity.sendSingleFile(fileInfo);
+                        break;
+                    case 1:
+                        FileUtil.openFile((Activity) getContext(), file);
+                        break;
+                    case 2:
+                        Intent intent = new Intent(dataCenterActivity, MusicService.class);
+                        intent.putExtra("musicFilePath", fileInfo.getPath());
+                        dataCenterActivity.startService(intent);
+                        break;
+                    case 3:
+                        mUtil.shareFile(false, fileInfo, getContext());
+                        break;
+                    case 4:
+                        mUtil.shareFile(true, fileInfo, getContext());
+                        break;
+                    default:
+                        break;
+                }
+            });
+        } else {
+            String[] items = new String[]{
+                    getString(R.string.send),
+                    getString(R.string.open),
+                    getString(R.string.generate_ipv6_sharing_link),
+                    getString(R.string.generate_ipv4_sharing_link),
+                    getString(R.string.cancel),
+            };
+            dialog.setItems(items);
+            dialog.setOnItemClickListener(arg1 -> {
+                switch (arg1) {
+                    case 0:
+                        dataCenterActivity.sendSingleFile(fileInfo);
+                        break;
+                    case 1:
+                        FileUtil.openFile((Activity) getContext(), file);
+                        break;
+                    case 2:
+                        mUtil.shareFile(false, fileInfo, getContext());
+                        break;
+                    case 3:
+                        mUtil.shareFile(true, fileInfo, getContext());
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+        dialog.show();
     }
 
     FileUtil.Search search = null;

@@ -2,7 +2,6 @@ package com.fgsqw.lanshare.dialog.adapter;
 
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -21,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.dialog.FileInfoDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.pojo.Device;
 import com.fgsqw.lanshare.utils.CopFileTask;
 import com.fgsqw.lanshare.utils.FileUtil;
@@ -46,18 +46,17 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
     }
 
     public boolean onLongClick(Device device) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("复制文本");
-        String[] items;
-        items = new String[]{
+        InfoDialog dialog = new InfoDialog(context);
+        dialog.setTitle("复制文本");
+        String[] items = new String[]{
                 "复制IP",
                 "复制设备名",
                 "复制网页地址",
                 "复制所有",
         };
         ClipboardManager cb = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        // 绑定选项和点击事件
-        builder.setItems(items, (arg0, arg1) -> {
+        dialog.setItems(items);
+        dialog.setOnItemClickListener(arg1 -> {
             switch (arg1) {
                 case 0:
                     cb.setPrimaryClip(ClipData.newPlainText("text", device.getDevIP()));
@@ -81,7 +80,7 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
                     break;
             }
         });
-        builder.show();
+        dialog.show();
         return true;
     }
 

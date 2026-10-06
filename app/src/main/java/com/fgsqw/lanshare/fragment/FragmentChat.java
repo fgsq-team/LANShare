@@ -1,7 +1,6 @@
 package com.fgsqw.lanshare.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Message;
@@ -36,6 +35,7 @@ import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.db.TokenDBUtil;
 import com.fgsqw.lanshare.dialog.DeviceSelectDialog;
+import com.fgsqw.lanshare.dialog.InfoDialog;
 import com.fgsqw.lanshare.fragment.adapter.ChatAdapter;
 import com.fgsqw.lanshare.fragment.adapter.viewolder.FileMsgHolder;
 import com.fgsqw.lanshare.pojo.Device;
@@ -174,18 +174,18 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
 
     public void newHttpClient(Object token) {
         String[] arr = (String[]) token;
-        AlertDialog.Builder normalDialog = new AlertDialog.Builder(dataCenterActivity);
-        normalDialog.setTitle(R.string.new_web_client);
-        normalDialog.setMessage(R.string.new_web_client_detail);
-        normalDialog.setPositiveButton(getString(R.string.agree), (dialog, which) -> {
-            tokenDBUtil.setPass(arr[0], 1);
-            //...To-do
+        InfoDialog dialog = new InfoDialog(dataCenterActivity);
+        dialog.setTitle(getString(R.string.new_web_client));
+        dialog.setText(getString(R.string.new_web_client_detail));
+        dialog.setLeftButtonText(getString(R.string.disagree));
+        dialog.setRightButtonText(getString(R.string.agree));
+        dialog.setOnClickListener(agree -> {
+            if (agree) {
+                tokenDBUtil.setPass(arr[0], 1);
+                //...To-do
+            }
         });
-        normalDialog.setNegativeButton(getString(R.string.disagree), (dialog, which) -> {
-            //...To-do
-        });
-        // 显示
-        normalDialog.show();
+        dialog.show();
     }
 
     //    @RequiresApi(api = Build.VERSION_CODES.M)
@@ -260,19 +260,12 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     public void showIsReceiveDialog(Message msg) {
         RecvFileCallback recvFileCallback = (RecvFileCallback) msg.obj;
         Device device = recvFileCallback.getFileTransfer().getFromDevice();
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme)
-                .setIcon(R.mipmap.ic_launcher_round)
-                .setCancelable(false)
-                .setTitle(getString(R.string.accept_files))
-                .setMessage(String.format(getString(R.string.accept_file_from_x), device.getDevName(), msg.arg1))
-                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    recvFileCallback.receviceFile(true);
-                }).setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    recvFileCallback.receviceFile(false);
-                });
-        builder.create().show();
+        InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+        dialog.setCancelable(false);
+        dialog.setTitle(getString(R.string.accept_files));
+        dialog.setText(String.format(getString(R.string.accept_file_from_x), device.getDevName(), msg.arg1));
+        dialog.setOnClickListener(agree -> recvFileCallback.receviceFile(agree));
+        dialog.show();
     }
 
     /**
@@ -284,18 +277,16 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         Object[] dataObject = (Object[]) msg.obj;
         Device device = (Device) dataObject[0];
         List<MessageFileContent> fileInfos = (List<MessageFileContent>) dataObject[1];
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme)
-                .setIcon(R.mipmap.ic_launcher_round)
-                .setCancelable(false)
-                .setTitle("APP更新请求")
-                .setMessage(String.format("是否同意%s的获取的%d个APP更新请求", device.getDevName(), fileInfos.size()))
-                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, fileInfos);
-                }).setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                });
-        builder.create().show();
+        InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+        dialog.setCancelable(false);
+        dialog.setTitle("APP更新请求");
+        dialog.setText(String.format("是否同意%s的获取的%d个APP更新请求", device.getDevName(), fileInfos.size()));
+        dialog.setOnClickListener(agree -> {
+            if (agree) {
+                LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, fileInfos);
+            }
+        });
+        dialog.show();
     }
 
     @Nullable
@@ -888,35 +879,29 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     }
 
     public void messageDelete() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialogTheme);
-        builder.setTitle(getString(R.string.please_select_operation));
+        InfoDialog dialog = new InfoDialog(getContext(), R.style.AlertDialogTheme);
+        dialog.setTitle(getString(R.string.please_select_operation));
         String[] items = new String[]{getString(R.string.clear_all_messages), getString(R.string.clear_all_text_messages), getString(R.string.clear_all_file_messages), getString(R.string.clear_all_deleted_file_messages)};
-
-        // 绑定选项和点击事件
-        builder.setItems(items, (arg0, arg1) -> {
-            switch (arg1) {
-                case 0: {
+        dialog.setItems(items);
+        dialog.setOnItemClickListener(position -> {
+            switch (position) {
+                case 0:
                     deleteAllMessage();
                     break;
-                }
-                case 1: {
+                case 1:
                     deleteAllTextMessage();
                     break;
-                }
-                case 2: {
+                case 2:
                     deleteFileMessage();
                     break;
-                }
-                case 3: {
+                case 3:
                     deleteFileMessageByNotExist();
                     break;
-                }
                 default:
                     break;
             }
-            arg0.dismiss();
         });
-        builder.show();
+        dialog.show();
     }
 
     public void deleteSelectedMessages() {
