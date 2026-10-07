@@ -1,75 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
-              android:orientation="vertical">
-    <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="70dp">
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/toolbarBackground"
+        android:elevation="0dp">
 
         <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/toolbarBackground"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="10dp">
-
-            <ImageView
-                    android:id="@+id/web_manager_exit_img"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:src="@drawable/ic_exit"/>
-            <TextView
-                    android:id="@+id/web_manager_title"
-                    android:layout_marginLeft="20px"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/textColor"
-                    android:textSize="20sp"
-                    android:text="@string/web_authorization_list">
-            </TextView>
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <!--  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-              android:id="@+id/web_manager_swipe"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">-->
-    <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="20dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:id="@+id/web_manager_exit_img"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="2dp"
+                android:src="@drawable/ic_exit"
+                app:tint="?attr/iconColor" />
+
+            <TextView
+                android:id="@+id/web_manager_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/web_authorization_list"
+                android:textColor="?attr/toolbarTextColor"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- 内容区域 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
-                android:layout_above="@+id/web_manager_add_layout"
-                android:id="@+id/web_manager_recy"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+            android:id="@+id/web_manager_recy"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/web_manager_add_layout"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp" />
 
-        <!--    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
+        <!-- 空状态提示 -->
         <LinearLayout
-                android:id="@+id/web_manager_add_layout"
-                android:layout_alignParentBottom="true"
-                android:layout_width="match_parent"
+            android:id="@+id/web_manager_empty_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/web_manager_empty_text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal">
-            <Button
-                    android:id="@+id/web_manager_add_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_new"/>
+                android:textColor="?attr/android:textColorTertiary"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/web_manager_add_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/web_manager_add_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_new" />
+
         </LinearLayout>
 
     </RelativeLayout>
-
 
 </LinearLayout>

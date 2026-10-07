@@ -38,6 +38,7 @@ import com.hjq.permissions.XXPermissions;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 
 import static android.graphics.BitmapFactory.decodeResource;
@@ -441,9 +442,21 @@ public class DeviceDataScanner {
 
     // ==================== 应用扫描 ====================
 
+    /** 图标并行加载线程池(CPU核心数,最多4线程) */
+    private static final ExecutorService ICON_EXECUTOR = Executors.newFixedThreadPool(
+            Math.min(Runtime.getRuntime().availableProcessors(), 4),
+            r -> {
+                Thread t = new Thread(r, "IconLoader");
+                t.setPriority(Thread.NORM_PRIORITY);
+                t.setDaemon(true);
+                return t;
+            }
+    );
+
     /**
      * 扫描已安装应用
-     * <p>遍历已安装应用包,收集应用信息并缓存图标到数据库</p>
+     * <p>分两阶段处理:先快速构建基本信息,再并行加载未缓存的图标</p>
+     * <p>优化点: 批量DB查询替代逐条查询, 并行加载图标, 批量事务写入DB</p>
      *
      * @param context 上下文
      * @param refresh 是否强制刷新
@@ -457,9 +470,9 @@ public class DeviceDataScanner {
             }
 
             long startTime = System.currentTimeMillis();
-            ApkIconDBUtil iconDB = null;
             List<MessageApkContent> apkInfoList = new ArrayList<>();
             PackageManager packageManager = context.getPackageManager();
+            ApkIconDBUtil iconDB = null;
 
             try {
                 List<PackageInfo> packages = getInstalledPackages(packageManager);
@@ -473,13 +486,13 @@ public class DeviceDataScanner {
                 boolean displaySystemApp = prefUtil.getBoolean(PreConfig.DISPLAY_SYSTEM_APP, false);
                 iconDB = new ApkIconDBUtil(context);
 
-                // 预加载缓存图标,避免循环中频繁查询数据库
-                Map<String, byte[]> cachedIcons = preloadCachedIcons(iconDB, packages);
+                // 一次DB查询加载所有缓存图标(替代原来的N次逐条查询)
+                Map<String, byte[]> cachedIcons = iconDB.queryAllIcons();
                 LLog.debug("Start loading " + packages.size() + " packages, cached icons: " + cachedIcons.size());
 
-                int successCount = 0;
+                // 快速构建基本信息 + 分离出需要加载图标的应用
+                List<PackageInfo> needIconPackages = new ArrayList<>();
                 int skipCount = 0;
-                int errorCount = 0;
 
                 for (PackageInfo packageInfo : packages) {
                     try {
@@ -488,18 +501,32 @@ public class DeviceDataScanner {
                             continue;
                         }
 
-                        MessageApkContent apkInfo = buildApkInfo(packageInfo, packageManager, cachedIcons, iconDB);
+                        MessageApkContent apkInfo = buildApkInfoBasic(packageInfo, packageManager);
+                        byte[] cachedIcon = cachedIcons.get(packageInfo.packageName);
+                        if (cachedIcon != null) {
+                            apkInfo.setIcon(cachedIcon);
+                        } else {
+                            needIconPackages.add(packageInfo);
+                        }
                         apkInfoList.add(apkInfo);
-                        successCount++;
                     } catch (Exception e) {
-                        errorCount++;
                         LLog.error("Error processing package: " +
                                 (packageInfo != null ? packageInfo.packageName : "unknown"), e);
                     }
                 }
 
-                LLog.debug(String.format("Load app completed: success=%d, skipped=%d, errors=%d, time=%dms",
-                        successCount, skipCount, errorCount, System.currentTimeMillis() - startTime));
+                long phase1Time = System.currentTimeMillis() - startTime;
+                LLog.debug("Phase1 (basic info) completed: " + apkInfoList.size() + " apps, "
+                        + needIconPackages.size() + " need icons, time=" + phase1Time + "ms");
+
+                // 并行加载未缓存的图标
+                if (!needIconPackages.isEmpty()) {
+                    loadIconsParallel(needIconPackages, packageManager, apkInfoList, iconDB);
+                }
+
+                LLog.debug(String.format("Load app completed: total=%d, skipped=%d, newIcons=%d, time=%dms",
+                        apkInfoList.size(), skipCount, needIconPackages.size(),
+                        System.currentTimeMillis() - startTime));
 
                 // 按名称忽略大小写排序
                 Collections.sort(apkInfoList, (a, b) ->
@@ -543,12 +570,11 @@ public class DeviceDataScanner {
     }
 
     /**
-     * 构建单个应用信息
+     * 构建应用基本信息(不含图标加载)
+     * <p>仅提取包名、版本、名称、路径、大小等轻量信息</p>
      */
-    private static MessageApkContent buildApkInfo(PackageInfo packageInfo,
-                                                   PackageManager packageManager,
-                                                   Map<String, byte[]> cachedIcons,
-                                                   ApkIconDBUtil iconDB) {
+    private static MessageApkContent buildApkInfoBasic(PackageInfo packageInfo,
+                                                       PackageManager packageManager) {
         MessageApkContent apkInfo = new MessageApkContent();
         String packageName = packageInfo.packageName;
 
@@ -581,25 +607,79 @@ public class DeviceDataScanner {
             apkInfo.setLength(0);
         }
 
-        // 获取图标(优先缓存)
-        byte[] iconBytes = cachedIcons.get(packageName);
-        if (iconBytes == null) {
-            iconBytes = loadAndCacheIcon(packageInfo, packageManager, iconDB, packageName, apkInfo.getPath());
-        }
-        apkInfo.setIcon(iconBytes);
-
         return apkInfo;
     }
 
     /**
-     * 加载并缓存应用图标
+     * 并行加载应用图标
+     * <p>使用线程池并行加载未缓存的应用图标,加载完成后批量写入数据库</p>
+     *
+     * @param packages        需要加载图标的应用列表
+     * @param packageManager  包管理器
+     * @param apkInfoList     完整的应用信息列表(用于匹配设置图标)
+     * @param iconDB          图标数据库
+     */
+    private static void loadIconsParallel(List<PackageInfo> packages,
+                                          PackageManager packageManager,
+                                          List<MessageApkContent> apkInfoList,
+                                          ApkIconDBUtil iconDB) {
+        // 构建 packageName -> apkInfo 的映射,用于快速查找
+        Map<String, MessageApkContent> apkInfoMap = new HashMap<>(apkInfoList.size());
+        for (MessageApkContent apkInfo : apkInfoList) {
+            if (apkInfo.getIcon() == null) {
+                apkInfoMap.put(apkInfo.getPackageName(), apkInfo);
+            }
+        }
+
+        // 用于收集新加载的图标,后续批量写入DB
+        List<ApkIconDBUtil.IconEntry> newIcons = Collections.synchronizedList(new ArrayList<>());
+        CountDownLatch latch = new CountDownLatch(packages.size());
+
+        for (PackageInfo packageInfo : packages) {
+            final String packageName = packageInfo.packageName;
+            ICON_EXECUTOR.submit(() -> {
+                try {
+                    byte[] iconBytes = loadIcon(packageInfo, packageManager);
+                    if (iconBytes != null) {
+                        MessageApkContent apkInfo = apkInfoMap.get(packageName);
+                        if (apkInfo != null) {
+                            apkInfo.setIcon(iconBytes);
+                        }
+                        newIcons.add(new ApkIconDBUtil.IconEntry(packageName, apkInfo != null ? apkInfo.getPath() : "", iconBytes));
+                    }
+                } catch (Exception e) {
+                    LLog.debug("Failed to load icon for: " + packageName);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // 等待所有图标加载完成
+        try {
+            latch.await(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LLog.error("Icon loading interrupted", e);
+            Thread.currentThread().interrupt();
+        }
+
+        // 批量写入数据库(事务方式,比逐条插入快数倍)
+        if (!newIcons.isEmpty()) {
+            try {
+                iconDB.batchAddIcons(newIcons);
+                LLog.debug("Batch saved " + newIcons.size() + " icons to database");
+            } catch (Exception e) {
+                LLog.error("Error batch saving icons", e);
+            }
+        }
+    }
+
+    /**
+     * 加载单个应用图标并转为字节数组
+     * <p>使用 PNG 格式保留透明通道,同时缩小过大图标减少体积</p>
      */
     @Nullable
-    private static byte[] loadAndCacheIcon(PackageInfo packageInfo,
-                                            PackageManager packageManager,
-                                            ApkIconDBUtil iconDB,
-                                            String packageName,
-                                            String path) {
+    private static byte[] loadIcon(PackageInfo packageInfo, PackageManager packageManager) {
         try {
             Drawable drawable = packageInfo.applicationInfo.loadIcon(packageManager);
             if (drawable == null) {
@@ -609,60 +689,29 @@ public class DeviceDataScanner {
             if (bitmap == null) {
                 return null;
             }
-            byte[] iconBytes = ImageUtils.bitmap2PngBytes(bitmap);
-            // 异步保存到数据库,不阻塞主流程
-            saveIconToDatabaseAsync(iconDB, packageName, path, iconBytes);
-            return iconBytes;
-        } catch (OutOfMemoryError e) {
-            LLog.error("Out of memory while loading icon for: " + packageName, e);
-            return null;
-        } catch (Exception e) {
-            LLog.debug("Failed to load icon for package: " + packageName);
-            return null;
-        }
-    }
-
-    /**
-     * 预加载所有已缓存的图标到内存 Map 中
-     *
-     * @param iconDB   图标数据库工具
-     * @param packages 已安装应用包列表
-     * @return 缓存图标映射表(包名 → 图标字节数据)
-     */
-    private static Map<String, byte[]> preloadCachedIcons(ApkIconDBUtil iconDB, List<PackageInfo> packages) {
-        Map<String, byte[]> cachedIcons = new HashMap<>(packages.size());
-        try {
-            for (PackageInfo packageInfo : packages) {
-                String packageName = packageInfo.packageName;
-                try {
-                    byte[] icon = iconDB.queryIconByPackageName(packageName);
-                    if (icon != null) {
-                        cachedIcons.put(packageName, icon);
-                    }
-                } catch (Exception e) {
-                    LLog.debug("Failed to query cached icon for: " + packageName);
+            // 缩放过大的图标到合理尺寸(最大 96x96),减少内存和存储占用
+            int maxDim = Math.max(bitmap.getWidth(), bitmap.getHeight());
+            if (maxDim > 96) {
+                float scale = 96f / maxDim;
+                int w = Math.round(bitmap.getWidth() * scale);
+                int h = Math.round(bitmap.getHeight() * scale);
+                Bitmap scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+                if (scaled != bitmap) {
+                    bitmap.recycle();
                 }
+                bitmap = scaled;
             }
+            // 使用 PNG 格式保留透明通道
+            java.io.ByteArrayOutputStream stream = new java.io.ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            return stream.toByteArray();
+        } catch (OutOfMemoryError e) {
+            LLog.error("Out of memory while loading icon for: " + packageInfo.packageName, e);
+            return null;
         } catch (Exception e) {
-            LLog.error("Error preloading cached icons", e);
+            LLog.debug("Failed to load icon for: " + packageInfo.packageName);
+            return null;
         }
-        return cachedIcons;
-    }
-
-    /**
-     * 异步保存图标到数据库
-     */
-    private static void saveIconToDatabaseAsync(final ApkIconDBUtil iconDB,
-                                                 final String packageName,
-                                                 final String path,
-                                                 final byte[] iconBytes) {
-        new Thread(() -> {
-            try {
-                iconDB.addIcon(packageName, path, iconBytes);
-            } catch (Exception e) {
-                LLog.debug("Failed to save icon for package: " + packageName);
-            }
-        }, "IconSave-" + packageName).start();
     }
 
     /**

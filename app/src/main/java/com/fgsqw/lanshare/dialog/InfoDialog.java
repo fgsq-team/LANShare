@@ -3,9 +3,11 @@ package com.fgsqw.lanshare.dialog;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -135,6 +137,16 @@ public class InfoDialog extends BaseDialog implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.info_dialog_enhanced);
+
+        // 设置弹窗宽度为屏幕宽度的 85%，避免弹窗过宽
+        Window window = getWindow();
+        if (window != null) {
+            DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+            int width = (int) (metrics.widthPixels * 0.85);
+            window.setLayout(
+                    width,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
 
         infoLayoutLeft = findViewById(R.id.info_layout_left);
         infoLayoutRight = findViewById(R.id.info_layout_right);

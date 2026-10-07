@@ -57,7 +57,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="monospace"
         android:textColor="?attr/colorPrimary"
-        android:textSize="18sp"
+        android:textSize="13sp"
         android:textStyle="bold" />
 
     <!-- IPv6 开关 -->

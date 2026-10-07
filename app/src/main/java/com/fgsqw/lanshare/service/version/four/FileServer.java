@@ -572,6 +572,7 @@ public class FileServer {
         @Override
         public void onProgress(FileTransfer fileTransfer, MessageFileContent fileItem) {
 //            logger.debug("progress: {}" + progress);
+            fileItem.setStatus(MessageContent.IN);
             lanService.sendProgressMeg(fileItem);
         }
 

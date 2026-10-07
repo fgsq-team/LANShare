@@ -10,7 +10,7 @@
     <meta name="author" content="fgsq">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.min.css" rel="stylesheet">
-    <link href="css/lanshare.min.css" rel="stylesheet">
+    <link href="css/lanshare.css" rel="stylesheet">
     <link href="css/theme.css" rel="stylesheet">
     <link rel="preload" href="/images/no_network.png" as="image">
 </head>
@@ -69,12 +69,24 @@
                 <div class="file-content" style="display:none">
                     <div class="card">
                         <div class="icard-header"><h4>文件列表</h4></div>
+                        <div class="select-all-toolbar" id="fileSelectAllToolbar" style="display:none;">
+                            <label class="select-all-label">
+                                <input type="checkbox" id="fileSelectAllCheckbox" onchange="toggleSelectAll('file', this)">
+                                <span>全选</span>
+                            </label>
+                        </div>
                         <div class="path-text">/</div>
                         <div class="icard-body"><div class="filelist"></div></div>
                     </div>
                 </div>
 
                 <!-- 媒体列表 -->
+                <div class="media-select-all-wrapper" id="mediaSelectAllToolbar" style="display:none;">
+                    <label class="select-all-label">
+                        <input type="checkbox" id="mediaSelectAllCheckbox" onchange="toggleSelectAll('media', this)">
+                        <span>全选</span>
+                    </label>
+                </div>
                 <div class="media-content" style="display:none"></div>
 
                 <!-- 软件列表 -->
@@ -84,7 +96,21 @@
                 <div class="chat-content" style="display:none">
                     <div class="chat_main">
                         <div class="line"></div>
+                        <div class="chat-toolbar" id="chatToolbar" style="display:none;">
+                            <label class="chat-toolbar-label">
+                                <input type="checkbox" id="chatSelectAllCheckbox" onchange="toggleChatSelectAll(this)">
+                                <span>全选</span>
+                            </label>
+                            <button class="chat-toolbar-btn" onclick="deleteSelectedMessages()">删除选中</button>
+                            <button class="chat-toolbar-btn" onclick="toggleChatMultiSelect(false)">取消</button>
+                        </div>
                         <div class="chat_content" id="chat_content"></div>
+                        <div class="chat-setting-bar">
+                            <label class="chat-no-save-label">
+                                <input type="checkbox" id="chatNoSaveCheckbox">
+                                <span>不保存消息</span>
+                            </label>
+                        </div>
                         <div class="line"></div>
                         <div class="chat_foot">
                             <label>
@@ -209,7 +235,7 @@
 <script type="text/javascript" src="js/bootstrap-notify.min.js"></script>
 <script type="text/javascript" src="js/lightyear.min.js"></script>
 <script type="text/javascript" src="js/WSCmd.js"></script>
-<script type="text/javascript" src="js/lanshareChat.min.js"></script>
-<script type="text/javascript" src="js/lanshare.min.js"></script>
+<script type="text/javascript" src="js/lanshareChat.js"></script>
+<script type="text/javascript" src="js/lanshare.js"></script>
 </body>
 </html>

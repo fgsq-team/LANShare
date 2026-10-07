@@ -1,172 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true">
 
-    <!-- 顶部工具栏 -->
-    <LinearLayout
+    <!-- 绘图区域（底层，铺满全屏） -->
+    <com.fgsqw.lanshare.widget.DrawingView
+        android:id="@+id/drawing_view"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="?attr/colorPrimary"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:layout_height="match_parent" />
 
-        <ImageView
-            android:id="@+id/draw_back"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="4dp"
-            android:src="@drawable/ic_back"
-            android:tint="@android:color/white" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="远程绘图"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/draw_mode_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp"
-            android:background="@android:color/transparent"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:text="网页同步"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <ImageView
-            android:id="@+id/draw_clear"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="4dp"
-            android:src="@drawable/baseline_delete_black_48"
-            android:tint="@android:color/white" />
-    </LinearLayout>
-
-    <!-- 画笔工具面板 -->
+    <!-- 工具栏 + 面板（浮于画布之上） -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimaryDark"
         android:orientation="vertical">
 
-        <!-- 收起状态：当前颜色 + 粗细预览 + 展开箭头 -->
-        <LinearLayout
-            android:id="@+id/draw_compact_bar"
+        <!-- 顶部工具栏 -->
+        <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="12dp">
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/toolbarBackground"
+            android:elevation="0dp">
 
-            <!-- 当前颜色预览圆 -->
-            <View
-                android:id="@+id/draw_current_color"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:background="#FFFF0000" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="画笔"
-                android:textColor="@android:color/white"
-                android:textSize="13sp" />
-
-            <!-- 当前粗细预览圆 -->
-            <View
-                android:id="@+id/draw_stroke_preview"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_marginStart="12dp"
-                android:background="@drawable/draw_stroke_preview_bg" />
-
-            <TextView
-                android:id="@+id/draw_stroke_size_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="5px"
-                android:textColor="@android:color/white"
-                android:textSize="12sp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/draw_expand_arrow"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:gravity="center"
-                android:text="▼"
-                android:textColor="@android:color/white"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- 展开状态：详细控制面板 -->
-        <LinearLayout
-            android:id="@+id/draw_detail_panel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="12dp"
-            android:visibility="gone">
-
-            <!-- 分隔线 -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginBottom="10dp"
-                android:background="#33FFFFFF" />
-
-            <!-- 颜色选择行：当前颜色预览 + "选择颜色"按钮 -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <ImageView
+                    android:id="@+id/draw_back"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="2dp"
+                    android:src="@drawable/ic_exit"
+                    app:tint="?attr/iconColor" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/drawing"
+                    android:textColor="?attr/toolbarTextColor"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/draw_mode_btn"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="4dp"
+                    android:minWidth="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="@string/web_sync"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="12sp"
+                    app:cornerRadius="8dp"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:strokeWidth="1dp" />
+
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- 画笔工具面板 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSurfaceVariant"
+            android:orientation="vertical">
+
+            <!-- 收起状态：当前颜色 + 粗细预览 + 展开箭头 -->
+            <LinearLayout
+                android:id="@+id/draw_compact_bar"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp">
 
                 <!-- 当前颜色预览圆 -->
                 <View
-                    android:id="@+id/draw_color_picker_preview"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="#FFFF0000" />
+                    android:id="@+id/draw_current_color"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp" />
 
                 <TextView
-                    android:id="@+id/draw_color_hex_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="#FF0000"
-                    android:textColor="@android:color/white"
-                    android:textSize="13sp"
-                    android:typeface="monospace" />
+                    android:text="@string/brush"
+                    android:textColor="?attr/android:textColorSecondary"
+                    android:textSize="13sp" />
+
+                <!-- 当前粗细预览圆 -->
+                <View
+                    android:id="@+id/draw_stroke_preview"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/draw_stroke_preview_bg" />
+
+                <TextView
+                    android:id="@+id/draw_stroke_size_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:textColor="?attr/android:textColorTertiary"
+                    android:textSize="12sp" />
 
                 <View
                     android:layout_width="0dp"
@@ -174,69 +127,132 @@
                     android:layout_weight="1" />
 
                 <TextView
-                    android:id="@+id/draw_color_pick_btn"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/draw_expand_arrow"
+                    android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
                     android:gravity="center"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:text="选择颜色 ▸"
-                    android:textColor="@android:color/white"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <!-- 粗细控制 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="粗细"
-                    android:textColor="#AAFFFFFF"
-                    android:textSize="11sp" />
-
-                <!-- 粗细实时预览圆 -->
-                <View
-                    android:id="@+id/draw_stroke_detail_preview"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/draw_stroke_preview_bg" />
-
-                <TextView
-                    android:id="@+id/draw_stroke_detail_size"
-                    android:layout_width="36dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text="5px"
-                    android:textColor="@android:color/white"
+                    android:text="▼"
+                    android:textColor="?attr/android:textColorSecondary"
                     android:textSize="12sp" />
 
-                <SeekBar
-                    android:id="@+id/draw_stroke_seekbar"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:max="48"
-                    android:progress="3" />
             </LinearLayout>
+
+            <!-- 展开状态：详细控制面板 -->
+            <LinearLayout
+                android:id="@+id/draw_detail_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="14dp"
+                android:visibility="gone">
+
+                <!-- 分隔线 -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="?attr/dividerColor" />
+
+                <!-- 颜色选择行 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- 当前颜色预览圆 -->
+                    <View
+                        android:id="@+id/draw_color_picker_preview"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp" />
+
+                    <TextView
+                        android:id="@+id/draw_color_hex_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="?attr/android:textColorSecondary"
+                        android:textSize="13sp"
+                        android:typeface="monospace" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/draw_color_pick_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:text="@string/pick_color"
+                        android:textSize="13sp"
+                        app:cornerRadius="10dp" />
+
+                </LinearLayout>
+
+                <!-- 粗细控制 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stroke_width"
+                        android:textColor="?attr/android:textColorSecondary"
+                        android:textSize="12sp" />
+
+                    <!-- 粗细实时预览圆 -->
+                    <View
+                        android:id="@+id/draw_stroke_detail_preview"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@drawable/draw_stroke_preview_bg" />
+
+                    <TextView
+                        android:id="@+id/draw_stroke_detail_size"
+                        android:layout_width="36dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="?attr/android:textColorTertiary"
+                        android:textSize="12sp" />
+
+                    <SeekBar
+                        android:id="@+id/draw_stroke_seekbar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:max="98"
+                        android:progress="3" />
+
+                </LinearLayout>
+
+                <!-- 清除画布 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/draw_clear"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/clear_canvas"
+                    android:textColor="?attr/errorTextColor"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
         </LinearLayout>
+
     </LinearLayout>
 
-    <!-- 绘图区域 -->
-    <com.fgsqw.lanshare.widget.DrawingView
-        android:id="@+id/drawing_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FFFFFFFF" />
-
-</LinearLayout>
+</FrameLayout>

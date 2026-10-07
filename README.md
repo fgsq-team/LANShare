@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Android-4.4.2%2B-green.svg)]()
-[![Version](https://img.shields.io/badge/version-1.2.9.2-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-1.2.9.3-orange.svg)]()
 
 LANShare 是一款运行在 Android 平台上的局域网文件传输工具。只需处于同一局域网内，即可自动发现设备并实现文件、消息、媒体等内容的快速互传，无需手动输入 IP 地址，操作简洁、上手即用。
 
@@ -19,18 +19,18 @@ LANShare 是一款运行在 Android 平台上的局域网文件传输工具。�
 - **Web 文件服务** — 内置 HTTP 文件服务器，支持通过浏览器访问和传输文件
 - **文件同步** — 支持设备间的文件同步功能
 - **二维码扫描** — 集成 ZXing 扫码功能，支持扫码添加设备
-- **NFC 传输** — 支持通过 NFC 进行设备配对与数据传输
 - **暗黑模式** — 支持深色/浅色主题切换
 - **开机自启** — 支持开机自动启动后台服务
 - **外部共享** — 支持通过系统分享菜单直接发送文件到 LANShare
 - **AES 加密** — 传输消息采用 AES 加密，保障数据安全
 - **文件分类保存** — 接收文件按类型自动分类存储
+- **远程绘图** — 支持设备间实时双向绘图同步（基于 V4 协议 TCP 长连接），同时支持通过网页端 WebSocket 与 APP 同步绘图，可自定义颜色、画笔粗细，坐标归一化适配不同屏幕尺寸
 
 ## 效果图
 
 | 应用选择 | 媒体选择 | 文件选择 | 选择设备发送 | 文件传输 |
 |:---:|:---:|:---:|:---:|:---:|
-| ![应用选择](img/1.png) | ![媒体选择](img/2.png) | ![文件选择](img/3.png) | ![选择设备发送](img/4.png) | ![文件传输](img/5.png) |
+| ![应用选择](img/1.jpg) | ![媒体选择](img/2.jpg) | ![文件选择](img/3.jpg) | ![选择设备发送](img/4.jpg) | ![文件传输](img/5.jpg) |
 
 ## 技术原理
 
@@ -40,6 +40,7 @@ LANShare 是一款运行在 Android 平台上的局域网文件传输工具。�
 | 文件/长文本传输 | TCP 协议 |
 | 消息加密 | AES 加密 |
 | Web 文件服务 | HTTP（内置 HttpServer） |
+| 远程绘图 | TCP（V4 协议）+ WebSocket |
 | 二维码 | ZXing |
 | 日志 | SLF4J + Logback |
 

@@ -29,6 +29,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     RelativeLayout aboutReward;
     RelativeLayout aboutUpdateVersion;
     RelativeLayout aboutOfficialWebsite;
+    RelativeLayout aboutGithub;
     RelativeLayout aboutUploadLogs;
     ImageView exitImg;
     ImageView aboutLogo;
@@ -51,6 +52,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         aboutReward = bind(R.id.about_reward);
         aboutUpdateVersion = bind(R.id.about_update_version);
         aboutOfficialWebsite = bind(R.id.about_official_website);
+        aboutGithub = bind(R.id.about_github);
         aboutUploadLogs = bind(R.id.about_upload_logs);
         tvVersionName = bind(R.id.about_version_name);
         exitImg = bind(R.id.about_exit_img);
@@ -64,6 +66,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         aboutUpdateVersion.setOnClickListener(this);
         aboutUploadLogs.setOnClickListener(this);
         aboutOfficialWebsite.setOnClickListener(this);
+        aboutGithub.setOnClickListener(this);
         aboutLogo.setOnClickListener(this);
         exitImg.setOnClickListener(this);
     }
@@ -152,6 +155,10 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
             break;
             case R.id.about_official_website: {
                 mUtil.openUrlInBrowser(this, Config.SERVER);
+            }
+            break;
+            case R.id.about_github: {
+                mUtil.openUrlInBrowser(this, Config.GITHUB);
             }
             break;
             case R.id.about_reward: {

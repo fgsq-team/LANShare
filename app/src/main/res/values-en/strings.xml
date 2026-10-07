@@ -343,5 +343,19 @@
     <string name="no_new_media_to_sync">No new media to sync</string>
     <string name="cancel_file_transfer_success">Cancel file transfer success</string>
     <string name="file_send_failed">File send failed</string>
+    <string name="no_authorized_clients">No authorized clients</string>
+    <string name="no_sync_devices">No sync devices</string>
+    <string name="file_sync_device_list">File Sync Device List</string>
+    <string name="drawing">Drawing</string>
+    <string name="web_sync">Web Sync</string>
+    <string name="brush">Brush</string>
+    <string name="pick_color">Pick Color</string>
+    <string name="stroke_width">Width</string>
+    <string name="device_prefix">Device: </string>
+    <string name="synced_with_device">Synced with \"%s\"</string>
+    <string name="connecting">Connecting...</string>
+    <string name="connected_to_device">Connected to device: %s</string>
+    <string name="connect_device_failed">Failed to connect: %s</string>
+    <string name="clear_canvas">Clear Canvas</string>
 
 </resources>

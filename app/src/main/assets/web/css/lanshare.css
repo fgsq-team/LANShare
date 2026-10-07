@@ -480,7 +480,7 @@ html, body {
 
 .chat_content {
     width: 100%;
-    height: 90%;
+    height: calc(90% - 28px);
     position: relative;
     box-sizing: border-box;
     overflow: auto;
@@ -938,4 +938,132 @@ html, body {
 .web-name:focus {
     border-color: #2E7D32;
     box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+/* === Select All Toolbar === */
+.select-all-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 6px 26px;
+    border-bottom: 1px solid var(--t-border);
+    background-color: var(--t-card-variant);
+}
+
+.media-select-all-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 2px;
+    border-radius: var(--t-radius-sm);
+    background-color: var(--t-card-variant);
+}
+
+.select-all-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--t-text);
+    user-select: none;
+}
+
+.select-all-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--t-primary);
+}
+
+/* === Chat Toolbar === */
+.chat-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px;
+    background-color: var(--t-card-variant);
+    border-bottom: 1px solid var(--t-border);
+}
+
+.chat-toolbar-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--t-text);
+    user-select: none;
+}
+
+.chat-toolbar-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--t-primary);
+    margin: 0;
+}
+
+.chat-toolbar-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--t-border);
+    border-radius: 4px;
+    background-color: var(--t-file-bg);
+    color: var(--t-text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-toolbar-btn:hover {
+    background-color: var(--t-hover);
+}
+
+/* === Chat Multi-Select === */
+.chat-item-wrapper {
+    position: relative;
+}
+
+.chat-multi-select-mode .chat-item-wrapper {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.chat-multi-select-mode .chat-item-wrapper:hover {
+    background-color: var(--t-hover);
+}
+
+.chat-multi-select-mode .chat-item-wrapper.chat-msg-selected {
+    background-color: rgba(46, 125, 50, 0.1);
+}
+
+/* === Chat Setting Bar === */
+.chat-setting-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 4px 16px;
+    background-color: var(--t-card-variant);
+    border-bottom: 1px solid var(--t-border);
+}
+
+.chat-no-save-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--t-text-sec);
+    user-select: none;
+}
+
+.chat-no-save-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    accent-color: var(--t-primary);
+    margin: 0;
+}
+
+.chat-body-no-save .chat_content {
+    background-color: var(--t-bg);
 }

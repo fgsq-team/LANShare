@@ -103,7 +103,9 @@ public class Config {
 //        return MD5Utils.md5(str + ":" + APP_NAME + ":" + KEY);
 //    }
     // 服务器地址
-    public static final String SERVER = "http://fgsqw.top";
+    public static final String SERVER = "http://lanshares.com";
+    // GitHub
+    public static final String GITHUB = "https://github.com/fgsq-team/LANShare";
 
     public static void initConfig(PrefUtil prefUtil) {
         String filePath = prefUtil.getString(PreConfig.FILE_PATH);

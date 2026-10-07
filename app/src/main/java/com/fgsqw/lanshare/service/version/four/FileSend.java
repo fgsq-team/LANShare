@@ -43,7 +43,7 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
 
     /** LAN 服务实例 */
     private final LANService lanService;
-    
+
     /** 任务队列,用于串行化文件发送任务 */
     private final ParameterizedTaskQueue<SendTask> taskQueue = new ParameterizedTaskQueue<>(this);
 
@@ -509,6 +509,7 @@ public class FileSend implements ParameterizedTaskQueue.TaskProcessor<SendTask> 
         @Override
         public void onProgress(FileTransfer fileTransfer, MessageFileContent fileItem) {
 //            LLog.debug("progress: " + progress);
+            fileItem.setStatus(MessageContent.IN);
             lanService.sendProgressMeg(fileItem);
         }
 

@@ -276,4 +276,18 @@
     <string name="no_new_media_to_sync">没有新的媒体文件需要同步</string>
     <string name="cancel_file_transfer_success">取消传输文件成功</string>
     <string name="file_send_failed">发送文件失败</string>
+    <string name="no_authorized_clients">暂无授权的客户端</string>
+    <string name="no_sync_devices">暂无同步设备</string>
+    <string name="file_sync_device_list">文件同步设备列表</string>
+    <string name="drawing">远程绘图</string>
+    <string name="web_sync">网页同步</string>
+    <string name="brush">画笔</string>
+    <string name="pick_color">选择颜色</string>
+    <string name="stroke_width">粗细</string>
+    <string name="device_prefix">设备: </string>
+    <string name="synced_with_device">已与 \"%s\" 同步绘图</string>
+    <string name="connecting">连接中...</string>
+    <string name="connected_to_device">已连接到设备: %s</string>
+    <string name="connect_device_failed">连接设备失败: %s</string>
+    <string name="clear_canvas">清除画布</string>
 </resources>

@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +21,7 @@ import com.fgsqw.lanshare.pojo.Token;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.NetWorkUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -31,26 +32,45 @@ public class WebClientManagerActivity extends BaseActivity implements View.OnCli
     private ItemAdapter itemAdapter;
     private TokenDBUtil tokenDBUtil;
     private ImageView webManagerExitImg;
-    private Button addButton;
+    private MaterialButton addButton;
+    private TextView webManagerTitle;
+    private LinearLayout emptyLayout;
+    private TextView emptyText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_manager);
         tokenDBUtil = new TokenDBUtil(this);
-        recyclerView = findViewById(R.id.web_manager_recy);
-        webManagerExitImg = findViewById(R.id.web_manager_exit_img);
-        addButton = findViewById(R.id.web_manager_add_button);
+        recyclerView = bind(R.id.web_manager_recy);
+        webManagerExitImg = bind(R.id.web_manager_exit_img);
+        addButton = bind(R.id.web_manager_add_button);
+        webManagerTitle = bind(R.id.web_manager_title);
+        emptyLayout = bind(R.id.web_manager_empty_layout);
+        emptyText = bind(R.id.web_manager_empty_text);
         itemList = generateItemList();
         itemAdapter = new ItemAdapter(itemList);
         webManagerExitImg.setOnClickListener(this);
         addButton.setOnClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(itemAdapter);
+        webManagerTitle.setText(getString(R.string.web_authorization_list));
+        updateEmptyState();
     }
 
     private List<Token> generateItemList() {
         return tokenDBUtil.queryList();
+    }
+
+    private void updateEmptyState() {
+        if (itemList.isEmpty()) {
+            emptyLayout.setVisibility(View.VISIBLE);
+            emptyText.setText(R.string.no_authorized_clients);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            emptyLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -71,6 +91,7 @@ public class WebClientManagerActivity extends BaseActivity implements View.OnCli
                 token.setIp(ip);
                 itemList.add(token);
                 itemAdapter.refresh();
+                updateEmptyState();
             });
             editTextDialog.setMaxLen(16).show();
         }
@@ -108,6 +129,7 @@ public class WebClientManagerActivity extends BaseActivity implements View.OnCli
             tokenDBUtil.delToken(token.getToken());
             itemList.remove(token);
             refresh();
+            updateEmptyState();
         }
 
         @SuppressLint("NotifyDataSetChanged")
@@ -117,7 +139,7 @@ public class WebClientManagerActivity extends BaseActivity implements View.OnCli
 
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView textView;
-            Button buttonDelete;
+            MaterialButton buttonDelete;
 
             ViewHolder(View itemView) {
                 super(itemView);

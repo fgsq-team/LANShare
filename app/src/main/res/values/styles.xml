@@ -208,7 +208,7 @@
         <item name="buttonTextColor">#FFFFFF</item>
         <item name="buttonRippleColor">#1B5E20</item>
         <item name="chatRightBackgroundColor">#2E7D32</item>
-        <item name="chatLeftBackgroundColor">#EDF7ED</item>
+        <item name="chatLeftBackgroundColor">#D8ECD8</item>
         <item name="chatRightTextColor">#FFFFFF</item>
         <item name="chatLeftTextColor">#1A1C1E</item>
         <item name="chatBackgroundColor">#F6FBF6</item>

@@ -39,7 +39,7 @@
 
     <!-- 聊天气泡 -->
     <color name="chatRightBackgroundColor">#5B8DEF</color>    <!-- 聊天气泡右边 (主色) -->
-    <color name="chatLeftBackgroundColor">#F0F2F8</color>     <!-- 聊天气泡左边 (浅灰) -->
+    <color name="chatLeftBackgroundColor">#E0E5F0</color>     <!-- 聊天气泡左边 (柔蓝灰，与聊天背景形成舒适对比) -->
     <color name="chatRightTextColor">#FFFFFF</color>           <!-- 右边气泡文字 -->
     <color name="chatLeftTextColor">#1A1C1E</color>            <!-- 左边气泡文字 -->
     <color name="chatBackgroundColor">#F8F9FE</color>          <!-- 聊天背景 -->

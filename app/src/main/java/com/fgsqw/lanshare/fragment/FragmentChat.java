@@ -46,6 +46,8 @@ import com.fgsqw.lanshare.service.RecvFileCallback;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
 import com.fgsqw.lanshare.db.MesssageDButil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +65,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         ChatAdapter.OnCheckedChangeListener {
 
     public final static String TAG = "FragChat";
+    private static final Logger logger = LoggerFactory.getLogger(FragmentChat.class);
     public DataCenterActivity dataCenterActivity;
     InputMethodManager mInputManager;
 
@@ -244,7 +247,6 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                 viewHolder.progressBar.setVisibility(View.VISIBLE);
                 viewHolder.stateTv.setVisibility(View.GONE);
                 viewHolder.stateTv.setTextColor(fileContent.isLeft() ? leftInfoColor : rightInfoColor);
-                fileContent.setStatus(MessageContent.IN);
             }
             viewHolder.progressBar.setProgress(fileContent.getProgress());
         } else {
@@ -551,31 +553,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         if (dataPosition == -1) return;
         if (fileContent.getViewType() == ChatAdapter.TYPE_FILE_MSG_LEFT || fileContent.getViewType() == ChatAdapter.TYPE_FILE_MSG_RIGHT
                 || fileContent.getViewType() == ChatAdapter.TYPE_MEDIA_MSG_LEFT || fileContent.getViewType() == ChatAdapter.TYPE_MEDIA_MSG_RIGHT) {
-            // 获取视图并更新视图数据
-            FileMsgHolder viewHolder = (FileMsgHolder) recyclerView.findViewHolderForAdapterPosition(dataPosition);
-            if (viewHolder != null) {
-                viewHolder.progressBar.setProgress(fileContent.getProgress());
-                if (fileContent.existStatus(MessageContent.IN)) {
-                    viewHolder.progressBar.setVisibility(View.VISIBLE);
-                    viewHolder.stateTv.setVisibility(View.GONE);
-                    viewHolder.stateTv.setTextColor(messageContent.isLeft() ? leftInfoColor : rightInfoColor);
-                } else {
-                    viewHolder.progressBar.setVisibility(View.GONE);
-                    viewHolder.stateTv.setVisibility(View.VISIBLE);
-                    viewHolder.stateTv.setText(fileContent.getStateMessage());
-                    if (fileContent.existStatus(MessageContent.SUCCESS)) {
-                        viewHolder.stateTv.setTextColor(fileContent.isLeft() ? leftSuccessColor : rightSuccessColor);
-                    } else if (fileContent.existStatus(MessageContent.ERROR)) {
-                        viewHolder.stateTv.setTextColor(errorColor);
-                    }
-                }
-            } /*else {
-                chatAdapter.notifyItemChanged(dataPosition);
-            }*/
-        } /*else {
-            chatAdapter.notifyItemChanged(dataPosition);
-        }*/
-        if (dataPosition != -1) {
+            // 直接通过notifyItemChanged触发onBindViewHolder重新绑定，避免直接操作View与rebind冲突
             chatAdapter.notifyItemChanged(dataPosition);
         }
     }

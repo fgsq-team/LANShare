@@ -83,8 +83,8 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
             currentMode = DrawSyncManager.SyncMode.DEVICE;
             drawingView.setSyncMode(DrawSyncManager.SyncMode.DEVICE);
             drawingView.setDrawSyncManager(sReceiverSyncManager);
-            modeBtn.setText("设备: " + deviceName);
-            T.s("已与 \"" + deviceName + "\" 同步绘图");
+            modeBtn.setText(getString(R.string.device_prefix) + deviceName);
+            T.s(getString(R.string.synced_with_device, deviceName));
         }
     }
 
@@ -154,8 +154,8 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
                 sInstance.currentMode = DrawSyncManager.SyncMode.DEVICE;
                 sInstance.drawingView.setSyncMode(DrawSyncManager.SyncMode.DEVICE);
                 sInstance.drawingView.setDrawSyncManager(manager);
-                sInstance.modeBtn.setText("设备: " + deviceName);
-                T.s("已与 \"" + deviceName + "\" 同步绘图");
+                sInstance.modeBtn.setText(sInstance.getString(R.string.device_prefix) + deviceName);
+                T.s(sInstance.getString(R.string.synced_with_device, deviceName));
             }
         });
     }
@@ -177,7 +177,7 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
                 sInstance.currentMode = DrawSyncManager.SyncMode.WEB;
                 sInstance.drawingView.setSyncMode(DrawSyncManager.SyncMode.WEB);
                 sInstance.drawingView.setDrawSyncManager(null);
-                sInstance.modeBtn.setText("网页同步");
+                sInstance.modeBtn.setText(sInstance.getString(R.string.web_sync));
             }
         });
     }
@@ -361,7 +361,7 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
         currentMode = DrawSyncManager.SyncMode.DEVICE;
         drawingView.setSyncMode(DrawSyncManager.SyncMode.DEVICE);
         drawingView.setDrawSyncManager(drawSyncManager);
-        modeBtn.setText("连接中...");
+        modeBtn.setText(R.string.connecting);
         drawSyncManager.connect(device);
     }
 
@@ -378,7 +378,7 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
             sReceiverSyncManager.disconnect();
             sReceiverSyncManager = null;
         }
-        modeBtn.setText("网页同步");
+        modeBtn.setText(getString(R.string.web_sync));
     }
 
     /**
@@ -388,13 +388,13 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
         drawSyncManager.setConnectionListener(new DrawSyncManager.ConnectionListener() {
             @Override
             public void onConnected(Device device) {
-                modeBtn.setText("设备: " + device.getDevName());
-                T.s("已连接到设备: " + device.getDevName());
+                modeBtn.setText(getString(R.string.device_prefix) + device.getDevName());
+                T.s(getString(R.string.connected_to_device, device.getDevName()));
             }
 
             @Override
             public void onConnectFailed(Device device, String error) {
-                T.s("连接设备失败: " + error);
+                T.s(getString(R.string.connect_device_failed, error));
                 switchToWebMode();
             }
 
@@ -405,7 +405,7 @@ public class DrawingActivity extends BaseActivity implements View.OnClickListene
                 currentMode = DrawSyncManager.SyncMode.WEB;
                 drawingView.setSyncMode(DrawSyncManager.SyncMode.WEB);
                 drawingView.setDrawSyncManager(null);
-                modeBtn.setText("网页同步");
+                modeBtn.setText(getString(R.string.web_sync));
             }
         });
     }

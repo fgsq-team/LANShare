@@ -178,10 +178,33 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
 
     @SuppressLint("SetTextI18n")
     private void loading(boolean refresh) {
-        tvCount.setText(getString(R.string.loading));
-        appSwipe.setRefreshing(true);
+        boolean hasCache = AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty();
+
+        // 如果有缓存数据且非强制刷新,直接展示
+        if (!refresh && hasCache) {
+            if (appAdapter != null) {
+                appAdapter.refresh();
+                tvCount.setText(AnyData.apkFileList.size() + " " + getString(R.string.applications));
+            }
+            return;
+        }
+
+        // 非刷新且无缓存时不加载(保持原始行为)
+        if (!refresh) {
+            return;
+        }
+
+        // 如果有缓存数据,先展示缓存(渐进式加载)
+        if (hasCache && appAdapter != null) {
+            appAdapter.refresh();
+            tvCount.setText(AnyData.apkFileList.size() + " " + getString(R.string.applications) + " " + getString(R.string.loading));
+        } else {
+            tvCount.setText(getString(R.string.loading));
+            appSwipe.setRefreshing(true);
+        }
+
         ThreadUtils.runThread(() -> {
-            DeviceDataScanner.scanInstalledApps(getContext(), refresh);
+            DeviceDataScanner.scanInstalledApps(getContext(), true);
             if (AnyData.apkFileList != null && !AnyData.apkFileList.isEmpty()) {
                 if (appAdapter != null) {
                     ThreadUtils.threadUi(() -> {
@@ -190,6 +213,11 @@ public class FragmentAppList extends BaseFragment implements AppAdapter.OnItemCl
                         appSwipe.setRefreshing(false);
                     });
                 }
+            } else {
+                ThreadUtils.threadUi(() -> {
+                    tvCount.setText("0 " + getString(R.string.applications));
+                    appSwipe.setRefreshing(false);
+                });
             }
         });
     }
