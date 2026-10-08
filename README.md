@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Android-4.4.2%2B-green.svg)]()
-[![Version](https://img.shields.io/badge/version-1.2.9.3-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-1.3.0-orange.svg)]()
 
 LANShare 是一款运行在 Android 平台上的局域网文件传输工具。只需处于同一局域网内，即可自动发现设备并实现文件、消息、媒体等内容的快速互传，无需手动输入 IP 地址，操作简洁、上手即用。
 
@@ -28,9 +28,9 @@ LANShare 是一款运行在 Android 平台上的局域网文件传输工具。�
 
 ## 效果图
 
-| 应用选择 | 媒体选择 | 文件选择 | 选择设备发送 | 文件传输 |
+| 传输记录 | 软件选择 | 图片选择 | 选择设备 | 应用设置 |
 |:---:|:---:|:---:|:---:|:---:|
-| ![应用选择](img/1.jpg) | ![媒体选择](img/2.jpg) | ![文件选择](img/3.jpg) | ![选择设备发送](img/4.jpg) | ![文件传输](img/5.jpg) |
+| ![传输记录](img/1.jpg) | ![软件选择](img/2.jpg) | ![图片选择](img/3.jpg) | ![选择设备](img/4.jpg) | ![应用设置](img/5.jpg) |
 
 ## 技术原理
 

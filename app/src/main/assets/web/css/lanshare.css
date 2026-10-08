@@ -897,27 +897,7 @@ html, body {
     cursor: pointer
 }
 
-.nav-drawer > li > a > i {
-    width: 20px;
-    height: 20px;
-    background-size: cover
-}
-
-.nav-item-media-apps {
-    background-image: url('/images/apps.png')
-}
-
-.nav-item-media-img {
-    background-image: url('/images/img.png')
-}
-
-.nav-item-media-folder {
-    background-image: url('/images/folder.png')
-}
-
-.nav-item-media-record {
-    background-image: url('/images/record.png')
-}
+/* 菜单图标已替换为内联 SVG，不再需要 PNG 背景图 */
 
 .topbar .dropdown.dropdown-skin {
     list-style: none;

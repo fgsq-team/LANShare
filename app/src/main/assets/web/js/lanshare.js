@@ -165,16 +165,26 @@ function updateWebName() {
 // 侧边栏导航
 // ============================================================
 
+// 统一风格的 Material Design Outlined SVG 图标
+var NAV_ICONS = {
+    apps: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4.5v4.5H4V4zm0 7.5h4.5V16H4v-4.5zm7.5-7.5H16v4.5h-4.5V4zm0 7.5H16V16h-4.5v-4.5zM16 4h4.5v4.5H16V4zm0 7.5h4.5V16H16v-4.5zM4 16h4.5v4.5H4V16zm7.5 0H16v4.5h-4.5V16z"/></svg>',
+    media: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5zm2 2v8.5l4-3.2 4 3.2 3-2.4V7H6zm3.5 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>',
+    files: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5v14h16V7h-8.5L10 5H4zm2 2h3.5l1.5 2H18v8H6V7z"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v12H7.5L4 19.5V4zm2 2v8h12V6H6zm2.5 2.5h7v1.5h-7V8.5zm0 3h5v1.5h-5v-1.5z"/></svg>',
+    draw: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 18.5h3l9.3-9.3-3-3L4 15.5v3zm1.2 1L3 21.5l2-1.2-.5-.5-.3.7zm13.1-13.6a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0l-1.8 1.8 3 3 1.8-1.8z"/></svg>'
+};
+
 function buildSidebar(menus) {
     var $nav = $('#sidebarNav');
     $nav.empty();
     menuKeys = [];
     menus.forEach(function (menu) {
         menuKeys.push(menu.key);
+        var iconSvg = NAV_ICONS[menu.key] || '';
         $nav.append(
             '<li class="nav-item nav-item-' + menu.key + '" data-page="' + menu.key + '">' +
             '<a href="javascript:;" onclick="navTo(\'' + menu.key + '\')">' +
-            '<i class="' + menu.icon + '"></i>' +
+            '<span class="nav-icon">' + iconSvg + '</span>' +
             '<span class="nav-text">' + menu.text + '</span>' +
             '</a></li>'
         );
