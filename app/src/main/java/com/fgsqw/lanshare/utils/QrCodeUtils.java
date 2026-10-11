@@ -18,8 +18,9 @@ public class QrCodeUtils {
         Map<EncodeHintType, Object> map = new HashMap<>();
         //   设置容错率 L>M>Q>H  等级越高扫描时间越长,准确率越高
         map.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
-        //设置字符集
-        map.put(EncodeHintType.CHARACTER_SET, FileUtil.UTF_8);
+        //设置字符集（必须传字符集名称字符串；ZXing 内部会对其 toString()，
+        //   直接传 Charset 对象在 Android 4.4 上会得到 "java.nio.charset.CharsetICU[UTF-8]" 导致 UnsupportedEncodingException）
+        map.put(EncodeHintType.CHARACTER_SET, FileUtil.UTF_8.name());
         //设置外边距
         map.put(EncodeHintType.MARGIN, 1);
         //利用编码器，生成二维码

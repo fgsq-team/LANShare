@@ -86,9 +86,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     // 消息列表
     private final List<MessageContent> messageContentList = new ArrayList<>();
     private final List<MessageContent> checkedMessageList = new ArrayList<>();
-    private int leftSuccessColor;
-    private int rightSuccessColor;
-    private int errorColor;
+
     private int leftInfoColor;
     private int rightInfoColor;
     // 选中的设备
@@ -128,9 +126,6 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         messsageDButil = new MesssageDButil(context);
         Config.lastMessageTime = messsageDButil.getLastMessageTime();
         tokenDBUtil = new TokenDBUtil(context);
-        leftSuccessColor = resolveThemeAttr(R.attr.chatLeftSuccessColor);
-        rightSuccessColor = resolveThemeAttr(R.attr.chatRightSuccessColor);
-        errorColor = resolveThemeAttr(R.attr.errorTextColor);
         leftInfoColor = resolveThemeAttr(R.attr.chatLeftInfoTextColor);
         rightInfoColor = resolveThemeAttr(R.attr.chatRightInfoTextColor);
         super.onAttach(context);
@@ -411,10 +406,99 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     @Override
     public void onItemCheckedChanged(boolean check, MessageContent messageContent, int position) {
         if (check) {
-            checkedMessageList.add(messageContent);
+            if (!checkedMessageList.contains(messageContent)) {
+                checkedMessageList.add(messageContent);
+            }
         } else {
             checkedMessageList.remove(messageContent);
         }
+        dataCenterActivity.updateDeleteSelectionCount();
+    }
+
+    /**
+     * 可选中消息总数（排除时间分隔项）
+     */
+    public int getSelectableCount() {
+        int count = 0;
+        for (MessageContent content : messageContentList) {
+            if (content.getViewType() != ChatAdapter.TYPE_TIME_MSG) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 当前已选中数量
+     */
+    public int getCheckedCount() {
+        return checkedMessageList.size();
+    }
+
+    /**
+     * 是否已全选
+     */
+    public boolean isAllSelected() {
+        int total = getSelectableCount();
+        return total > 0 && checkedMessageList.size() >= total;
+    }
+
+    /**
+     * 选中全部消息
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    public void selectAllMessages() {
+        checkedMessageList.clear();
+        for (MessageContent content : messageContentList) {
+            if (content.getViewType() != ChatAdapter.TYPE_TIME_MSG) {
+                content.setChecked(true);
+                checkedMessageList.add(content);
+            }
+        }
+        chatAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 取消选中全部消息
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    public void deselectAllMessages() {
+        for (MessageContent content : messageContentList) {
+            content.setChecked(false);
+        }
+        checkedMessageList.clear();
+        chatAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 全选 / 取消全选 切换
+     */
+    public void toggleSelectAll() {
+        if (isAllSelected()) {
+            deselectAllMessages();
+        } else {
+            selectAllMessages();
+        }
+        dataCenterActivity.updateDeleteSelectionCount();
+    }
+
+    /**
+     * 清空选中状态（不刷新列表）
+     */
+    public void clearSelection() {
+        for (MessageContent content : messageContentList) {
+            content.setChecked(false);
+        }
+        checkedMessageList.clear();
+    }
+
+    /**
+     * 退出多选删除模式
+     */
+    public void exitCheckMode() {
+        chatAdapter.setCheckMode(false);
+        clearSelection();
+        dataCenterActivity.setDeleteMode(false);
     }
 
     /**
@@ -631,8 +715,7 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
     @Override
     public boolean onBack() {
         if (chatAdapter.isCheckMode()) {
-            chatAdapter.setCheckMode(false);
-            dataCenterActivity.setDeleteMode(false);
+            exitCheckMode();
             return true;
         }
         if (editContent.isFocused()) {

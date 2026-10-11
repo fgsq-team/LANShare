@@ -159,12 +159,7 @@ public class DeviceDialogAdapter extends RecyclerView.Adapter<DeviceDialogAdapte
             holder.tvBattery.setText(device.getBatteryLevel() + "%");
             holder.tvBattery.setTextColor(ContextCompat.getColor(context, batteryColor));
             // 电量
-            Glide
-                    .with(context)
-                    .load(batteryDrawable)
-                    .centerCrop()
-                    .placeholder(R.drawable.ic_null)
-                    .into(holder.mBattery);
+            holder.mBattery.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(context, batteryDrawable));
         } else {
             holder.tvBattery.setVisibility(View.GONE);
             holder.mBattery.setVisibility(View.GONE);

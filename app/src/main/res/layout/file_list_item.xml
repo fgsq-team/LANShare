@@ -86,7 +86,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_image_un_select" />
+                app:srcCompat="@drawable/ic_image_un_select" />
 
         </LinearLayout>
 

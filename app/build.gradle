@@ -7,8 +7,8 @@ android {
         applicationId "com.fgsqw.lanshare"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2601007
-        versionName "1.3.0"
+        versionCode 2601009
+        versionName "1.3.1_dev"
         vectorDrawables.useSupportLibrary = true
     }
 

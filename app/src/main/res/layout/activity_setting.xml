@@ -27,7 +27,7 @@
                 android:id="@+id/setting_exit_img"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="2dp"

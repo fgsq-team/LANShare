@@ -70,7 +70,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="12dp"
                     android:layout_marginRight="12dp"
-                    android:src="@drawable/rc_file_icon_file" />
+                    app:srcCompat="@drawable/rc_file_icon_file" />
 
                 <RelativeLayout
                     android:layout_width="wrap_content"

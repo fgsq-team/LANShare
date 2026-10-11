@@ -91,8 +91,8 @@ public class ReviewImages extends BaseActivity {
         //  isSingle = intent.getBooleanExtra(ImageSelector.IS_SINGLE, false);
 
         Resources resources = getResources();
-        mSelectDrawable = drawableToBitmapDrawable(resources, ContextCompat.getDrawable(this, R.drawable.ic_image_select));
-        mUnSelectDrawable = drawableToBitmapDrawable(resources, ContextCompat.getDrawable(this, R.drawable.ic_image_un_select));
+        mSelectDrawable = drawableToBitmapDrawable(resources, androidx.appcompat.content.res.AppCompatResources.getDrawable(this, R.drawable.ic_image_select));
+        mUnSelectDrawable = drawableToBitmapDrawable(resources, androidx.appcompat.content.res.AppCompatResources.getDrawable(this, R.drawable.ic_image_un_select));
 
         setStatusBarColor();
         initView();

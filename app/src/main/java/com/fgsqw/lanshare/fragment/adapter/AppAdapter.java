@@ -143,7 +143,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ViewHolder> {
      */
     private void setItemSelect(ViewHolder holder, boolean isSelect) {
         if (isSelect) {
-            holder.mSelect.setImageResource(R.drawable.ic_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_select));
             holder.contentLayout.setAlpha(0.3f);
         } else {
             holder.mSelect.setImageResource(R.drawable.ic_null);

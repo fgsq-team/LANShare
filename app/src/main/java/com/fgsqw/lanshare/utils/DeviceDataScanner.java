@@ -262,7 +262,9 @@ public class DeviceDataScanner {
                         audioInfo.setName(name);
                         audioInfo.setMediaId(mediaId);
                         audioInfo.setPath(path);
-                        audioInfo.setTime(time);
+                        // MediaStore.DATE_ADDED 单位为秒，而 MessageFileContent.time 约定为毫秒，
+                        // 需按位数自适应转换，否则会被当作 1970 年附近的日期显示
+                        audioInfo.setTime(time < 100_000_000_000L ? time * 1000L : time);
                         audioInfo.setLength(length);
                         audioInfo.setAudioTime(formatDuration(duration));
                         audioList.add(audioInfo);

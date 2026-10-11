@@ -47,22 +47,96 @@
             <LinearLayout
                 android:id="@+id/bottom_delete_message"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:background="?attr/colorAccent"
-                android:gravity="center"
-                android:orientation="horizontal"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorSurface"
+                android:elevation="16dp"
+                android:orientation="vertical"
+                android:paddingBottom="8dp"
                 android:visibility="gone">
 
-                <ImageView
-                    android:id="@+id/bottom_delete_message_image"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/baseline_delete_black_48"
-                    android:tint="@android:color/white"
-                    tools:ignore="UseAppTint" />
+                <TextView
+                    android:id="@+id/bottom_delete_count"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="20dp"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="4dp"
+                    android:text="已选 0 项"
+                    android:textColor="?attr/toolbarTextColor"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="6dp"
+                    android:paddingLeft="6dp"
+                    android:paddingEnd="12dp"
+                    android:paddingRight="12dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/bottom_delete_cancel"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="取消"
+                        android:textAllCaps="false"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="15sp" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/bottom_delete_select_all"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="全选"
+                        android:textAllCaps="false"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="15sp" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/bottom_delete_message_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingStart="14dp"
+                        android:paddingLeft="14dp"
+                        android:paddingEnd="16dp"
+                        android:paddingRight="16dp"
+                        android:paddingTop="9dp"
+                        android:paddingBottom="9dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="删除"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        app:backgroundTint="?attr/errorTextColor"
+                        app:cornerRadius="10dp"
+                        app:icon="@drawable/baseline_delete_black_48"
+                        app:iconGravity="textStart"
+                        app:iconPadding="4dp"
+                        app:iconSize="18dp"
+                        app:iconTint="@android:color/white" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

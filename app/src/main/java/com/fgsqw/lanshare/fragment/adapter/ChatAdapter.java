@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -117,9 +118,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             fileMsgHolder.content.setText(messageFileContent.getContent());
             fileMsgHolder.tvSize.setText(FileUtil.computeSize(messageFileContent.getLength()));
             if (messageFileContent.getFileType() == MessageFileContent.FILE_TYPE_FOLDER) {
-                fileMsgHolder.fileTypeIcon.setImageResource(R.drawable.rc_file_blue_icon);
+                fileMsgHolder.fileTypeIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, R.drawable.rc_file_blue_icon));
             } else {
-                fileMsgHolder.fileTypeIcon.setImageResource(R.drawable.rc_file_icon_file);
+                fileMsgHolder.fileTypeIcon.setImageDrawable(AppCompatResources.getDrawable(mContext, R.drawable.rc_file_icon_file));
             }
             boolean status = !messageFileContent.existStatus(MessageContent.IN);
             fileMsgHolder.progressBar.setVisibility(status ? View.GONE : View.VISIBLE);
@@ -183,19 +184,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }*/ else {
             MsgHolder msgHolder = (MsgHolder) absMsgHolder;
             if (msgHolder.checkBox != null) {
-                msgHolder.checkBox.setOnClickListener(v -> {
-                    messageContent.setChecked(msgHolder.checkBox.isChecked());
-                    if (mCheckedChangeListener != null) {
-                        mCheckedChangeListener.onItemCheckedChanged(msgHolder.checkBox.isChecked(), messageContent, position);
-                    }
-                });
+                // checkbox 仅作为选中状态指示，点击由整条 item 统一处理，避免重复触发
+                msgHolder.checkBox.setClickable(false);
+                msgHolder.checkBox.setFocusable(false);
             } else {
                 messageContent.setChecked(false);
             }
         }
         viewHolder.itemView.setOnClickListener((v) -> {
-            if (mListener != null)
+            if (checkMode) {
+                // 多选模式下点击 item 任意位置切换选中状态
+                if (absMsgHolder instanceof MsgHolder) {
+                    MsgHolder msgHolder = (MsgHolder) absMsgHolder;
+                    if (msgHolder.checkBox != null) {
+                        boolean newCheck = !messageContent.isChecked();
+                        messageContent.setChecked(newCheck);
+                        msgHolder.checkBox.setChecked(newCheck);
+                        if (mCheckedChangeListener != null) {
+                            mCheckedChangeListener.onItemCheckedChanged(newCheck, messageContent, position);
+                        }
+                    }
+                }
+            } else if (mListener != null) {
                 mListener.onItemClick(messageContent, position);
+            }
         });
         viewHolder.itemView.setOnLongClickListener((v) -> {
             if (mLongListener != null)

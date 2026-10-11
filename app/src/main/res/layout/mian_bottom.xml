@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_nar_layout"
     android:layout_width="match_parent"
@@ -17,7 +18,7 @@
         android:layout_weight="1.0"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        android:foreground="?android:attr/selectableItemBackground"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingTop="8dp"
@@ -28,8 +29,8 @@
             android:id="@+id/img_record"
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:src="@drawable/ic_record"
-            android:tint="?attr/bottomTextColor"
+            app:srcCompat="@drawable/ic_record"
+            app:tint="?attr/bottomTextColor"
             tools:ignore="UseAppTint" />
 
         <TextView
@@ -51,7 +52,7 @@
         android:layout_weight="1.0"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        android:foreground="?android:attr/selectableItemBackground"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingTop="8dp"
@@ -62,8 +63,8 @@
             android:id="@+id/img_send"
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:src="@drawable/ic_send"
-            android:tint="?attr/colorAccent"
+            app:srcCompat="@drawable/ic_send"
+            app:tint="?attr/colorAccent"
             tools:ignore="UseAppTint" />
 
         <TextView
@@ -84,7 +85,7 @@
         android:layout_weight="1.0"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        android:foreground="?android:attr/selectableItemBackground"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingTop="8dp"
@@ -96,8 +97,8 @@
             android:id="@+id/img_files"
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:src="@drawable/ic_file"
-            android:tint="?attr/bottomTextColor"
+            app:srcCompat="@drawable/ic_file"
+            app:tint="?attr/bottomTextColor"
             tools:ignore="UseAppTint" />
 
         <TextView

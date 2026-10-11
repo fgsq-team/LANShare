@@ -46,6 +46,7 @@ import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.service.MusicService;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
+import com.google.android.material.button.MaterialButton;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -90,7 +91,10 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
     private LinearLayout bottomLayout;
     private LinearLayout bottomBottomMenu;
     private LinearLayout bottomDeleteMessage;
-    private ImageView bottomDeleteMessageImage;
+    private MaterialButton bottomDeleteMessageImage;
+    private TextView bottomDeleteCancel;
+    private TextView bottomDeleteSelectAll;
+    private TextView bottomDeleteCount;
     private final List<BaseFragment> fragmentList = new ArrayList<>();
     private static BaseFragment currentFragment;
     // 文件
@@ -319,6 +323,9 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         bottomBottomMenu = bind(R.id.bottom_bottom_menu);
         bottomDeleteMessage = bind(R.id.bottom_delete_message);
         bottomDeleteMessageImage = bind(R.id.bottom_delete_message_image);
+        bottomDeleteCancel = bind(R.id.bottom_delete_cancel);
+        bottomDeleteSelectAll = bind(R.id.bottom_delete_select_all);
+        bottomDeleteCount = bind(R.id.bottom_delete_count);
 
         bottomRecord.requestFocus();
         mainToobar = bind(R.id.main_toolbar);
@@ -337,6 +344,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         mainIp.setOnLongClickListener(this);
         webSwitch.setOnCheckedChangeListener(this);
         bottomDeleteMessageImage.setOnClickListener(this);
+        bottomDeleteCancel.setOnClickListener(this);
+        bottomDeleteSelectAll.setOnClickListener(this);
     }
 
 
@@ -557,6 +566,12 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
             case R.id.bottom_delete_message_image:
                 fragmentChat.deleteSelectedMessages();
                 break;
+            case R.id.bottom_delete_cancel:
+                fragmentChat.exitCheckMode();
+                break;
+            case R.id.bottom_delete_select_all:
+                fragmentChat.toggleSelectAll();
+                break;
             default:
                 break;
         }
@@ -573,10 +588,26 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         if (deleteMode) {
             bottomDeleteMessage.setVisibility(View.VISIBLE);
             bottomBottomMenu.setVisibility(View.GONE);
+            fragmentChat.clearSelection();
+            updateDeleteSelectionCount();
         } else {
             bottomDeleteMessage.setVisibility(View.GONE);
             bottomBottomMenu.setVisibility(View.VISIBLE);
         }
+    }
+
+    /**
+     * 刷新多选删除栏的选中数量与全选按钮文案
+     */
+    @SuppressLint("SetTextI18n")
+    public void updateDeleteSelectionCount() {
+        if (bottomDeleteMessage == null || bottomDeleteMessage.getVisibility() != View.VISIBLE) {
+            return;
+        }
+        int checked = fragmentChat.getCheckedCount();
+        bottomDeleteCount.setText("已选 " + checked + " 项");
+        bottomDeleteSelectAll.setText(fragmentChat.isAllSelected() ? "取消全选" : "全选");
+        bottomDeleteMessageImage.setEnabled(checked > 0);
     }
 
     /**

@@ -103,7 +103,7 @@
                     android:padding="8dp"
                     android:saveEnabled="false"
                     android:scaleType="centerInside"
-                    android:src="@drawable/ic_send_white" />
+                    app:srcCompat="@drawable/ic_send_white" />
 
             </LinearLayout>
 

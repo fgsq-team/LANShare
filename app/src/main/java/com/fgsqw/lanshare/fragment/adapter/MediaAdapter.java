@@ -180,10 +180,10 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder> 
      */
     private void setItemSelect(ViewHolder holder, boolean isSelect) {
         if (isSelect) {
-            holder.ivSelectIcon.setImageResource(R.drawable.ic_image_select);
+            holder.ivSelectIcon.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.ivSelectIcon.getContext(), R.drawable.ic_image_select));
             holder.ivMasking.setAlpha(0.5f);//设置imageview透明度
         } else {
-            holder.ivSelectIcon.setImageResource(R.drawable.ic_image_un_select);
+            holder.ivSelectIcon.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.ivSelectIcon.getContext(), R.drawable.ic_image_un_select));
             holder.ivMasking.setAlpha(0.2f);//设置imageview透明度
         }
     }

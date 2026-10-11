@@ -80,7 +80,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
                 nam.setText(musicService.getName());
                 stop.setText(musicService.getTotalTime());
                 seekbar.setMax(musicService.getDuration());
-                play.setImageResource(R.drawable.pause);
+                play.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(play.getContext(), R.drawable.pause));
                 isPlaying = true;
             }
             // 注册播放进度监听器，用于更新播放进度
@@ -92,7 +92,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
                         nam.setText(name);
                         stop.setText(endTime);
                         seekbar.setMax(duration);
-                        play.setImageResource(R.drawable.pause);
+                        play.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(play.getContext(), R.drawable.pause));
                     });
 
                 }
@@ -100,7 +100,7 @@ public class FragmentMusic extends BaseFragment implements View.OnClickListener 
                 @Override
                 public void onPause() {
                     ThreadUtils.threadUi(() -> {
-                        play.setImageResource(R.drawable.play);
+                        play.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(play.getContext(), R.drawable.play));
                     });
                 }
 

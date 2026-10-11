@@ -84,10 +84,10 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
      */
     private void setItemSelect(FileAdapter.ViewHolder holder, boolean isSelect) {
         if (isSelect) {
-            holder.mSelect.setImageResource(R.drawable.ic_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_select));
             holder.layout.setAlpha(0.3f);
         } else {
-            holder.mSelect.setImageResource(R.drawable.ic_image_un_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_image_un_select));
             holder.layout.setAlpha(1f);
         }
     }

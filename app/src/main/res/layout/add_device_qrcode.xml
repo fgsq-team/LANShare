@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="16dp"
     tools:ignore="UseCompoundDrawables">
 
     <!-- 标题 -->
@@ -42,8 +42,11 @@
 
         <ImageView
             android:id="@+id/qr_code"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:maxWidth="200dp"
+            android:maxHeight="200dp"
             android:padding="12dp"
             android:scaleType="fitCenter" />
 

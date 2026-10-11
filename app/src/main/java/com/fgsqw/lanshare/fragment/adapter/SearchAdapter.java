@@ -65,7 +65,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     .into(holder.mImg);
             holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
         } else if (fileType == MessageFileContent.FILE_TYPE_AUDIO) {
-            holder.mImg.setImageResource(R.drawable.ic_music);
+            holder.mImg.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mImg.getContext(), R.drawable.ic_music));
             holder.mInfo.setText(FileUtil.computeSize(fileInfo.getLength()));
         } else if (fileType == MessageFileContent.FILE_TYPE_IMAGE || fileType == MessageFileContent.FILE_TYPE_VIDEO) {
             MessageMediaContent mediaInfo = (MessageMediaContent) fileInfo;
@@ -116,10 +116,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
      */
     private void setItemSelect(SearchAdapter.ViewHolder holder, boolean isSelect) {
         if (isSelect) {
-            holder.mSelect.setImageResource(R.drawable.ic_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_select));
             holder.layout.setAlpha(0.3f);
         } else {
-            holder.mSelect.setImageResource(R.drawable.ic_image_un_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_image_un_select));
             holder.layout.setAlpha(1f);
         }
     }

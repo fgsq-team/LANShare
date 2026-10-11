@@ -64,7 +64,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
         }
 */
 
-        holder.mImg.setImageResource(R.drawable.ic_music);
+        holder.mImg.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mImg.getContext(), R.drawable.ic_music));
 
         setItemSelect(holder, isSelect(fileSource));
 
@@ -87,10 +87,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
      */
     private void setItemSelect(MusicAdapter.ViewHolder holder, boolean isSelect) {
         if (isSelect) {
-            holder.mSelect.setImageResource(R.drawable.ic_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_select));
             holder.layout.setAlpha(0.3f);
         } else {
-            holder.mSelect.setImageResource(R.drawable.ic_image_un_select);
+            holder.mSelect.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(holder.mSelect.getContext(), R.drawable.ic_image_un_select));
             holder.layout.setAlpha(1f);
         }
     }
