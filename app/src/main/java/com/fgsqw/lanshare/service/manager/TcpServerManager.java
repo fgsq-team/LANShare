@@ -17,6 +17,7 @@ import com.fgsqw.lanshare.service.CustomDataInputStream;
 import com.fgsqw.lanshare.service.CustomDataOutputStream;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.service.version.four.FileServer;
+import com.fgsqw.lanshare.service.version.five.FileServerV5;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.*;
 import org.slf4j.Logger;
@@ -58,6 +59,9 @@ public class TcpServerManager {
     /** 文件服务器 */
     private final FileServer fileServer;
 
+    /** V5 文件服务器(断点续传, 独立 NEW_VERSION_5 协议链) */
+    private final FileServerV5 fileServerV5;
+
     /** TCP 服务器 Socket */
     private ServerSocket fileReceive;
 
@@ -70,11 +74,13 @@ public class TcpServerManager {
      * @param service       LAN 服务实例
      * @param deviceManager 设备管理器
      * @param fileServer    文件服务器
+     * @param fileServerV5  V5 文件服务器
      */
-    public TcpServerManager(LANService service, DeviceManager deviceManager, FileServer fileServer) {
+    public TcpServerManager(LANService service, DeviceManager deviceManager, FileServer fileServer, FileServerV5 fileServerV5) {
         this.service = service;
         this.deviceManager = deviceManager;
         this.fileServer = fileServer;
+        this.fileServerV5 = fileServerV5;
     }
 
     /**
@@ -143,12 +149,14 @@ public class TcpServerManager {
             int cmd = input.readInt();
             DataDec dataDec = null;
             Device device;
-            if (cmd == LCmd.NEW_VERSION_4) {
+            if (cmd == LCmd.NEW_VERSION_4 || cmd == LCmd.NEW_VERSION_5) {
+                // V4/V5 握手:后续为设备 JSON,再分发到各自版本的 handleVersion
                 String deviceJson = input.readString();
                 device = new Device();
                 device.fromJsonString(JSON.parseObject(deviceJson));
-                if (device.getDataVersion() < LVersion.DATA_VERSION_4) {
-                    device.setDataVersion(LVersion.DATA_VERSION_4);
+                int minVersion = cmd == LCmd.NEW_VERSION_5 ? LVersion.DATA_VERSION_5 : LVersion.DATA_VERSION_4;
+                if (device.getDataVersion() < minVersion) {
+                    device.setDataVersion(minVersion);
                 }
             } else {
                 new DataEnc(buffer).setCmd(cmd);
@@ -209,6 +217,17 @@ public class TcpServerManager {
                     fileServer.handleVersion1(device, client, inputStream, outputStream);
                 } catch (Exception e) {
                     logger.error("handleVersion error", e);
+                }
+            });
+        } else if (cmd == LCmd.NEW_VERSION_5) {
+            // V5 断点续传协议:独立握手与命令分发,不经过 V4
+            CustomDataInputStream inputStream = new CustomDataInputStream(input);
+            CustomDataOutputStream outputStream = new CustomDataOutputStream(out);
+            ThreadUtils.runThread(() -> {
+                try {
+                    fileServerV5.handleVersion(device, client, inputStream, outputStream);
+                } catch (Exception e) {
+                    logger.error("handleVersion V5 error", e);
                 }
             });
         } else if (device.getDataVersion() < LVersion.DATA_VERSION_4) {

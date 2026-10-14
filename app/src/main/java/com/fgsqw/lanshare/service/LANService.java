@@ -24,6 +24,7 @@ import com.fgsqw.lanshare.receiver.NetWorkReceiver;
 import com.fgsqw.lanshare.service.manager.DeviceManager;
 import com.fgsqw.lanshare.service.manager.FileTransferManager;
 import com.fgsqw.lanshare.service.manager.TcpServerManager;
+import com.fgsqw.lanshare.service.version.five.FileServerV5;
 import com.fgsqw.lanshare.service.manager.UdpServerManager;
 import com.fgsqw.lanshare.service.version.four.FileSend;
 import com.fgsqw.lanshare.service.version.four.FileServer;
@@ -89,6 +90,9 @@ public class LANService extends BaseService {
 
     /** 文件服务器 */
     private FileServer fileServer;
+
+    /** V5 文件服务器(断点续传, 独立 NEW_VERSION_5 协议链) */
+    private FileServerV5 fileServerV5;
 
     /** 文件发送器 */
     private FileSend fileSend;
@@ -172,11 +176,12 @@ public class LANService extends BaseService {
 
         // 初始化文件服务
         fileServer = new FileServer(this);
+        fileServerV5 = new FileServerV5(this);
         fileSend = new FileSend(this);
 
         // 初始化管理器
         deviceManager = new DeviceManager(this, this);
-        tcpServerManager = new TcpServerManager(this, deviceManager, fileServer);
+        tcpServerManager = new TcpServerManager(this, deviceManager, fileServer, fileServerV5);
         udpServerManager = new UdpServerManager(this, deviceManager);
         fileTransferManager = new FileTransferManager(this, deviceManager, fileSend, mediaIdPathDBUtil);
     }
@@ -306,7 +311,8 @@ public class LANService extends BaseService {
         messageSend(mMessage);
         if (Config.SAVE_MESSAGE) {
             checkAndAddChatTime(messageFileContents.get(0).getId());
-            messsageDButil.addListMessage(messageFileContents);
+            // V5 断点续传: id 为稳定 fileId, 已存在则更新原记录而不新增
+            messsageDButil.addOrUpdateListMessage(messageFileContents);
         }
     }
 

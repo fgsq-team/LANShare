@@ -1,18 +1,9 @@
 package com.fgsqw.lanshare.service.version.four;
 
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fgsqw.lanshare.App;
-import com.fgsqw.lanshare.R;
-import com.fgsqw.lanshare.activity.DrawingActivity;
-import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.config.Config;
 import com.fgsqw.lanshare.config.PreConfig;
 import com.fgsqw.lanshare.constants.LCmd;
@@ -23,11 +14,9 @@ import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
 import com.fgsqw.lanshare.service.CustomDataInputStream;
 import com.fgsqw.lanshare.service.CustomDataOutputStream;
-import com.fgsqw.lanshare.service.DrawSyncManager;
 import com.fgsqw.lanshare.service.LANService;
 import com.fgsqw.lanshare.service.RecvFileCallback;
-import com.fgsqw.lanshare.toast.T;
-import com.fgsqw.lanshare.utils.AESUtils;
+import com.fgsqw.lanshare.service.version.SyncFeatureHandler;
 import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.StringUtils;
@@ -91,148 +80,15 @@ public class FileServer {
             case LCmd.FS_SHARE_FILE: // 文件传输
                 handleFileTransfer(device, socket, inputStream, outputStream);
                 break;
-            case LCmd.FS_MESSAGE: // 接收消息
-                handleMessage(device, socket, inputStream);
+            case LCmd.FS_MESSAGE: // 接收消息(V4/V5 共用扩展功能)
+                SyncFeatureHandler.handleMessage(lanService, device, socket, inputStream);
                 break;
-            case LCmd.FS_GET_NO_SYNC_MEDIA: // 媒体同步
-                handleMediaSync(device, socket, inputStream, outputStream);
+            case LCmd.FS_GET_NO_SYNC_MEDIA: // 媒体同步(V4/V5 共用扩展功能)
+                SyncFeatureHandler.handleMediaSync(lanService, device, socket, inputStream, outputStream);
                 break;
-            case LCmd.FS_DRAW_SYNC_REQUEST: // 远程绘图同步请求（长连接）
-                handleDrawSync(device, socket, inputStream, outputStream);
+            case LCmd.FS_DRAW_SYNC_REQUEST: // 远程绘图同步请求（长连接，V4/V5 共用扩展功能）
+                SyncFeatureHandler.handleDrawSync(lanService, device, socket, inputStream, outputStream);
                 break;
-        }
-    }
-
-    /**
-     * 处理消息接收
-     *
-     * @param device      发送方设备
-     * @param socket      Socket 连接
-     * @param inputStream 输入流
-     * @throws IOException 如果发生 I/O 错误
-     */
-    public void handleMessage(Device device, Socket socket, CustomDataInputStream inputStream) throws IOException {
-        // 是否写入剪切板
-        boolean isClip = inputStream.readBoolean();
-        String messageEnc = inputStream.readString();
-        logger.debug("tcp message: {}", messageEnc);
-        try {
-            String message = AESUtils.decrypt(messageEnc, Config.MESSAGE_KEY);
-            MessageContent content = new MessageContent();
-            content.setId(StringUtils.getUUID());
-            content.setStatus(MessageContent.SUCCESS);
-            content.setUserName(device.getDevName());
-            content.setContent(message);
-            content.setLeft(true);
-            if (isClip) {
-                // 写入剪贴板
-                ClipboardManager cb = (ClipboardManager) lanService.getSystemService(Context.CLIPBOARD_SERVICE);
-                cb.setPrimaryClip(ClipData.newPlainText("text", message));
-                T.s((R.string.copy_text_to_clipboard_successful));
-            }
-            lanService.addMessage(content);
-        } catch (Exception e) {
-            logger.error("message decrypt error:", e);
-            T.s((R.string.message_decryption_failed));
-        } finally {
-            IOUtil.closeIO(socket);
-        }
-    }
-
-    /**
-     * 处理媒体同步请求
-     *
-     * @param device       发送方设备
-     * @param socket       Socket 连接
-     * @param inputStream  输入流
-     * @param outputStream 输出流
-     * @throws IOException 如果发生 I/O 错误
-     */
-    public void handleMediaSync(Device device, Socket socket, CustomDataInputStream inputStream, CustomDataOutputStream outputStream) throws IOException {
-        String mediaSyncJson = inputStream.readString();
-        JSONArray mediaIdArray = JSON.parseArray(mediaSyncJson);
-        JSONArray resultArray = new JSONArray();
-        for (int i = 0; i < mediaIdArray.size(); i++) {
-            long mediaId = mediaIdArray.getLong(i);
-            if (!lanService.getMediaIdPathDBUtil().isIdExists(mediaId)) {
-                resultArray.add(mediaId);
-            }
-        }
-        outputStream.writeString(resultArray.toJSONString());
-        outputStream.flush();
-        IOUtil.closeIO(socket);
-    }
-
-    /**
-     * 处理远程绘图同步（接收端流程）
-     * <p>流程：读取同步请求 → 弹出确认对话框 → 接受则进入双向同步循环，拒绝则断开连接</p>
-     *
-     * @param device       请求方设备
-     * @param socket       Socket 连接
-     * @param inputStream  输入流
-     * @param outputStream 输出流
-     */
-    public void handleDrawSync(Device device, Socket socket, CustomDataInputStream inputStream, CustomDataOutputStream outputStream) {
-        try {
-            // 命令已由handleVersion1读取(FS_DRAW_SYNC_REQUEST)，这里直接读取请求方设备名
-            String requesterName = inputStream.readString();
-
-            // 在任意前台Activity弹出确认对话框，等待用户选择（阻塞60秒超时）
-            boolean accepted = BaseActivity.showDrawSyncConfirm(requesterName, 60);
-
-            if (!accepted) {
-                // 拒绝：发送拒绝响应并断开
-                outputStream.writeInt(LCmd.FS_DRAW_SYNC_REJECT);
-                outputStream.flush();
-                IOUtil.closeIO(socket);
-                return;
-            }
-
-            // 接受：通过DrawSyncManager发送接受响应（与后续FS_DRAW写入共用同一把锁，防止写入交错）
-            DrawSyncManager receiverSyncManager = new DrawSyncManager();
-            receiverSyncManager.setTargetDevice(device);
-            // 设置断连回调：断连时清理DrawingActivity的静态引用，防止重连时DrawingView找到已死的manager
-            receiverSyncManager.setOnDisconnectCallback(DrawingActivity::clearReceiverSync);
-            receiverSyncManager.bindStreams(socket, inputStream, outputStream);
-            receiverSyncManager.sendAccept();
-
-            // 判断当前是否已在绘图界面，避免重复跳转
-            if (BaseActivity.getCurrentActivity() instanceof DrawingActivity) {
-                // 已在绘图界面，直接设置接收端同步
-                DrawingActivity.setupReceiverSync(receiverSyncManager, requesterName);
-            } else {
-                // 不在绘图界面，设置静态引用后启动DrawingActivity
-                DrawingActivity.setReceiverSyncManager(receiverSyncManager);
-                Intent drawIntent = new Intent(lanService, DrawingActivity.class);
-                drawIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                drawIntent.putExtra("receiver_mode", true);
-                drawIntent.putExtra("device_name", requesterName);
-                lanService.startActivity(drawIntent);
-            }
-
-            // 进入双向同步循环（通过DrawSyncManager实现双向读写）
-            ThreadUtils.runThread(() -> {
-                try {
-                    receiverSyncManager.readLoop();
-                } catch (Exception e) {
-                    logger.debug("Receiver draw sync ended: {}", e.getMessage());
-                }
-                // 不在这里closeIO，由V4线程finally统一关闭，避免双重关闭
-            });
-
-            // 等待双向同步线程结束（V4协议线程在此阻塞，保持连接不被上层关闭）
-            // 由于startBidirectionalLoop内部会处理连接生命周期，这里直接返回即可
-            // 注意：不能直接return，否则上层handleVersion会结束，但socket已在receiverSyncManager中管理
-            // 使用简单等待方式：在双向循环结束前保持此线程
-            while (receiverSyncManager.isConnected()) {
-                Thread.sleep(500);
-            }
-
-        } catch (IOException e) {
-            logger.debug("Draw sync connection closed: {}", device.getDevName());
-        } catch (InterruptedException ignored) {
-        } finally {
-            IOUtil.closeIO(socket);
         }
     }
 

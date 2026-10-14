@@ -230,8 +230,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         List<MessageContent> messageContents = fragmentChat.getMessageContents();
         if (messageContents == null || messageContents.isEmpty())
             return -1;
+        // V5 断点续传: 文件记录以稳定的 fileId 为准,
+        // 续传时发送端/接收端都用同一个 fileId, 需命中之前那条记录而不是新增。
+        String fileId = (messageContent instanceof MessageFileContent)
+                ? ((MessageFileContent) messageContent).getFileId() : null;
+        String id = messageContent.getId();
         for (int i = messageContents.size() - 1; i >= 0; i--) {
-            if (messageContents.get(i).getId().equals(messageContent.getId()))
+            MessageContent item = messageContents.get(i);
+            if (id != null && id.equals(item.getId()))
+                return i;
+            if (fileId != null && item instanceof MessageFileContent
+                    && fileId.equals(((MessageFileContent) item).getFileId()))
                 return i;
         }
         return -1;

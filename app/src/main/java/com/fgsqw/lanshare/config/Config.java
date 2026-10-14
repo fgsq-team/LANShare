@@ -27,7 +27,7 @@ public class Config {
     // 魔法数字(fgsq)
     public static final int MAGIC_NUM = 0x66677371;
     // 数据版本/协议版本
-    public static final int DATA_VERSION = LVersion.DATA_VERSION_4;
+    public static final int DATA_VERSION = LVersion.DATA_VERSION_5;
     // UDP端口
     public static int UDP_PORT = 4573;
     // 隐私协议版本

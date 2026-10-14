@@ -16,6 +16,7 @@ import com.fgsqw.lanshare.pojo.message.*;
 import com.fgsqw.lanshare.service.CustomDataInputStream;
 import com.fgsqw.lanshare.service.CustomDataOutputStream;
 import com.fgsqw.lanshare.service.LANService;
+import com.fgsqw.lanshare.service.version.five.FileSenderV5;
 import com.fgsqw.lanshare.service.version.four.FileSend;
 import com.fgsqw.lanshare.service.version.four.FileTransfer;
 import com.fgsqw.lanshare.toast.T;
@@ -62,6 +63,9 @@ public class FileTransferManager {
     
     /** 文件发送器 */
     private final FileSend fileSend;
+
+    /** V5 文件发送器(断点续传) */
+    private final FileSenderV5 fileSenderV5;
     
     /** 媒体 ID 路径数据库工具 */
     private final MediaIdPathDBUtil mediaIdPathDBUtil;
@@ -82,6 +86,7 @@ public class FileTransferManager {
         this.service = service;
         this.deviceManager = deviceManager;
         this.fileSend = fileSend;
+        this.fileSenderV5 = new FileSenderV5(service);
         this.mediaIdPathDBUtil = mediaIdPathDBUtil;
     }
 
@@ -385,7 +390,9 @@ public class FileTransferManager {
                            CustomDataInputStream input, CustomDataOutputStream output, 
                            List<MessageFileContent> fileList) throws IOException {
         boolean encData = App.getPrefUtil().getBoolean(PreConfig.ENC_DATA);
-        if (toDevice.getDataVersion() >= LVersion.DATA_VERSION_4) {
+        if (toDevice.getDataVersion() >= LVersion.DATA_VERSION_5) {
+            fileSenderV5.send(fromDevice, toDevice, socket, input, output, fileList);
+        } else if (toDevice.getDataVersion() >= LVersion.DATA_VERSION_4) {
             fileSend.send(fromDevice, toDevice, socket, input, output, fileList);
         } else if (toDevice.getDataVersion() < LVersion.DATA_VERSION_4) {
             DataEnc dataEnc = deviceManager.makeDataEnc(fromDevice, toDevice, 1024 * 1024);

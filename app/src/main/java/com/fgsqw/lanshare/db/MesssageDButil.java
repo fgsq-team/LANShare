@@ -356,6 +356,41 @@ public class MesssageDButil extends SQLiteOpenHelper {
     }
 
     /**
+     * 判断指定主键 id 的消息是否已存在
+     *
+     * @param id 消息主键 id
+     * @return 存在返回 true
+     */
+    public boolean exists(String id) {
+        if (id == null) {
+            return false;
+        }
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("select 1 from " + TABLE_NAME + " where id = ? LIMIT 1", new String[]{id});
+        boolean exists = cursor != null && cursor.moveToFirst();
+        if (cursor != null) {
+            cursor.close();
+        }
+        return exists;
+    }
+
+    /**
+     * 批量新增或更新消息(V5 断点续传: 命中同一条记录时更新而不新增)
+     * <p>已存在则 update(保留原 createTime),否则 insert</p>
+     *
+     * @param messageContent 消息列表
+     */
+    public void addOrUpdateListMessage(List<? extends MessageContent> messageContent) {
+        for (MessageContent content : messageContent) {
+            if (content.getId() != null && exists(content.getId())) {
+                updateMessage(content);
+            } else {
+                addMessage(content);
+            }
+        }
+    }
+
+    /**
      * 删除消息(软删除)
      *
      * @param id 消息 ID
