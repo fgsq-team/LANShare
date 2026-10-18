@@ -92,7 +92,7 @@ dependencies {
     // 工具
     implementation 'commons-codec:commons-codec:1.15'
     // 视频预览
-    implementation project(':mnvideoplayerlibrary')
+    implementation project(':player')
     implementation fileTree(dir: 'libs', includes: ['*.jar'])
 
 }

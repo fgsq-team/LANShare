@@ -1,0 +1,11 @@
+<resources>
+    <string name="lp_app_name">Player</string>
+    <string name="lp_no_net_hint">当前网络不可用,检查网络设置</string>
+    <string name="lp_url_empty_hint">播放地址为空</string>
+    <string name="lp_play_fail_hint">视频播放失败</string>
+    <string name="lp_mobile_net_hint">请注意,当前网络状态切换为移动网络</string>
+    <string name="lp_loading_error">加载出错\n点击重新加载</string>
+    <string name="lp_network_disconnected">网络断开 \n 点击重新加载</string>
+    <string name="lp_no_read_permission">没有读取权限\n点击重新加载</string>
+    <string name="lp_loading_exception">加载异常\n点击重新加载</string>
+</resources>

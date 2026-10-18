@@ -588,9 +588,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         fileSource.setName(mediaContent.getName());
                         fileSource.setPath(mediaContent.getPath());
                         fileSource.setLength(mediaContent.getLength());
-                        // 列表内重新点击发送: 复用原记录的 fileId 以支持断点续传(不生成新记录)
+                        // 候选续传 fileId: 仅当对同一设备续传时才保留, 否则由 resendFromChat 清空生成新记录
                         fileSource.setFileId(resolveResumeFileId(mediaContent));
-                        dataCenterActivity.sendSingleFile(fileSource);
+                        dataCenterActivity.resendFromChat(fileSource, messageContent.getToUser(), messageContent.getStatus() == MessageContent.SUCCESS);
                     } else if (messageContent instanceof MessageFolderContent) {
                         MessageFolderContent folderContent = (MessageFolderContent) messageContent;
                         MessageFolderContent fileSource = new MessageFolderContent();
@@ -598,9 +598,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         fileSource.setPath(folderContent.getPath());
                         fileSource.setIsPreView(false);
                         fileSource.setLength(folderContent.getLength());
-                        // 列表内重新点击发送: 复用原记录的 fileId 以支持断点续传(不生成新记录)
+                        // 候选续传 fileId: 仅当对同一设备续传时才保留, 否则由 resendFromChat 清空生成新记录
                         fileSource.setFileId(resolveResumeFileId(folderContent));
-                        dataCenterActivity.sendSingleFile(fileSource);
+                        dataCenterActivity.resendFromChat(fileSource, messageContent.getToUser(), messageContent.getStatus() == MessageContent.SUCCESS);
                     } else if (messageContent instanceof MessageFileContent) {
                         MessageFileContent fileContent = (MessageFileContent) messageContent;
                         if (StringUtils.isEmpty(fileContent.getPath())) {
@@ -612,9 +612,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         fileSource.setPath(fileContent.getPath());
                         fileSource.setIsPreView(false);
                         fileSource.setLength(fileContent.getLength());
-                        // 列表内重新点击发送: 复用原记录的 fileId 以支持断点续传(不生成新记录)
+                        // 候选续传 fileId: 仅当对同一设备续传时才保留, 否则由 resendFromChat 清空生成新记录
                         fileSource.setFileId(resolveResumeFileId(fileContent));
-                        dataCenterActivity.sendSingleFile(fileSource);
+                        dataCenterActivity.resendFromChat(fileSource, messageContent.getToUser(), messageContent.getStatus() == MessageContent.SUCCESS);
                     }
 
                 }

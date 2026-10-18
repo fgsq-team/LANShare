@@ -418,6 +418,8 @@ function loadChatFromCache() {
     if (chatNoSave) return;
     try {
         var cached = localStorage.getItem('chatMessages');
+        // 先清空聊天区域，避免多次点击消息菜单时重复追加同一批缓存消息
+        $('.chat_content').empty();
         if (cached) {
             chatMessages = JSON.parse(cached);
             chatMessages.forEach(function (msg) {

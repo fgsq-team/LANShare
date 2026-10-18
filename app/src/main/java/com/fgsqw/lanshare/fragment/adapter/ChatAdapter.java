@@ -2,12 +2,14 @@ package com.fgsqw.lanshare.fragment.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.widget.TextViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -45,6 +47,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int leftSuccessColor;
     private final int rightSuccessColor;
     private final int errorColor;
+    private final int leftInfoColor;
+    private final int rightInfoColor;
     private boolean checkMode = false;
     private OnItemLongClickListener mLongListener;
     private OnItemClickListener mListener;
@@ -55,6 +59,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         leftSuccessColor = resolveThemeAttr(mContext, R.attr.chatLeftSuccessColor);
         rightSuccessColor = resolveThemeAttr(mContext, R.attr.chatRightSuccessColor);
         errorColor = resolveThemeAttr(mContext, R.attr.errorTextColor);
+        leftInfoColor = resolveThemeAttr(mContext, R.attr.chatLeftInfoTextColor);
+        rightInfoColor = resolveThemeAttr(mContext, R.attr.chatRightInfoTextColor);
         this.fragmentChat = fragmentChat;
         mInflater = LayoutInflater.from(mContext);
         options = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
@@ -127,10 +133,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             fileMsgHolder.stateTv.setVisibility(status ? View.VISIBLE : View.GONE);
             if (status) {
                 fileMsgHolder.stateTv.setText(messageFileContent.getStateMessage());
+                boolean left = messageContent.isLeft();
+                // 状态做成"胶囊徽章": 前置状态图标 + 文字; 右侧蓝色气泡用白色文字(深色徽章衬托), 左侧浅底用对应语义色
                 if (messageFileContent.existStatus(MessageContent.SUCCESS)) {
-                    fileMsgHolder.stateTv.setTextColor(messageContent.isLeft() ? leftSuccessColor : rightSuccessColor);
+                    TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(fileMsgHolder.stateTv, R.drawable.ic_status_success, 0, 0, 0);
+                    fileMsgHolder.stateTv.setTextColor(left ? leftSuccessColor : Color.WHITE);
                 } else if (messageFileContent.existStatus(MessageContent.ERROR)) {
-                    fileMsgHolder.stateTv.setTextColor(errorColor);
+                    TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(fileMsgHolder.stateTv, R.drawable.ic_status_error, 0, 0, 0);
+                    fileMsgHolder.stateTv.setTextColor(left ? errorColor : Color.WHITE);
+                } else {
+                    // 已取消等其它终态: 不显示图标, 文字沿用信息色
+                    TextViewCompat.setCompoundDrawablesRelativeWithIntrinsicBounds(fileMsgHolder.stateTv, 0, 0, 0, 0);
+                    fileMsgHolder.stateTv.setTextColor(left ? leftInfoColor : rightInfoColor);
                 }
             }
             // 判断为媒体文件

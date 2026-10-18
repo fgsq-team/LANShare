@@ -14,16 +14,16 @@ import com.fgsqw.lanshare.R;
 import com.fgsqw.lanshare.base.BaseActivity;
 import com.fgsqw.lanshare.pojo.message.MessageFileContent;
 import com.fgsqw.lanshare.toast.T;
-import com.maning.mnvideoplayerlibrary.player.MNViderPlayer;
+import com.fgsqw.lanshare.player.VideoPlayerView;
 
 import java.io.File;
 import java.util.Objects;
 
 public class VideoPlayer extends BaseActivity {
 
-    private static final String TAG = "MNViderPlayer";
+    private static final String TAG = "VideoPlayer";
 
-    private MNViderPlayer mnViderPlayer;
+    private VideoPlayerView videoPlayer;
     private boolean isInit = false;
     String path;
 
@@ -74,7 +74,7 @@ public class VideoPlayer extends BaseActivity {
     }
 
     private void initViews() {
-        mnViderPlayer = findViewById(R.id.mn_videoplayer);
+        videoPlayer = findViewById(R.id.video_player_view);
     }
 
     private void initPlayer() {
@@ -83,9 +83,9 @@ public class VideoPlayer extends BaseActivity {
         }
         isInit = true;
         // 设置电量监听
-        mnViderPlayer.setIsNeedBatteryListen(true);
+        videoPlayer.setIsNeedBatteryListen(true);
         // 播放完成监听
-        mnViderPlayer.setOnCompletionListener(mediaPlayer -> Log.i(TAG, "播放完成----"));
+        videoPlayer.setOnCompletionListener(mediaPlayer -> Log.i(TAG, "播放完成----"));
     }
 
 
@@ -93,8 +93,8 @@ public class VideoPlayer extends BaseActivity {
         //判断本地有没有这个文件
         File file = new File(path);
         if (file.exists()) {
-            mnViderPlayer.setDataSource(path, file.getName());
-            mnViderPlayer.startVideo();
+            videoPlayer.setDataSource(path, file.getName());
+            videoPlayer.startVideo();
         } else {
             T.s((R.string.file_not_found));
         }
@@ -104,13 +104,13 @@ public class VideoPlayer extends BaseActivity {
     protected void onPause() {
         super.onPause();
         //暂停
-        mnViderPlayer.pauseVideo();
+        videoPlayer.pauseVideo();
     }
 
     @Override
     public void onBackPressed() {
-        if (mnViderPlayer.isFullScreen()) {
-            mnViderPlayer.setOrientationPortrait();
+        if (videoPlayer.isFullScreen()) {
+            videoPlayer.setOrientationPortrait();
             return;
         }
         super.onBackPressed();
@@ -119,9 +119,9 @@ public class VideoPlayer extends BaseActivity {
     @Override
     protected void onDestroy() {
         //一定要记得销毁View
-        if (mnViderPlayer != null) {
-            mnViderPlayer.destroyVideo();
-            mnViderPlayer = null;
+        if (videoPlayer != null) {
+            videoPlayer.destroyVideo();
+            videoPlayer = null;
         }
         super.onDestroy();
     }

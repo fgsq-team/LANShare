@@ -619,6 +619,48 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         sendFiles(mUtil.singletonArrayList(fileInfo));
     }
 
+    /**
+     * @author fgsq
+     * @comments 聊天列表长按重发文件
+     * “新记录 vs 原位续传”必须等用户选完设备后才能确定, 故 fileId 的保留/清空放在设备回调里判断:
+     * - 原记录已发送成功, 或所选设备与原发送设备不一致 → 清空 fileId, 发送端生成新随机 UUID → 新增一条消息;
+     * - 原记录未成功且选择的是同一设备 → 保留 fileId → 命中原记录做断点续传(原位更新)。
+     *
+     * @param fileSource     已携带续传 fileId 的待发文件对象(重发新建, 非列表原记录)
+     * @param originalToUser 原记录发送到的设备名
+     * @param wasSuccess     原记录是否已发送成功
+     */
+    public void resendFromChat(MessageFileContent fileSource, String originalToUser, boolean wasSuccess) {
+        if (Config.DEFAULT_SELECT_ONLY_ONE_DEVICE) {
+            // 只有一个设备时默认选择这个设备发送文件
+            Map<String, Device> onLineDevices = LANService.getInstance().getOnLineDevices();
+            if (onLineDevices.size() == 1) {
+                Device device = onLineDevices.values().iterator().next();
+                T.s("已默认发送数据到：" + device.getDevName());
+                applyResendFileId(fileSource, device, originalToUser, wasSuccess);
+                LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, new LinkedList<>(Collections.singletonList(fileSource)));
+                return;
+            }
+        }
+        FileSendDialog dialog = new FileSendDialog(this, 1);
+        dialog.setOnDeviceSelect(device -> {
+            applyResendFileId(fileSource, device, originalToUser, wasSuccess);
+            LANService.getInstance().fileSend(LANService.getInstance().getDeviceManager().getDevice(device), device, new LinkedList<>(Collections.singletonList(fileSource)));
+        });
+        dialog.show();
+    }
+
+    /**
+     * 重发时根据“是否已成功 / 是否换了设备”决定是否清空 fileId。
+     * 清空即让发送端生成新随机 UUID 从而新增一条消息; 保留则命中原记录原位续传。
+     */
+    private void applyResendFileId(MessageFileContent fileSource, Device device, String originalToUser, boolean wasSuccess) {
+        boolean sameDevice = device != null && device.getDevName() != null && device.getDevName().equals(originalToUser);
+        if (wasSuccess || !sameDevice) {
+            fileSource.setFileId(null);
+        }
+    }
+
     public void showSelectDeviceDialog(List<MessageFileContent> fileSelects) {
         fileSelects = mUtil.deepCopyList(fileSelects);
         FileSendDialog dialog = new FileSendDialog(this, fileSelects.size());

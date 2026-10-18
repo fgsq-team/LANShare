@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lp_app_name">Player</string>
+    <string name="lp_no_net_hint">The current network is not available, please check your network settings</string>
+    <string name="lp_url_empty_hint">The playback URL is empty</string>
+    <string name="lp_play_fail_hint">Video playback failed</string>
+    <string name="lp_mobile_net_hint">Please note that the current network has switched to mobile data</string>
+    <string name="lp_loading_error">Loading error\nTap to reload</string>
+    <string name="lp_network_disconnected">Network disconnected\nTap to reload</string>
+    <string name="lp_no_read_permission">No read permission\nTap to reload</string>
+    <string name="lp_loading_exception">Loading exception\nTap to reload</string>
+</resources>
