@@ -897,13 +897,13 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
 //                        }
                         String ip = split[2];
                         int port = Integer.parseInt(split[3]);
-                        PrefUtil prefUtil = App.getPrefUtil();
+//                        PrefUtil prefUtil = App.getPrefUtil();
                         try {
-                            List<NetInfo> ipv6NetInfoList = NetWorkUtil.getOpenIpv6();
-                            if (ipv6NetInfoList.isEmpty()) {
-                                T.s((R.string.ipv6_address_not_found));
-                                return;
-                            }
+//                            List<NetInfo> ipv6NetInfoList = NetWorkUtil.getOpenIpv6();
+//                            if (ipv6NetInfoList.isEmpty()) {
+//                                T.s((R.string.ipv6_address_not_found));
+//                                return;
+//                            }
                             Device device = null;
                             InetAddress inetAddress = null;
                             if (isIPV6) {
