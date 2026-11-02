@@ -34,6 +34,9 @@
     <!-- 图标 -->
     <attr name="iconColor" format="color" />
     <attr name="iconSelectedColor" format="color" />
+
+    <!-- 三级文字颜色 (纯颜色值，避免低版本 tint 引用 ColorStateList 崩溃) -->
+    <attr name="textTertiaryColor" format="color" />
     <attr name="mediaTextColor" format="color" />
     <attr name="chatInfoTextColor" format="color" />
     <attr name="chatLeftInfoTextColor" format="color" />

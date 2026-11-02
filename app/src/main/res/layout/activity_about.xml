@@ -31,7 +31,7 @@
                 android:focusable="true"
                 android:padding="2dp"
                 android:src="@drawable/ic_exit"
-                android:tint="?attr/iconColor" />
+                app:tint="?attr/iconColor" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -90,7 +90,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="@string/version"
-                        android:textColor="?attr/android:textColorPrimary"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -99,7 +99,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:textColor="?attr/android:textColorSecondary"
+                        android:textColor="?android:attr/textColorSecondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -107,7 +107,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:textColor="?attr/android:textColorTertiary"
+                        android:textColor="?attr/textTertiaryColor"
                         android:textSize="12sp" />
 
                 </LinearLayout>
@@ -147,7 +147,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/official_website"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -156,7 +156,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -184,7 +184,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/github"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -193,7 +193,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -221,7 +221,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/check_update"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -230,7 +230,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -258,7 +258,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/help"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -267,7 +267,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -295,7 +295,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/privacy"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -304,7 +304,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -332,7 +332,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/join_group"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -341,7 +341,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -370,7 +370,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="@string/upload_logs"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -379,7 +379,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -400,7 +400,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="打赏支持"
-                            android:textColor="?attr/android:textColorPrimary"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="16sp" />
 
                         <ImageView
@@ -409,7 +409,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@drawable/ic_next"
-                            android:tint="?attr/android:textColorTertiary" />
+                            app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
 
@@ -425,7 +425,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:text="@string/copyright"
-                android:textColor="?attr/android:textColorTertiary"
+                android:textColor="?attr/textTertiaryColor"
                 android:textSize="12sp" />
 
         </LinearLayout>

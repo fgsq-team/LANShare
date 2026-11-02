@@ -76,7 +76,7 @@
                 android:id="@+id/web_manager_empty_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?attr/android:textColorTertiary"
+                android:textColor="?attr/textTertiaryColor"
                 android:textSize="14sp" />
 
         </LinearLayout>

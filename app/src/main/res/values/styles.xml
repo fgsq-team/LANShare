@@ -13,6 +13,9 @@
         <item name="android:colorBackground">@color/backgroundColor</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/textColorSecondary</item>
+        <!-- Android 4.4 等平台默认 textColorTertiary 是 ColorStateList，低版本 tint/hint 需要纯颜色 -->
+        <item name="android:textColorTertiary">@color/textColorTertiary</item>
+        <item name="android:textColorHint">@color/textColorTertiary</item>
 
         <!-- Status bar -->
         <item name="android:statusBarColor">@color/statusBarColor</item>
@@ -54,6 +57,7 @@
         <item name="bottomBackgroundColor">@color/bottomBackgroundColor</item>
         <item name="bottomIndicatorColor">@color/bottomIndicatorColor</item>
         <item name="iconColor">@color/iconColor</item>
+        <item name="textTertiaryColor">@color/textColorTertiary</item>
         <item name="iconSelectedColor">@color/iconSelectedColor</item>
         <item name="mediaTextColor">@color/mediaTextColor</item>
         <item name="chatInfoTextColor">@color/chatInfoTextColor</item>
@@ -113,6 +117,8 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="dialogCornerRadius">16dp</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorTertiary">@color/textColorTertiary</item>
+        <item name="android:textColorHint">@color/textColorTertiary</item>
         <item name="android:textColor">@color/textColorPrimary</item>
         <item name="android:background">@color/surfaceColor</item>
         <item name="android:textColorAlertDialogListItem">@color/textColorPrimary</item>
@@ -188,6 +194,8 @@
         <item name="android:colorBackground">#F6FBF6</item>
         <item name="android:textColorPrimary">#1A1C1E</item>
         <item name="android:textColorSecondary">#5F6368</item>
+        <item name="android:textColorTertiary">#9E9E9E</item>
+        <item name="android:textColorHint">#9E9E9E</item>
 
         <item name="android:statusBarColor">#F6FBF6</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
@@ -217,6 +225,7 @@
         <item name="bottomBackgroundColor">#FFFFFF</item>
         <item name="bottomIndicatorColor">#E8F5E9</item>
         <item name="iconColor">#5F6368</item>
+        <item name="textTertiaryColor">#9E9E9E</item>
         <item name="iconSelectedColor">#2E7D32</item>
         <item name="mediaTextColor">#5F6368</item>
         <item name="chatInfoTextColor">#757575</item>
@@ -266,6 +275,8 @@
         <item name="colorAccent">#FF8F00</item>
         <item name="dialogCornerRadius">16dp</item>
         <item name="android:textColorPrimary">#1A1C1E</item>
+        <item name="android:textColorTertiary">#9E9E9E</item>
+        <item name="android:textColorHint">#9E9E9E</item>
         <item name="android:textColor">#1A1C1E</item>
         <item name="android:background">#FFFFFF</item>
         <item name="android:textColorAlertDialogListItem">#1A1C1E</item>

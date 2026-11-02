@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="@string/not_file"
-        android:textColor="?attr/android:textColorTertiary"
+        android:textColor="?attr/textTertiaryColor"
         android:textSize="16sp" />
 
     <!-- 消息列表 -->
