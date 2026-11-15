@@ -36,7 +36,7 @@ DENSITIES = {
     "xxxhdpi": 192,
 }
 
-# SVG 中的背景圆 -> 圆角矩形（方形图标用），取圆的包围盒，圆角约为宽度的 17%
+# SVG 中的背景圆 -> 圆角矩形（方形图标用），取圆的包围盒，圆角约为宽度的 22%
 BG_CIRCLE_RE = re.compile(r'<circle\s+cx="([\d.]+)"\s+cy="([\d.]+)"\s+r="([\d.]+)"\s+fill="(#[0-9A-Fa-f]{3,8})"\s*/>')
 
 
@@ -75,7 +75,7 @@ def make_square_svg(svg: str) -> str:
         cx, cy, r, fill = (float(m.group(1)), float(m.group(2)),
                            float(m.group(3)), m.group(4))
         x, y, d = cx - r, cy - r, 2 * r
-        rx = ry = d * 0.17
+        rx = ry = d * 0.22
         return f'<rect x="{x:.1f}" y="{y:.1f}" width="{d:.1f}" height="{d:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" fill="{fill}"/>'
 
     new_svg, n = BG_CIRCLE_RE.subn(repl, svg, count=1)

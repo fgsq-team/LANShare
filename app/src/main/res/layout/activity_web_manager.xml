@@ -30,7 +30,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="2dp"
-                android:src="@drawable/ic_exit"
+                app:srcCompat="@drawable/ic_exit"
                 app:tint="?attr/iconColor" />
 
             <TextView

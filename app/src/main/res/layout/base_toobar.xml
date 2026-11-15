@@ -75,8 +75,8 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_scan"
-                    android:tint="?attr/iconColor"
+                    app:srcCompat="@drawable/ic_scan"
+                    app:tint="?attr/iconColor"
                     tools:ignore="UseAppTint" />
             </LinearLayout>
         </LinearLayout>

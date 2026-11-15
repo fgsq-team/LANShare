@@ -131,7 +131,6 @@
                         android:textSize="14sp"
                         app:backgroundTint="?attr/errorTextColor"
                         app:cornerRadius="10dp"
-                        app:icon="@drawable/baseline_delete_black_48"
                         app:iconGravity="textStart"
                         app:iconPadding="4dp"
                         app:iconSize="18dp"

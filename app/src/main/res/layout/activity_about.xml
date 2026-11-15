@@ -30,7 +30,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="2dp"
-                android:src="@drawable/ic_exit"
+                app:srcCompat="@drawable/ic_exit"
                 app:tint="?attr/iconColor" />
 
             <TextView
@@ -155,7 +155,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -192,7 +192,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -229,7 +229,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -266,7 +266,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -303,7 +303,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -340,7 +340,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -378,7 +378,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>
@@ -408,7 +408,7 @@
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:src="@drawable/ic_next"
+                            app:srcCompat="@drawable/ic_next"
                             app:tint="?attr/textTertiaryColor" />
 
                     </RelativeLayout>

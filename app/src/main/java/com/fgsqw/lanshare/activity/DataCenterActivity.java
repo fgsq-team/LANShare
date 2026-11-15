@@ -15,6 +15,7 @@ import android.view.*;
 import android.widget.*;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -323,6 +324,8 @@ public class DataCenterActivity extends BaseActivity implements View.OnClickList
         bottomBottomMenu = bind(R.id.bottom_bottom_menu);
         bottomDeleteMessage = bind(R.id.bottom_delete_message);
         bottomDeleteMessageImage = bind(R.id.bottom_delete_message_image);
+        // 矢量图标不能在 XML 的 app:icon 上声明, Android 4.4 会走框架资源解析导致 inflate 崩溃, 改由 AppCompat 加载
+        bottomDeleteMessageImage.setIcon(AppCompatResources.getDrawable(this, R.drawable.baseline_delete_black_48));
         bottomDeleteCancel = bind(R.id.bottom_delete_cancel);
         bottomDeleteSelectAll = bind(R.id.bottom_delete_select_all);
         bottomDeleteCount = bind(R.id.bottom_delete_count);
