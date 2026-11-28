@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--播放器通用颜色-->
+    <color name="lp_transparent">#00000000</color>
+    <color name="lp_text">#FFFFFFFF</color>
+    <color name="lp_gesture_bg">#A0000000</color>
+    <!--进度条-->
+    <color name="lp_track_bg">#E1767676</color>
+    <color name="lp_track_buffer">#C1C1C1</color>
+    <color name="lp_track_active">#FFFFFFFF</color>
+    <!--加载与电量-->
+    <color name="lp_loading">#FFFFFFFF</color>
+    <color name="lp_battery_body">#FFFFFFFF</color>
+    <color name="lp_battery_low">#FFFF5252</color>
+</resources>

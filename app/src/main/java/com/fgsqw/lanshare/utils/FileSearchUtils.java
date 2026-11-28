@@ -45,7 +45,7 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 
-import static android.graphics.BitmapFactory.decodeResource;
+import static com.fgsqw.lanshare.utils.ImageUtils.decodeResource;
 
 @SuppressLint("Range")
 public class FileSearchUtils {

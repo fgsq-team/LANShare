@@ -22,6 +22,7 @@ import com.fgsqw.lanshare.pojo.message.MessageApkContent;
 import com.fgsqw.lanshare.pojo.message.MessageFileContent;
 import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
 import com.fgsqw.lanshare.utils.FileUtil;
+import com.fgsqw.lanshare.utils.ImageUtils;
 import com.fgsqw.lanshare.utils.mUtil;
 
 import java.util.List;
@@ -78,7 +79,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         } else {
             // 文件
             Glide.with(context)
-                    .load(fileType == MessageFileContent.FILE_TYPE_FOLDER ? R.drawable.ic_folder : R.drawable.ic_file_file)
+                    .load(ImageUtils.decodeResource(context.getResources(),
+                            fileType == MessageFileContent.FILE_TYPE_FOLDER ? R.drawable.ic_folder : R.drawable.ic_file_file))
                     .centerCrop()
                     .placeholder(R.drawable.ic_null)
                     .into(holder.mImg);

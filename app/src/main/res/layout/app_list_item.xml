@@ -36,7 +36,7 @@
                 android:id="@+id/app_item_img_icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_null" />
+                app:srcCompat="@drawable/ic_null" />
 
             <TextView
                 android:id="@+id/app_item_tv_name"
@@ -59,7 +59,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_centerInParent="true"
-            android:background="@drawable/ic_null" />
+            android:background="@android:color/transparent" />
 
     </RelativeLayout>
 

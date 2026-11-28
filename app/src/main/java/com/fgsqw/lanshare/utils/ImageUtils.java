@@ -2,12 +2,14 @@ package com.fgsqw.lanshare.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import com.fgsqw.lanshare.App;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +32,18 @@ public class ImageUtils {
         return bitmap;
     }
 
+
+    /**
+     * 矢量资源经 BitmapFactory.decodeResource 会返回 null，回退为 VectorDrawableCompat 渲染
+     */
+    public static Bitmap decodeResource(Resources res, int id) {
+        Bitmap bitmap = BitmapFactory.decodeResource(res, id);
+        if (bitmap != null) {
+            return bitmap;
+        }
+        Drawable drawable = VectorDrawableCompat.create(res, id, null);
+        return drawable == null ? null : drawableToBitmap(drawable);
+    }
 
     /**
      * 通知系统扫描文件夹下的图片

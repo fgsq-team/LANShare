@@ -90,7 +90,7 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"
                     android:textColor="?attr/android:textColorPrimary"
-                    android:textColorHint="?attr/android:textColorTertiary"
+                    android:textColorHint="?attr/textTertiaryColor"
                     android:textSize="15sp" />
 
                 <ImageButton

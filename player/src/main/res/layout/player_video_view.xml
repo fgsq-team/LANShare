@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lp_transparent">
+
+    <!-- 视频画面区域 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/lp_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:scaleType="fitCenter"
+            tools:ignore="ContentDescription" />
+
+        <LinearLayout
+            android:id="@+id/lp_surface_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:gravity="center">
+
+            <SurfaceView
+                android:id="@+id/lp_surface"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- 加载 / 中心播放 / 错误 / 无网络 覆盖层 -->
+    <RelativeLayout
+        android:id="@+id/lp_status_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#55000000">
+
+        <com.fgsqw.lanshare.player.LoadingRing
+            android:id="@+id/lp_loading"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_centerInParent="true"
+            app:lpLoadingBarColor="@color/lp_loading"
+            app:lpLoadingBarWidth="3dp"
+            app:lpLoadingSweepAngle="270" />
+
+        <ImageView
+            android:id="@+id/lp_center_play"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/lp_circle_bg"
+            android:padding="18dp"
+            app:srcCompat="@drawable/lp_ic_play"
+            tools:ignore="ContentDescription" />
+
+        <LinearLayout
+            android:id="@+id/lp_error_layer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                app:srcCompat="@drawable/lp_ic_error"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/lp_error_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/lp_loading_error"
+                android:textColor="@color/lp_text"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/lp_no_net_layer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                app:srcCompat="@drawable/lp_ic_no_net"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/lp_network_disconnected"
+                android:textColor="@color/lp_text"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- 顶部工具栏 -->
+    <RelativeLayout
+        android:id="@+id/lp_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/lp_scrim_top"
+        android:paddingLeft="8dp"
+        android:paddingRight="12dp">
+
+        <ImageView
+            android:id="@+id/lp_back"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            app:srcCompat="@drawable/lp_ic_back"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/lp_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="00:00"
+            android:textColor="@color/lp_text"
+            android:textSize="13sp"
+            tools:ignore="HardcodedText" />
+
+        <com.fgsqw.lanshare.player.BatteryView
+            android:id="@+id/lp_battery"
+            android:layout_width="24dp"
+            android:layout_height="12dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@id/lp_clock"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/lp_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="16dp"
+            android:layout_toLeftOf="@id/lp_battery"
+            android:layout_toRightOf="@id/lp_back"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/lp_text"
+            android:textSize="17sp"
+            tools:ignore="HardcodedText" />
+
+    </RelativeLayout>
+
+    <!-- 底部工具栏 -->
+    <RelativeLayout
+        android:id="@+id/lp_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/lp_scrim_bottom"
+        android:paddingLeft="4dp"
+        android:paddingRight="8dp">
+
+        <ImageView
+            android:id="@+id/lp_toggle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:padding="12dp"
+            app:srcCompat="@drawable/lp_ic_play"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/lp_fullscreen"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            app:srcCompat="@drawable/lp_ic_fullscreen"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/lp_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_toLeftOf="@id/lp_fullscreen"
+            android:text="00:00 / 00:00"
+            android:textColor="@color/lp_text"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <SeekBar
+            android:id="@+id/lp_seek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/lp_time"
+            android:layout_toRightOf="@id/lp_toggle"
+            android:max="100"
+            android:maxHeight="3dp"
+            android:minHeight="3dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:progressDrawable="@drawable/lp_seek_track"
+            android:thumb="@drawable/lp_seek_thumb" />
+
+    </RelativeLayout>
+
+    <!-- 屏幕锁定按钮（横屏时显示） -->
+    <ImageView
+        android:id="@+id/lp_lock"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="24dp"
+        android:background="@drawable/lp_circle_bg"
+        android:padding="10dp"
+        app:srcCompat="@drawable/lp_ic_lock_open"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
+    <!-- 手势：音量 -->
+    <RelativeLayout
+        android:id="@+id/lp_gesture_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/lp_gesture_bg"
+        android:gravity="center"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/lp_gesture_volume_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            app:srcCompat="@drawable/lp_ic_volume_up"
+            tools:ignore="ContentDescription" />
+
+        <ProgressBar
+            android:id="@+id/lp_gesture_volume_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="140dp"
+            android:layout_height="4dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/lp_gesture_volume_icon"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/lp_gesture_progress" />
+
+    </RelativeLayout>
+
+    <!-- 手势：亮度 -->
+    <RelativeLayout
+        android:id="@+id/lp_gesture_light"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/lp_gesture_bg"
+        android:gravity="center"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/lp_gesture_light_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            app:srcCompat="@drawable/lp_ic_brightness"
+            tools:ignore="ContentDescription" />
+
+        <ProgressBar
+            android:id="@+id/lp_gesture_light_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="140dp"
+            android:layout_height="4dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/lp_gesture_light_icon"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/lp_gesture_progress" />
+
+    </RelativeLayout>
+
+    <!-- 手势：进度 -->
+    <RelativeLayout
+        android:id="@+id/lp_gesture_seek"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/lp_gesture_bg"
+        android:gravity="center"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/lp_gesture_seek_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            app:srcCompat="@drawable/lp_ic_forward"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/lp_gesture_seek_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lp_gesture_seek_icon"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/lp_text"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="00:35 / 24:89" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

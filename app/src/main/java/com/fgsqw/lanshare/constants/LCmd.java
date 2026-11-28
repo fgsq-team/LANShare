@@ -3,6 +3,7 @@ package com.fgsqw.lanshare.constants;
 public class LCmd {
 
     public static final int NEW_VERSION_4 = -2;
+    public static final int NEW_VERSION_5 = -3; // V5 断点续传协议独立魔法数, 直连 five 包处理链
 
     // 局域网通讯命令
     public static final int UDP_GET_DEVICES = 1001;        // 获取设备

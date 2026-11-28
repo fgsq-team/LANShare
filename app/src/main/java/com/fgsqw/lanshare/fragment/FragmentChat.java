@@ -396,10 +396,15 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
         // 将新数据插入到列表开头
         messageContentList.addAll(0, messageContents);
         chatAdapter.notifyDataSetChanged();
-        // 保持滚动位置
-        if (oldItemCount > 0 && !messageContents.isEmpty()) {
-            // 让RecyclerView保持在原来的滚动位置
+        if (messageContents.isEmpty()) {
+            return;
+        }
+        if (oldItemCount > 0) {
+            // 上拉加载更早的消息: 让 RecyclerView 保持在原来的滚动位置
             layoutManager.scrollToPositionWithOffset(messageContents.size(), 0);
+        } else {
+            // 首次加载: 定位到最新一条(列表底部), 避免停留在这一页最旧的一条上
+            recyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
         }
     }
 
@@ -583,7 +588,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         fileSource.setName(mediaContent.getName());
                         fileSource.setPath(mediaContent.getPath());
                         fileSource.setLength(mediaContent.getLength());
-                        dataCenterActivity.sendSingleFile(fileSource);
+                        // 候选续传 fileId: 仅当对同一设备续传时才保留, 否则由 resendFromChat 清空生成新记录
+                        fileSource.setFileId(resolveResumeFileId(mediaContent));
+                        dataCenterActivity.resendFromChat(fileSource, messageContent.getToUser(), messageContent.getStatus() == MessageContent.SUCCESS);
                     } else if (messageContent instanceof MessageFolderContent) {
                         MessageFolderContent folderContent = (MessageFolderContent) messageContent;
                         MessageFolderContent fileSource = new MessageFolderContent();
@@ -591,7 +598,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         fileSource.setPath(folderContent.getPath());
                         fileSource.setIsPreView(false);
                         fileSource.setLength(folderContent.getLength());
-                        dataCenterActivity.sendSingleFile(fileSource);
+                        // 候选续传 fileId: 仅当对同一设备续传时才保留, 否则由 resendFromChat 清空生成新记录
+                        fileSource.setFileId(resolveResumeFileId(folderContent));
+                        dataCenterActivity.resendFromChat(fileSource, messageContent.getToUser(), messageContent.getStatus() == MessageContent.SUCCESS);
                     } else if (messageContent instanceof MessageFileContent) {
                         MessageFileContent fileContent = (MessageFileContent) messageContent;
                         if (StringUtils.isEmpty(fileContent.getPath())) {
@@ -603,7 +612,9 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
                         fileSource.setPath(fileContent.getPath());
                         fileSource.setIsPreView(false);
                         fileSource.setLength(fileContent.getLength());
-                        dataCenterActivity.sendSingleFile(fileSource);
+                        // 候选续传 fileId: 仅当对同一设备续传时才保留, 否则由 resendFromChat 清空生成新记录
+                        fileSource.setFileId(resolveResumeFileId(fileContent));
+                        dataCenterActivity.resendFromChat(fileSource, messageContent.getToUser(), messageContent.getStatus() == MessageContent.SUCCESS);
                     }
 
                 }
@@ -661,9 +672,51 @@ public class FragmentChat extends BaseFragment implements View.OnClickListener,
 
     @SuppressLint("NotifyDataSetChanged")
     public void addListMessage(List<MessageContent> messageContent) {
-        messageContentList.addAll(messageContent);
+        boolean appended = false;
+        for (MessageContent incoming : messageContent) {
+            int existingIndex = findExistingIndex(incoming);
+            if (existingIndex >= 0) {
+                // V5 断点续传: 命中之前那条记录, 原位更新而非新增,
+                // 保留原位置与创建时间, 重置为进行中状态继续更新进度。
+                MessageContent old = messageContentList.get(existingIndex);
+                incoming.setCreateTime(old.getCreateTime());
+                messageContentList.set(existingIndex, incoming);
+            } else {
+                messageContentList.add(incoming);
+                appended = true;
+            }
+        }
         chatAdapter.notifyDataSetChanged();
-        recyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+        if (appended) {
+            recyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+        }
+    }
+
+    /**
+     * 查找已存在记录的下标: 文件消息优先按稳定的 fileId 匹配, 否则按主键 id 匹配。
+     */
+    private int findExistingIndex(MessageContent incoming) {
+        String id = incoming.getId();
+        String fileId = (incoming instanceof MessageFileContent)
+                ? ((MessageFileContent) incoming).getFileId() : null;
+        for (int i = messageContentList.size() - 1; i >= 0; i--) {
+            MessageContent item = messageContentList.get(i);
+            if (id != null && id.equals(item.getId()))
+                return i;
+            if (fileId != null && item instanceof MessageFileContent
+                    && fileId.equals(((MessageFileContent) item).getFileId()))
+                return i;
+        }
+        return -1;
+    }
+
+    /**
+     * 重新发送(列表内重新点击发送)时复用该记录已有的 fileId 以支持断点续传;
+     * 若重启后旧记录的 fileId 未落库, 则回退使用主键 id(V5 下 id==fileId)。
+     */
+    private String resolveResumeFileId(MessageFileContent record) {
+        String fid = record.getFileId();
+        return StringUtils.isEmpty(fid) ? record.getId() : fid;
     }
 
     public void deleteBindTime(String bindId) {

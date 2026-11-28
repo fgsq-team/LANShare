@@ -22,7 +22,7 @@ import java.net.Socket;
  * 使用V4私有协议：
  * <pre>
  * 发起方: MAGIC → NEW_VERSION_4 → FS_DRAW_SYNC_REQUEST → 等待响应
- * 接收方: FileServer.handleDrawSync() → 弹出确认对话框 → 发送ACCEPT/REJECT
+ * 接收方: SyncFeatureHandler.handleDrawSync()(V4/V5 共用扩展) → 弹出确认对话框 → 发送ACCEPT/REJECT
  * 双方:   进入双向读写循环（readLoop读远端事件 + sendDrawEvent写本地事件）
  * </pre>
  * </p>

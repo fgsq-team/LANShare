@@ -78,14 +78,13 @@ public class mUtil {
         String osVersion = Build.VERSION.INCREMENTAL;
         // 获取操作系统 API 级别
         int apiLevel = Build.VERSION.SDK_INT;
-        String deviceInfo = context.getString(R.string.smartphone_manufacturer) + ": " + manufacturer + "\n" +
+        return context.getString(R.string.smartphone_manufacturer) + ": " + manufacturer + "\n" +
                 context.getString(R.string.phone_model) + ": " + model + "\n" +
                 context.getString(R.string.android_version) + ": " + androidVersion + "\n" +
                 context.getString(R.string.kernel_version) + ": " + kernelVersion + "\n" +
                 context.getString(R.string.operating_system_version) + ": " + osVersion + "\n" +
                 context.getString(R.string.unique_id) + ": " + Config.uniqueUUid + "\n" +
                 context.getString(R.string.api_level) + ": " + apiLevel;
-        return deviceInfo;
     }
 
     /**

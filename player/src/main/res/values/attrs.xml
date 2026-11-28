@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="LanPlayer">
+        <!--首次进入是否自动播放-->
+        <attr name="lpFirstPlay" format="boolean" />
+        <!--是否监听电量-->
+        <attr name="lpNeedBattery" format="boolean" />
+        <!--是否监听网络变化-->
+        <attr name="lpNeedNetwork" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="LoadingRing">
+        <attr name="lpLoadingBarColor" format="color" />
+        <attr name="lpLoadingBarWidth" format="dimension" />
+        <attr name="lpLoadingSweepAngle" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="BatteryView">
+        <attr name="lpBatteryLevel" format="integer" />
+    </declare-styleable>
+
+</resources>

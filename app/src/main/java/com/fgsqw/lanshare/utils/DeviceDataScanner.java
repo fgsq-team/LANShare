@@ -41,7 +41,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 
-import static android.graphics.BitmapFactory.decodeResource;
+import static com.fgsqw.lanshare.utils.ImageUtils.decodeResource;
 
 /**
  * 设备数据扫描器

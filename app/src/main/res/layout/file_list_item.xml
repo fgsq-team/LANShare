@@ -39,7 +39,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_null" />
+                app:srcCompat="@drawable/ic_null" />
 
             <!-- 文件信息 -->
             <LinearLayout

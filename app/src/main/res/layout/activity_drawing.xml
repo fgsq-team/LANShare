@@ -40,7 +40,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:padding="2dp"
-                    android:src="@drawable/ic_exit"
+                    app:srcCompat="@drawable/ic_exit"
                     app:tint="?attr/iconColor" />
 
                 <TextView
@@ -118,7 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:textColor="?attr/android:textColorTertiary"
+                    android:textColor="?attr/textTertiaryColor"
                     android:textSize="12sp" />
 
                 <View
@@ -223,7 +223,7 @@
                         android:layout_width="36dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
-                        android:textColor="?attr/android:textColorTertiary"
+                        android:textColor="?attr/textTertiaryColor"
                         android:textSize="12sp" />
 
                     <SeekBar

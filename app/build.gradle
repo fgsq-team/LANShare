@@ -7,8 +7,8 @@ android {
         applicationId "com.fgsqw.lanshare"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2601009
-        versionName "1.3.1_dev"
+        versionCode 2601115
+        versionName "1.3.2_dev"
         vectorDrawables.useSupportLibrary = true
     }
 
@@ -92,7 +92,7 @@ dependencies {
     // 工具
     implementation 'commons-codec:commons-codec:1.15'
     // 视频预览
-    implementation project(':mnvideoplayerlibrary')
+    implementation project(':player')
     implementation fileTree(dir: 'libs', includes: ['*.jar'])
 
 }

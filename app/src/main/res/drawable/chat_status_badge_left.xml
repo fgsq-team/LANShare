@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 左侧浅色气泡内的状态徽章: 半透明绿色胶囊, 衬托绿色文字 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#224CAF50" />
+    <corners android:radius="11dp" />
+</shape>
