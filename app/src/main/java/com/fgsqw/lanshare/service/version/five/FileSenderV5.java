@@ -13,6 +13,7 @@ import com.fgsqw.lanshare.pojo.message.MessageFileContent;
 import com.fgsqw.lanshare.pojo.message.MessageFolderContent;
 import com.fgsqw.lanshare.pojo.message.MessageMediaContent;
 import com.fgsqw.lanshare.pojo.message.MessageStreamContent;
+import com.fgsqw.lanshare.pojo.message.MessageUriContent;
 import com.fgsqw.lanshare.service.CustomDataInputStream;
 import com.fgsqw.lanshare.service.CustomDataOutputStream;
 import com.fgsqw.lanshare.service.LANService;
@@ -20,6 +21,7 @@ import com.fgsqw.lanshare.service.version.four.FileTransfer;
 import com.fgsqw.lanshare.service.version.four.ProgressCallback;
 import com.fgsqw.lanshare.toast.T;
 import com.fgsqw.lanshare.utils.DeviceDataScanner;
+import com.fgsqw.lanshare.utils.FileUtil;
 import com.fgsqw.lanshare.utils.IOUtil;
 import com.fgsqw.lanshare.utils.LLog;
 import com.fgsqw.lanshare.utils.ParameterizedTaskQueue;
@@ -240,6 +242,9 @@ public class FileSenderV5 implements ParameterizedTaskQueue.TaskProcessor<SendTa
                     if (fileItem.getFileType() == MessageFileContent.FILE_TYPE_STREAM) {
                         MessageStreamContent streamContent = (MessageStreamContent) fileItem;
                         inputStream = streamContent.getInputStream();
+                    } else if (fileItem.getFileType() == MessageFileContent.FILE_TYPE_URI) {
+                        MessageUriContent uriContent = (MessageUriContent) fileItem;
+                        inputStream = FileUtil.getInputStreamFromUri(uriContent.getUri());
                     } else {
                         inputStream = new FileInputStream(fileItem.getPath());
                     }
